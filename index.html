@@ -314,83 +314,146 @@
             config: { teoriaAtiva: true },
             materias: [
                 {
-                    id: "portugues",
-                    nome: "Língua Portuguesa",
+                    id: "lingua_portuguesa",
+                    nome: "1. CONHECIMENTOS BÁSICOS — A. Língua Portuguesa",
                     icone: "fa-book",
                     prioridade: "Alta",
                     topicos: [
-                        { id: "p1", nome: "Interpretação e compreensão de textos", status: "Concluído", checklist: { lei: false, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "Foco em tipologia e coerência textual.", questoesTotal: 120, questoesAcertos: 98 },
-                        { id: "p2", nome: "Tipologia e gêneros textuais", status: "Concluído", checklist: { lei: false, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "", questoesTotal: 80, questoesAcertos: 64 },
-                        { id: "p3", nome: "Coesão e coerência / Conectivos", status: "Estudando", checklist: { lei: false, questoes: true, erros: true, revisao: false, teoria: true }, anotaçoes: "Revisar conectivos adversativos.", questoesTotal: 60, questoesAcertos: 32 }
-                    ]
-                },
-                {
-                    id: "adm_pub",
-                    nome: "Direito Administrativo",
-                    icone: "fa-landmark",
-                    prioridade: "Alta",
-                    topicos: [
-                        { id: "da1", nome: "Estado, Governo e Administração Pública", status: "Concluído", checklist: { lei: true, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "Bons conhecimentos de base jurídica.", questoesTotal: 100, questoesAcertos: 85 },
-                        { id: "da2", nome: "Princípios expressos e implícitos", status: "Concluído", checklist: { lei: true, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "", questoesTotal: 90, questoesAcertos: 78 },
-                        { id: "da3", nome: "Organização administrativa (Direta e Indireta)", status: "Estudando", checklist: { lei: true, questoes: true, erros: true, revisao: false, teoria: true }, anotaçoes: "Atenção às autarquias e fundações.", questoesTotal: 40, questoesAcertos: 22 }
-                    ]
-                },
-                {
-                    id: "leg_df",
-                    nome: "Legislação do Distrito Federal",
-                    icone: "fa-file-shield",
-                    prioridade: "Alta",
-                    topicos: [
-                        { id: "ldf1", nome: "Lei Orgânica do Distrito Federal (LODF)", status: "Rever", checklist: { lei: true, questoes: true, erros: true, revisao: true, teoria: true }, anotaçoes: "Exige memorização intensa de prazos.", questoesTotal: 150, questoesAcertos: 80 },
-                        { id: "ldf2", nome: "Lei Complementar nº 840/2011 (RJDF)", status: "Estudando", checklist: { lei: true, questoes: true, erros: false, revisao: false, teoria: true }, anotaçoes: "Regime jurídico dos servidores.", questoesTotal: 110, questoesAcertos: 65 }
-                    ]
-                },
-                {
-                    id: "adm_geral",
-                    nome: "Administração Geral e Gestão",
-                    icone: "fa-chart-line",
-                    prioridade: "Média",
-                    topicos: [
-                        { id: "ag1", nome: "Evolução das teorias administrativas", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
-                        { id: "ag2", nome: "Gestão de Pessoas, Motivação e Liderança", status: "Concluído", checklist: { lei: false, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "", questoesTotal: 50, questoesAcertos: 41 }
-                    ]
-                },
-                {
-                    id: "materiais_arq",
-                    nome: "Materiais, Patrimônio e Arquivologia",
-                    icone: "fa-boxes-stacked",
-                    prioridade: "Média",
-                    topicos: [
-                        { id: "mat1", nome: "Administração de materiais e Curva ABC", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                        { id: "lp1", nome: "Interpretação e compreensão de textos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp2", nome: "Tipologia e gêneros textuais.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp3", nome: "Coesão e coerência.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp4", nome: "Referenciação e conectivos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp5", nome: "Classes de palavras.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp6", nome: "Morfologia e sintaxe.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp7", nome: "Coordenação e subordinação.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp8", nome: "Pontuação.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp9", nome: "Concordância verbal e nominal.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp10", nome: "Regência verbal e nominal.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp11", nome: "Crase.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp12", nome: "Colocação pronominal.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp13", nome: "Tempos e modos verbais.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp14", nome: "Ortografia e acentuação.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp15", nome: "Reescrita de frases e períodos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "lp16", nome: "Significação de palavras e figuras de linguagem.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
                     ]
                 },
                 {
                     id: "df_ride",
-                    nome: "DF, RIDE e Conhecimentos Complementares",
+                    nome: "1. CONHECIMENTOS BÁSICOS — B. DF/RIDE e conhecimentos complementares",
                     icone: "fa-map-location-dot",
-                    prioridade: "Baixa",
+                    prioridade: "Alta",
                     topicos: [
-                        { id: "dfr3", nome: "Atualidades do DF, Brasil e Mundo", status: "Concluído", checklist: { lei: false, questoes: true, erros: false, revisao: true, teoria: true }, anotaçoes: "Acompanhamento diário.", questoesTotal: 40, questoesAcertos: 34 }
+                        { id: "dfr1", nome: "História do Distrito Federal.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr2", nome: "Geografia do DF e Entorno.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr3", nome: "Organização política e administrativa.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr4", nome: "Aspectos econômicos e sociais.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr5", nome: "Realidade étnica e cultural.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr6", nome: "Região Integrada de Desenvolvimento do Distrito Federal e Entorno (RIDE) e LC nº 94/1998.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "dfr7", nome: "Atualidades relacionadas ao DF e ao Brasil.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                    ]
+                },
+                {
+                    id: "direito_administrativo",
+                    nome: "2. CONHECIMENTOS COMPLEMENTARES — C. Direito Administrativo",
+                    icone: "fa-landmark",
+                    prioridade: "Alta",
+                    topicos: [
+                        { id: "da1", nome: "Estado, Governo e Administração Pública.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da2", nome: "Princípios expressos e implícitos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da3", nome: "Organização administrativa.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da4", nome: "Administração direta e indireta.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da5", nome: "Centralização, descentralização e desconcentração.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da6", nome: "Agentes públicos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da7", nome: "Poderes administrativos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da8", nome: "Atos administrativos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da9", nome: "Requisitos, atributos e classificação dos atos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da10", nome: "Anulação, revogação e convalidação.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da11", nome: "Controle da Administração Pública.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da12", nome: "Responsabilidade civil do Estado.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "da13", nome: "Processo administrativo.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                    ]
+                },
+                {
+                    id: "legislacao_df",
+                    nome: "2. CONHECIMENTOS COMPLEMENTARES — D. Legislação do Distrito Federal",
+                    icone: "fa-file-shield",
+                    prioridade: "Alta",
+                    topicos: [
+                        { id: "ldf1", nome: "Lei Orgânica do Distrito Federal.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf2", nome: "Lei Complementar nº 840/2011.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf3", nome: "Lei nº 4.949/2012, art. 10, § 6º.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf4", nome: "Lei nº 6.805/2021.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf5", nome: "Portaria nº 271/2021 — Plano Distrital de Política para Mulheres.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf6", nome: "Lei nº 11.340/2006 — Lei Maria da Penha.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ldf7", nome: "Lei Complementar nº 94/1998 — RIDE.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                    ]
+                },
+                {
+                    id: "administracao_geral",
+                    nome: "3. CONHECIMENTOS ESPECÍFICOS — E. Administração Geral",
+                    icone: "fa-briefcase",
+                    prioridade: "Alta",
+                    topicos: [
+                        { id: "ag1", nome: "Evolução das teorias administrativas.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag2", nome: "Funções administrativas: planejamento, organização, direção e controle.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag3", nome: "Gestão de pessoas.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag4", nome: "Comportamento organizacional.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag5", nome: "Motivação e liderança.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag6", nome: "Gestão da qualidade.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag7", nome: "Ciclo PDCA.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag8", nome: "Ferramentas da qualidade.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag9", nome: "Gestão de processos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "ag10", nome: "Mapeamento, análise e melhoria de processos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                    ]
+                },
+                {
+                    id: "materiais_patrimonio_arquivologia",
+                    nome: "3. CONHECIMENTOS ESPECÍFICOS — F. Materiais, patrimônio e arquivologia",
+                    icone: "fa-boxes-stacked",
+                    prioridade: "Alta",
+                    topicos: [
+                        { id: "mpa1", nome: "Administração de materiais: Classificação de materiais; curva ABC; gestão de estoques; compras e fornecedores; recebimento e conferência; armazenagem e leiaute; distribuição de materiais.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "mpa2", nome: "Gestão patrimonial: Tombamento; controle de bens; inventário; alienação; alterações e baixa.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "mpa3", nome: "Arquivologia: Princípios e conceitos; legislação arquivística; gestão de documentos; protocolo; classificação e arquivamento; plano de classificação; tabela de temporalidade; preservação e conservação; eliminação e destinação documental; digitalização.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
+                    ]
+                },
+                {
+                    id: "prova_discursiva",
+                    nome: "4. PREPARAÇÃO PARA A PROVA DISCURSIVA",
+                    icone: "fa-pen-nib",
+                    prioridade: "Média",
+                    topicos: [
+                        { id: "pd1", nome: "Compreensão do tema e delimitação da resposta.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "pd2", nome: "Construção de tese e organização dos argumentos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "pd3", nome: "Desenvolvimento em parágrafos.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "pd4", nome: "Coesão, coerência e correção gramatical.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 },
+                        { id: "pd5", nome: "Conclusão e adequação ao limite de linhas.", status: "Não iniciado", checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false }, anotaçoes: "", questoesTotal: 0, questoesAcertos: 0 }
                     ]
                 }
             ],
-            registrosEstudo: [
-                { id: 1, materiaId: "portugues", data: "2026-11-24", plataforma: "Tec Concursos", tempo: 90, qTotal: 30, qAcertos: 24, obs: "Excelente aproveitamento." }
-            ],
-            simulados: [
-                { id: 1, nome: "Simulado Diagnóstico Quadrix 01", data: "2026-05-15", banca: "Quadrix", qTotal: 120, qAcertos: 85, tempo: "3h30", obs: "Bom desempenho.", origem: "manual" }
-            ],
-            jurisprudencia: [
-                { id: 1, tribunal: "STF", tema: "Estágio probatório e estabilidade", data: "2025-04-10", resumo: "Entendimento consolidado.", tese: "A estabilidade exige efetivo exercício e aprovação.", materia: "Direito Administrativo", revisada: true }
-            ]
+            registrosEstudo: [],
+            simulados: [],
+            jurisprudencia: []
         };
 
-        let appData;
         try {
-            appData = JSON.parse(localStorage.getItem("sga_sedf_2027_data")) || defaultData;
-        } catch(e) {
-            appData = defaultData;
-        }
+            localStorage.removeItem("sga_sedf_2027_data");
+            localStorage.removeItem("sedf_2027_db");
+        } catch(e) {}
+
+        let appData = JSON.parse(JSON.stringify(defaultData));
+        appData.registrosEstudo = [];
+        appData.simulados = [];
+        appData.jurisprudencia = [];
+        appData.materias.forEach(m => {
+            m.topicos.forEach(t => {
+                t.status = "Não iniciado";
+                t.checklist = { lei: false, questoes: false, erros: false, revisao: false, teoria: false };
+                t.anotaçoes = "";
+                t.questoesTotal = 0;
+                t.questoesAcertos = 0;
+            });
+        });
         if (!appData.examDate) appData.examDate = "2027-05-20";
         if (!appData.startDate) appData.startDate = "2026-11-23";
         if (!appData.headerTitle || appData.headerTitle === "SGA-SEDF 2027") appData.headerTitle = "SEDF 2027 - PLANNER DA BRE";
@@ -639,9 +702,9 @@ function applyTheme() {
                                 <a href="https://quadrix.org.br/informacoes/3081/" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2 shadow-md shadow-indigo-600/20">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i><span>1. Portal Quadrix</span>
                                 </a>
-                                <button onclick="openEditalVerticalizado()" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2">
+                                <a href="https://github.com/arabarbrenda/planner-SEDF/blob/main/SEDF_Analista_Apoio_Administrativo_Verticalizado_atualizado.pdf" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2">
                                     <i class="fa-solid fa-file-lines"></i><span>2. Edital Verticalizado - unofficial</span>
-                                </button>
+                                </a>
                             </div>
                             <div class="text-[11px] text-slate-400 md:text-right leading-relaxed pt-1">
                                 <p>Baseado em: provas anteriores, Termo de Referência de 2026, e editais de 2016 e 2022.</p>
@@ -813,7 +876,7 @@ function applyTheme() {
                                             <span class="text-xs font-bold text-red-400">${item.ap}% de Aproveitamento</span>
                                             <p class="text-[10px] text-slate-400">${item.qAcertos} acertos / ${item.qTotal} questões</p>
                                         </div>
-                                        <button onclick="switchTab('materia', '${item.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow">Revisar Tópico</button>
+                                                                                <button onclick="switchTab('materia', '${item.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow">Revisar Tópico</button>
                                     </div>
                                 </div>
                             `).join('') : `
@@ -1691,3 +1754,4 @@ function applyTheme() {
     </script>
 </body>
 </html>
+
