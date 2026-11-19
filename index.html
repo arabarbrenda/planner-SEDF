@@ -69,10 +69,13 @@
         }
     </style>
 </head>
-<body class="h-full bg-slate-900 text-slate-100 font-sans antialiased flex flex-col md:flex-row overflow-hidden">
+<body class="h-full bg-slate-900 text-slate-100 font-sans antialiased flex md:flex-row overflow-hidden relative">
+
+    <!-- BACKDROP MOBILE -->
+    <div id="mobile-backdrop" onclick="closeMobileMenu()" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
 
     <!-- BARRA LATERAL (SIDEBAR) -->
-    <aside aria-label="Navegação Principal" class="w-full md:w-64 bg-slate-950 border-r border-slate-800 flex flex-col z-20 shrink-0">
+    <aside id="sidebar" aria-label="Navegação Principal" class="fixed inset-y-0 left-0 w-72 max-w-[85vw] md:static md:w-64 bg-slate-950 border-r border-slate-800 flex flex-col z-40 shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 h-full">
         <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
             <label for="icon-upload-input" class="cursor-pointer group relative" title="Clique para alterar o ícone">
                 <div id="sidebar-icon-container" class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/30 flex items-center justify-center w-11 h-11 overflow-hidden">
@@ -82,51 +85,54 @@
             </label>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center space-x-1 group">
-                    <h1 class="font-bold text-sm leading-tight tracking-wide text-white cursor-pointer hover:text-indigo-400 transition" onclick="switchTab('dashboard')" id="header-title-text" title="Ir para o Dashboard Geral">SEDF 2027 - PLANNER DA BRE</h1>
-                    <button onclick="editHeaderTitle()" class="text-slate-500 hover:text-indigo-400 text-xs opacity-0 group-hover:opacity-100 transition" title="Editar título"><i class="fa-solid fa-pencil"></i></button>
+                    <h1 class="font-bold text-sm leading-tight tracking-wide text-white cursor-pointer hover:text-indigo-400 transition truncate" onclick="switchTab('dashboard')" id="header-title-text" title="Ir para o Dashboard Geral">SEDF 2027 - PLANNER DA BRE</h1>
+                    <button type="button" onclick="editHeaderTitle()" class="text-slate-500 hover:text-indigo-400 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100 transition" title="Editar título"><i class="fa-solid fa-pencil"></i></button>
                 </div>
                 <div class="flex items-center space-x-1 group mt-0.5">
                     <p class="text-xs text-slate-400 truncate cursor-pointer" onclick="editHeaderSubtitle()" id="header-subtitle-text" title="Clique para editar">Analista - Apoio Administrativo</p>
-                    <button onclick="editHeaderSubtitle()" class="text-slate-500 hover:text-indigo-400 text-[10px] opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pencil"></i></button>
+                    <button type="button" onclick="editHeaderSubtitle()" class="text-slate-500 hover:text-indigo-400 text-[10px] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition"><i class="fa-solid fa-pencil"></i></button>
                 </div>
             </div>
+            <button type="button" onclick="closeMobileMenu()" class="md:hidden text-slate-400 hover:text-white p-2 rounded-lg" title="Diminuir / Fechar menu">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1 text-sm" role="navigation">
             <div class="flex items-center justify-between px-3 pb-2">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Menu Principal</p>
-                <button onclick="openNewSubjectModal()" class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex items-center space-x-1" title="Adicionar Matéria">
+                <button type="button" onclick="openNewSubjectModal()" class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex items-center space-x-1" title="Adicionar Matéria">
                     <i class="fa-solid fa-plus-circle"></i><span>Nova Matéria</span>
                 </button>
             </div>
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-indigo-400 bg-indigo-500/10">
+            <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-indigo-400 bg-indigo-500/10 text-left">
                 <i class="fa-solid fa-chart-pie w-5"></i><span>Dashboard Geral</span>
             </button>
-            <button onclick="switchTab('materias_lista')" id="nav-materias_lista" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('materias_lista')" id="nav-materias_lista" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-book-open w-5"></i><span>Matérias</span>
             </button>
-            <button onclick="switchTab('planejamento')" id="nav-planejamento" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('planejamento')" id="nav-planejamento" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-calendar-days w-5"></i><span>Planejamento</span>
             </button>
-            <button onclick="switchTab('ciclo')" id="nav-ciclo" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('ciclo')" id="nav-ciclo" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-rotate w-5"></i><span>Ciclo de Estudos</span>
             </button>
-            <button onclick="switchTab('revisao')" id="nav-revisao" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('revisao')" id="nav-revisao" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-brain w-5"></i><span>Revisão Inteligente</span>
             </button>
-            <button onclick="switchTab('baixo_aproveitamento')" id="nav-baixo_aproveitamento" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('baixo_aproveitamento')" id="nav-baixo_aproveitamento" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-triangle-exclamation w-5"></i><span>Baixo Aproveitamento</span>
             </button>
-            <button onclick="switchTab('simulados')" id="nav-simulados" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('simulados')" id="nav-simulados" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-file-lines w-5"></i><span>Simulados</span>
             </button>
-            <button onclick="switchTab('jurisprudencia')" id="nav-jurisprudencia" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('jurisprudencia')" id="nav-jurisprudencia" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-scale-balanced w-5"></i><span>Jurisprudência</span>
             </button>
-            <button onclick="switchTab('importacao')" id="nav-importacao" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('importacao')" id="nav-importacao" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-file-arrow-up w-5"></i><span>Importar Tec Concursos</span>
             </button>
-            <button onclick="switchTab('backup')" id="nav-backup" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button type="button" onclick="switchTab('backup')" id="nav-backup" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-database w-5"></i><span>Backup & Configs</span>
             </button>
 
@@ -137,31 +143,37 @@
         </nav>
 
         <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center space-y-2.5">
-            <button onclick="toggleTheme()" id="theme-toggle-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-800 transition flex items-center justify-center space-x-2" title="Alternar entre Modo Escuro e Modo Claro">
+            <button type="button" onclick="closeMobileMenu()" class="md:hidden w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-compress"></i>
+                <span>Diminuir / Recolher Menu</span>
+            </button>
+            <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-800 transition flex items-center justify-center space-x-2" title="Alternar entre Modo Escuro e Modo Claro">
                 <i id="theme-icon" class="fa-solid fa-sun text-amber-400"></i>
                 <span id="theme-text">Alternar Modo Claro</span>
             </button>
-            <button onclick="exportToGoogleCalendar()" class="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 py-2 px-3 rounded-xl text-xs font-semibold border border-indigo-500/30 transition flex items-center justify-center space-x-1.5">
+            <button type="button" onclick="exportToGoogleCalendar()" class="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 py-2 px-3 rounded-xl text-xs font-semibold border border-indigo-500/30 transition flex items-center justify-center space-x-1.5">
                 <i class="fa-brands fa-google"></i><span>Exportar p/ Google Agenda</span>
             </button>
         </div>
     </aside>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900">
-        <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
-            <div class="flex items-center space-x-4">
-                <h2 id="current-page-title" class="text-xl font-bold text-white tracking-wide">Dashboard Geral</h2>
-                <span class="px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full border border-indigo-500/30">Quadrix 2027</span>
+<!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-full w-full min-w-0 overflow-hidden bg-slate-900">
+        <header class="bg-slate-950 border-b border-slate-800 px-4 md:px-6 py-4 flex items-center justify-between shrink-0 gap-2">
+            <div class="flex items-center space-x-3 min-w-0">
+                <button type="button" onclick="toggleMobileMenu()" aria-label="Abrir ou diminuir menu" class="md:hidden text-slate-300 hover:text-white bg-slate-900 border border-slate-800 w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-bars text-base"></i>
+                </button>
+                <h2 id="current-page-title" class="text-lg md:text-xl font-bold text-white tracking-wide truncate">Dashboard Geral</h2>
+                <span class="hidden sm:inline-block px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full border border-indigo-500/30 shrink-0">Quadrix 2027</span>
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="openStudyModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
-                    <i class="fa-solid fa-plus"></i><span>Registrar Estudo / Questões</span>
+            <div class="flex items-center space-x-3 shrink-0">
+                <button type="button" onclick="openStudyModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i><span class="hidden sm:inline">Registrar Estudo / Questões</span><span class="sm:hidden">Registrar</span>
                 </button>
             </div>
         </header>
 
-        <div id="view-container" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+        <div id="view-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6"></div>
     </main>
 
     <!-- MODAL DE REGISTRO DE ESTUDO -->
@@ -267,6 +279,30 @@
 
     <!-- SCRIPT DE GERENCIAMENTO DE DADOS E RENDERIZAÇÃO -->
     <script>
+        function openMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('mobile-backdrop');
+            if (sidebar) sidebar.classList.remove('-translate-x-full');
+            if (backdrop) backdrop.classList.remove('hidden');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('mobile-backdrop');
+            if (sidebar) sidebar.classList.add('-translate-x-full');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            if (sidebar.classList.contains('-translate-x-full')) {
+                openMobileMenu();
+            } else {
+                closeMobileMenu();
+            }
+        }
+
         const defaultData = {
             examDate: "2027-05-20",
             startDate: "2026-11-23",
@@ -360,8 +396,7 @@
         if (!appData.headerTitle || appData.headerTitle === "SGA-SEDF 2027") appData.headerTitle = "SEDF 2027 - PLANNER DA BRE";
         if (!appData.headerSubtitle) appData.headerSubtitle = "Analista - Apoio Administrativo";
         if (!appData.theme) appData.theme = "dark";
-
-        function applyTheme() {
+function applyTheme() {
             const body = document.body;
             const icon = document.getElementById('theme-icon');
             const text = document.getElementById('theme-text');
@@ -404,6 +439,7 @@
                 activeBtn.classList.remove('text-slate-300');
                 activeBtn.classList.add('text-indigo-400', 'bg-indigo-500/10');
             }
+            closeMobileMenu();
             renderView(tabId, param);
         }
 
