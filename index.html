@@ -145,7 +145,7 @@
         <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center space-y-2.5">
             <button type="button" onclick="closeMobileMenu()" class="md:hidden w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-compress"></i>
-                <span>Diminuir / Recolher Menu</span>
+                <span>Recolher Menu</span>
             </button>
             <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-800 transition flex items-center justify-center space-x-2" title="Alternar entre Modo Escuro e Modo Claro">
                 <i id="theme-icon" class="fa-solid fa-sun text-amber-400"></i>
@@ -197,7 +197,7 @@
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Plataforma</label>
                         <select id="modal-plataforma" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
                             <option value="Tec Concursos">Tec Concursos</option>
-                            <option value="Gran Cursos (Teoria)">Gran Cursos (Teoria)</option>
+                            <option value="Gran Cursos">Gran Cursos</option>
                             <option value="Caderno de Erros">Caderno de Erros</option>
                             <option value="Revisão">Revisão</option>
                         </select>
@@ -315,7 +315,7 @@
             materias: [
                 {
                     id: "lingua_portuguesa",
-                    nome: "1. CONHECIMENTOS BÁSICOS — A. Língua Portuguesa",
+                    nome: "Língua Portuguesa",
                     icone: "fa-book",
                     prioridade: "Alta",
                     topicos: [
@@ -339,7 +339,7 @@
                 },
                 {
                     id: "df_ride",
-                    nome: "1. CONHECIMENTOS BÁSICOS — B. DF/RIDE e conhecimentos complementares",
+                    nome: "DF/RIDE e conhecimentos complementares",
                     icone: "fa-map-location-dot",
                     prioridade: "Alta",
                     topicos: [
@@ -354,7 +354,7 @@
                 },
                 {
                     id: "direito_administrativo",
-                    nome: "2. CONHECIMENTOS COMPLEMENTARES — C. Direito Administrativo",
+                    nome: "Direito Administrativo",
                     icone: "fa-landmark",
                     prioridade: "Alta",
                     topicos: [
@@ -375,7 +375,7 @@
                 },
                 {
                     id: "legislacao_df",
-                    nome: "2. CONHECIMENTOS COMPLEMENTARES — D. Legislação do Distrito Federal",
+                    nome: "Legislação do Distrito Federal",
                     icone: "fa-file-shield",
                     prioridade: "Alta",
                     topicos: [
@@ -390,7 +390,7 @@
                 },
                 {
                     id: "administracao_geral",
-                    nome: "3. CONHECIMENTOS ESPECÍFICOS — E. Administração Geral",
+                    nome: "Administração Geral",
                     icone: "fa-briefcase",
                     prioridade: "Alta",
                     topicos: [
@@ -408,7 +408,7 @@
                 },
                 {
                     id: "materiais_patrimonio_arquivologia",
-                    nome: "3. CONHECIMENTOS ESPECÍFICOS — F. Materiais, patrimônio e arquivologia",
+                    nome: "Materiais, patrimônio e arquivologia",
                     icone: "fa-boxes-stacked",
                     prioridade: "Alta",
                     topicos: [
@@ -419,7 +419,7 @@
                 },
                 {
                     id: "prova_discursiva",
-                    nome: "4. PREPARAÇÃO PARA A PROVA DISCURSIVA",
+                    nome: "PROVA DISCURSIVA",
                     icone: "fa-pen-nib",
                     prioridade: "Média",
                     topicos: [
@@ -707,18 +707,18 @@ function applyTheme() {
                                 </a>
                             </div>
                             <div class="text-[11px] text-slate-400 md:text-right leading-relaxed pt-1">
-                                <p>Baseado em: provas anteriores, Termo de Referência de 2026, e editais de 2016 e 2022.</p>
+                                <p>Baseado em provas anteriores, Termo de Referência de 2026, e editais de 2016 e 2022.</p>
                                 <p>Edital <a href="https://www.educacao.df.gov.br/concursos-da-seedf" target="_blank" class="text-amber-400 hover:text-amber-300 underline font-semibold">não publicado</a>. Previsão até dezembro de 2026.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-                        <!-- 1. ESTRUTURA DA PROVA OBJETIVA -->
+                        <!-- 1. PROVA OBJETIVA -->
                         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
                             <div class="flex items-center justify-between flex-wrap gap-1 border-b border-slate-800 pb-1.5">
-                                <span class="text-indigo-400 font-bold uppercase tracking-wide">1. Estrutura da Prova Objetiva</span>
-                                <a href="https://www.educacao.df.gov.br/concursos-da-seedf" target="_blank" class="bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-md text-[10px] font-bold hover:bg-amber-400/30 transition">aguardando edital</a>
+                                <span class="text-indigo-400 font-bold uppercase tracking-wide">1. Prova Objetiva</span>
+                                
                             </div>
                             <p class="text-white font-semibold">120 itens — Certo ou Errado</p>
                             <ul class="text-slate-300 space-y-0.5 pl-3 list-disc text-[11px]">
@@ -729,7 +729,7 @@ function applyTheme() {
                             <div class="pt-1.5 border-t border-slate-800/80 space-y-1 text-[11px]">
                                 <p class="text-slate-400 font-bold uppercase">Pontuação:</p>
                                 <p class="text-slate-300">Penalização por erro em cada questão: acertos valem 1 ponto; erradas diminuem 1 ponto; em branco ou com dupla marcação não alteram pontuação.</p>
-                                <p class="text-amber-300/90 font-medium">Nota mínima de: 8 acertos em básicos, 11 em complementares, 12 em específicos e 34 pontos no total.</p>
+                                <p class="text-amber-300/90 font-medium">Nota mínima: 8 acertos em básicos, 11 em complementares, 12 em específicos - 34 pontos no total.</p>
                             </div>
                         </div>
 
@@ -737,13 +737,16 @@ function applyTheme() {
                         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
                             <div class="flex items-center justify-between flex-wrap gap-1 border-b border-slate-800 pb-1.5">
                                 <span class="text-indigo-400 font-bold uppercase tracking-wide">2. Prova Discursiva</span>
-                                <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-md text-[10px] font-bold" title="Corrigida se classificados na objetiva (até 3x das vagas), na colocação de até 3.600 (provável)">Corrigida até 3x vagas (~3.600º provável)</span>
                             </div>
                             <p class="text-white font-medium">Uma dissertação de até 30 linhas com tema a definir no edital.</p>
                             <div class="pt-1.5 border-t border-slate-800/80 space-y-1 text-[11px]">
                                 <p class="text-slate-400 font-bold uppercase">Pontuação:</p>
                                 <ul class="text-slate-300 list-disc pl-3">
                                     <li>Nota mínima de <strong>20 pontos (50%)</strong> na prova discursiva, que vale <strong>40 pontos</strong>.</li>
+                                    <li>Nota mínima de <strong>20 pontos (50%)</strong> na prova discursiva, que vale <strong>40 pontos</strong>.</li>
+                                    <li>Corrigidas <strong>apenas</strong> dos quandidatos que classificados até 3x vagas (até 3.600º)</li>
+                                
+                                
                                 </ul>
                             </div>
                         </div>
@@ -1379,7 +1382,7 @@ function applyTheme() {
                     <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl shadow-xl flex justify-between items-center">
                         <div>
                             <h3 class="text-lg font-bold text-white">Registro de Simulados & Desempenho</h3>
-                            <p class="text-xs text-slate-400">Acompanhe sua evolução em provas importadas do Tec Concursos e simulados cadastrados manualmente.</p>
+                            <p class="text-xs text-slate-400">Acompanhe sua evolução por questões e simulados.</p>
                         </div>
                         <button onclick="openSimuladoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow flex items-center space-x-2">
                             <i class="fa-solid fa-plus"></i><span>Novo Simulado Manual</span>
@@ -1453,8 +1456,8 @@ function applyTheme() {
                         <div class="w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/30">
                             <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-white">Importar Dados do Tec Concursos</h3>
-                        <p class="text-xs text-slate-400">Faça o upload do seu relatório em formato CSV ou XLSX exportado do Tec Concursos para atualizar automaticamente seu progresso e aproveitamento.</p>
+                        <h3 class="text-lg font-bold text-white">Importar Dados</h3>
+                        <p class="text-xs text-slate-400">Faça o upload do seu relatório em formato CSV ou XLSX exportado para atualizar automaticamente seu progresso e aproveitamento.</p>
                         <input type="file" id="import-file" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-slate-800 rounded-xl bg-slate-900 p-2">
                         <button onclick="processTecImportSimulation()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Processar e Sincronizar</button>
                     </div>
@@ -1466,7 +1469,7 @@ function applyTheme() {
             return `
                 <div class="space-y-6 max-w-2xl mx-auto">
                     <div class="bg-slate-950 border border-slate-800 p-8 rounded-2xl shadow-xl space-y-4">
-                        <h3 class="text-lg font-bold text-white">Backup e Restauração de Dados</h3>
+                        <h3 class="text-lg font-bold text-white">Exportar Dados</h3>
                         <p class="text-xs text-slate-400">Exporte todos os seus registros de estudos, anotações e progresso em formato JSON para garantir total segurança.</p>
                         <div class="flex space-x-3 pt-2">
                             <button onclick="exportBackup()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-download mr-2"></i>Exportar Backup JSON</button>
