@@ -3,6 +3,7 @@ import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, T
 import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, deleteMockExam } from "../services/studyData";
 import type { MockExam, Revision, RevisionResult, StudyPlan, StudyPlanItem, Subject, Topic, TopicStatus } from "../types/database";
 import { LearningLibrary } from "./LearningLibrary";
+import { LegacyImport } from "./LegacyImport";
 
 const statusLabels: Record<TopicStatus, string> = {
   not_started: "Não iniciado",
@@ -258,6 +259,7 @@ export function StudyHome({ email }: { email: string }) {
         </form>}
         {mockExams.length === 0 ? <div className="empty-state"><span className="empty-icon"><ClipboardList size={23}/></span><h3>Seu histórico começa aqui.</h3><p>Registre um simulado para acompanhar sua evolução.</p></div> : <div className="mock-exam-list">{mockExams.map(exam=><article className="mock-exam-row" key={exam.id}><div className="mock-exam-main"><span className="revision-date">{new Date(exam.exam_date+"T12:00:00").toLocaleDateString("pt-BR")}{exam.examining_board ? " · "+exam.examining_board : ""}</span><strong>{exam.title}</strong><small>{exam.total_questions} questões · {exam.correct_answers} acertos · {exam.incorrect_answers} erros · {exam.blank_answers} em branco{exam.duration_minutes ? " · "+exam.duration_minutes+" min" : ""}</small>{exam.notes && <small>{exam.notes}</small>}</div><div className="mock-exam-score"><strong>{Math.round(exam.correct_answers / exam.total_questions * 100)}%</strong><small>de acertos</small><button type="button" className="remove-plan-item" aria-label={`Excluir ${exam.title}`} onClick={()=>void handleDeleteMockExam(exam.id)}><Trash2 size={15}/></button></div></article>)}</div>}
       </section>
+      <LegacyImport />
       <LearningLibrary subjects={subjects} topics={allTopics} />
       <footer className="workspace-footer">PLANNER DA BRE V2 <span>·</span> SEUS DADOS SINCRONIZADOS COM SEGURANÇA</footer>
     </section>
