@@ -418,3 +418,76 @@ export async function deleteJurisprudenceEntry(entryId: string): Promise<void> {
   const { error } = await requireSupabase().from("jurisprudence_entries").delete().eq("id", entryId);
   if (error) throw error;
 }
+
+
+export type PlannerBackup = {
+  format: "planner-da-bre-v2";
+  version: 1;
+  exported_at: string;
+  data: {
+    study_settings: unknown[];
+    subjects: unknown[];
+    topics: unknown[];
+    study_sessions: unknown[];
+    question_attempts: unknown[];
+    revisions: unknown[];
+    study_plans: unknown[];
+    study_plan_items: unknown[];
+    mock_exams: unknown[];
+    error_notebook: unknown[];
+    jurisprudence_entries: unknown[];
+  };
+};
+
+async function fetchAllRows<T>(
+  fetchPage: (from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>
+): Promise<T[]> {
+  const rows: T[] = [];
+  const pageSize = 500;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await fetchPage(from, from + pageSize - 1);
+    if (error) throw new Error(error.message);
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+}
+
+export async function exportPlannerBackup(): Promise<PlannerBackup> {
+  const client = requireSupabase();
+  const [
+    studySettings, subjects, topics, studySessions, questionAttempts,
+    revisions, studyPlans, studyPlanItems, mockExams, errorNotebook, jurisprudence
+  ] = await Promise.all([
+    fetchAllRows(async (from, to) => await client.from("study_settings").select("*").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("subjects").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("topics").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_sessions").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("question_attempts").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("revisions").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_plans").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_plan_items").select("*").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("mock_exams").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("error_notebook").select("*").order("created_at").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("jurisprudence_entries").select("*").order("created_at").range(from, to))
+  ]);
+
+  return {
+    format: "planner-da-bre-v2",
+    version: 1,
+    exported_at: new Date().toISOString(),
+    data: {
+      study_settings: studySettings,
+      subjects,
+      topics,
+      study_sessions: studySessions,
+      question_attempts: questionAttempts,
+      revisions,
+      study_plans: studyPlans,
+      study_plan_items: studyPlanItems,
+      mock_exams: mockExams,
+      error_notebook: errorNotebook,
+      jurisprudence_entries: jurisprudence
+    }
+  };
+}
