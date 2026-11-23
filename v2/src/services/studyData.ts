@@ -357,7 +357,7 @@ export async function createJurisprudenceEntry(input: JurisprudenceInsert): Prom
 
 export async function updateJurisprudenceEntry(entryId: string, input: Partial<JurisprudenceInsert>): Promise<void> {
   if (input.title !== undefined && !input.title.trim()) throw new Error("Informe o título do registro.");
-  if (input.source_url && !/^https?:\\/\\//i.test(input.source_url)) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  if (input.source_url && !(input.source_url.startsWith("https://") || input.source_url.startsWith("http://"))) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
   const { error } = await requireSupabase().from("jurisprudence_entries").update({
     ...(input.title !== undefined && { title: input.title.trim() }),
     ...(input.court !== undefined && { court: input.court.trim() || null }),
