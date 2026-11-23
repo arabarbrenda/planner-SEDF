@@ -83,3 +83,28 @@ export type Revision = {
   topics?: { name: string } | null;
 };
 export type RevisionInsert = Pick<Revision, "topic_id" | "scheduled_for"> & Partial<Pick<Revision, "revision_type" | "notes">>;
+
+export type StudyPlan = {
+  id: string;
+  user_id: string;
+  name: string;
+  is_active: boolean;
+  settings: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+export type StudyPlanItem = {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
+  weekday: number | null;
+  start_time: string | null;
+  duration_minutes: number;
+  sort_order: number;
+  notes: string;
+  subjects?: { name: string } | null;
+  topics?: { name: string } | null;
+};
+export type StudyPlanItemInsert = Pick<StudyPlanItem, "plan_id" | "weekday" | "duration_minutes"> & Partial<Pick<StudyPlanItem, "subject_id" | "topic_id" | "start_time" | "sort_order" | "notes">>;
