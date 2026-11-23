@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AuthPage } from "../src/auth/AuthPage";
 
 const mocks = vi.hoisted(() => ({
@@ -21,6 +21,8 @@ vi.mock("../src/lib/supabase", () => ({
 }));
 
 describe("AuthPage", () => {
+  afterEach(() => cleanup());
+
   beforeEach(() => {
     mocks.signInWithPassword.mockResolvedValue({ error: null });
     mocks.signUp.mockResolvedValue({ data: { session: null }, error: null });
