@@ -54,12 +54,31 @@
 6. Do not fabricate question-attempt history from ambiguous legacy counters. Preserve uncertain legacy aggregates as migration notes until the user confirms the intended interpretation.
 7. Verify row counts and sample records before enabling V2 as the daily planner.
 
-## Open implementation work
-- Create the React + TypeScript app and design system.
-- Configure Supabase Auth redirect URLs for local development and the eventual V2 domain.
-- Apply and test the SQL migration in a non-production project state.
-- Add typed Supabase client and repository/service layer.
-- Build JSON backup import/export and a reversible migration preview.
-- Implement real Tec Concursos parsing only after inspecting an anonymized sample export.
-- Generate Google Calendar events from the saved plan, using the user's local timezone.
-- Add automated tests for analytics, access isolation and data migration.
+## Implementation status
+
+### Implemented on `feature/planner-bre-v2`
+- React 18 + TypeScript + Vite application shell and responsive visual system.
+- Supabase client, email/password authentication, Google OAuth entry point and password-recovery flow.
+- Typed data services and study dashboard, including subjects, topics, sessions, question batches, revisions and weekly planning.
+- Mock exams with validation and chronological performance trend.
+- Error notebook and jurisprudence records with search, filters and editing.
+- V1 JSON import preview and additive migration with duplicate fingerprint protection. This import is not transactional; a failed attempt can leave partial records and requires manual reconciliation.
+- V2 JSON backup export, paginated in batches of 500, and transactional restore through the `restore_planner_backup` RPC.
+- Automated frontend/service tests and CI checks using a temporary PostgreSQL 15 environment with minimal Supabase-compatible objects.
+
+### Remaining before a production decision
+- Run the documented authentication, RLS, export and restore checklist in a separate Supabase development project. This has not been done against the hosted project.
+- Inspect an anonymized Tec Concursos export before implementing a real parser.
+- Implement Google Calendar export from saved plan items, honoring the local timezone.
+- Review dependency audit findings and update dependencies deliberately; do not apply force upgrades without compatibility review.
+- Consider whether export needs a consistent database snapshot if writes can occur during a backup. Current export paginates each table independently; it is not a cross-table transactional snapshot.
+- Complete manual accessibility and responsive-browser review.
+
+## Migration and rollout
+1. Keep V1 and its GitHub Pages deployment unchanged.
+2. Continue V2 work only on `feature/planner-bre-v2`.
+3. Export a V1 JSON backup before any data migration.
+4. Review the V1 import preview and preserve uncertain legacy aggregates rather than fabricating history.
+5. Validate V2 in a separate, disposable Supabase development project using `docs/SUPABASE_DEV_VALIDATION.md`.
+6. Verify row counts, representative records, authentication and RLS with at least two test accounts.
+7. Obtain explicit approval before applying migrations to the hosted project, importing personal data, merging branches or deploying V2.
