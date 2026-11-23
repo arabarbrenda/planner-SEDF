@@ -18,6 +18,7 @@ export function StudyHome({ email }: { email: string }) {
   const [allTopics, setAllTopics] = useState<Topic[]>([]);
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [mockExams, setMockExams] = useState<MockExam[]>([]);
+  const [mockSearch, setMockSearch] = useState("");
   const [showMockExamForm, setShowMockExamForm] = useState(false);
   const [mockTitle, setMockTitle] = useState("");
   const [mockDate, setMockDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));
@@ -58,6 +59,7 @@ export function StudyHome({ email }: { email: string }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const filteredMockExams = mockExams.filter(exam => [exam.title, exam.examining_board, exam.notes, exam.exam_date].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(mockSearch.trim().toLocaleLowerCase("pt-BR")));
 
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
@@ -257,7 +259,7 @@ export function StudyHome({ email }: { email: string }) {
           <small className="form-hint">A soma de acertos, erros e questões em branco precisa corresponder ao total.</small>
           <button className="submit-button" disabled={saving || !mockTitle.trim()}>{saving ? "Salvando..." : "Salvar simulado"}</button>
         </form>}
-        {mockExams.length === 0 ? <div className="empty-state"><span className="empty-icon"><ClipboardList size={23}/></span><h3>Seu histórico começa aqui.</h3><p>Registre um simulado para acompanhar sua evolução.</p></div> : <div className="mock-exam-list">{mockExams.map(exam=><article className="mock-exam-row" key={exam.id}><div className="mock-exam-main"><span className="revision-date">{new Date(exam.exam_date+"T12:00:00").toLocaleDateString("pt-BR")}{exam.examining_board ? " · "+exam.examining_board : ""}</span><strong>{exam.title}</strong><small>{exam.total_questions} questões · {exam.correct_answers} acertos · {exam.incorrect_answers} erros · {exam.blank_answers} em branco{exam.duration_minutes ? " · "+exam.duration_minutes+" min" : ""}</small>{exam.notes && <small>{exam.notes}</small>}</div><div className="mock-exam-score"><strong>{Math.round(exam.correct_answers / exam.total_questions * 100)}%</strong><small>de acertos</small><button type="button" className="remove-plan-item" aria-label={`Excluir ${exam.title}`} onClick={()=>void handleDeleteMockExam(exam.id)}><Trash2 size={15}/></button></div></article>)}</div>}
+        {mockExams.length === 0 ? <div className="empty-state"><span className="empty-icon"><ClipboardList size={23}/></span><h3>Seu histórico começa aqui.</h3><p>Registre um simulado para acompanhar sua evolução.</p></div> : <><div className="library-filters"><input aria-label="Pesquisar simulados" value={mockSearch} onChange={e=>setMockSearch(e.target.value)} placeholder="Pesquisar por nome, banca, data ou observação..."/></div>{filteredMockExams.length === 0 ? <div className="empty-state"><h3>Nenhum simulado encontrado.</h3><p>Tente outro termo de pesquisa.</p></div> : <div className="mock-exam-list">{filteredMockExams.map(exam=><article className="mock-exam-row" key={exam.id}><div className="mock-exam-main"><span className="revision-date">{new Date(exam.exam_date+"T12:00:00").toLocaleDateString("pt-BR")}{exam.examining_board ? " · "+exam.examining_board : ""}</span><strong>{exam.title}</strong><small>{exam.total_questions} questões · {exam.correct_answers} acertos · {exam.incorrect_answers} erros · {exam.blank_answers} em branco{exam.duration_minutes ? " · "+exam.duration_minutes+" min" : ""}</small>{exam.notes && <small>{exam.notes}</small>}</div><div className="mock-exam-score"><strong>{Math.round(exam.correct_answers / exam.total_questions * 100)}%</strong><small>de acertos</small><button type="button" className="remove-plan-item" aria-label={`Excluir ${exam.title}`} onClick={()=>void handleDeleteMockExam(exam.id)}><Trash2 size={15}/></button></div></article>)}</div>}</>}
       </section>
       <LegacyImport />
       <LearningLibrary subjects={subjects} topics={allTopics} />
