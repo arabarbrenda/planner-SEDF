@@ -64,7 +64,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 ## Limitações conhecidas nesta etapa
 
 - O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
-- A V2 já permite baixar um backup JSON completo. A restauração/importação desse formato V2 ainda não está implementada; mantenha o arquivo exportado em local seguro e não o considere um mecanismo de restauração até essa etapa ser concluída.
+- A V2 permite exportar e restaurar backup JSON completo. A restauração é aditiva: IDs já existentes são ignorados, novos registros são inseridos e conflitos de integridade fazem a transação inteira falhar. Ela ainda não foi validada contra o projeto Supabase hospedado; mantenha cópias independentes dos arquivos de backup.
 - O importador da V1 aceita o backup JSON e adiciona disciplinas, assuntos, sessões, totais de questões por assunto, simulados e registros de jurisprudência reconhecidos. Não migra planejamento/ciclo, tema visual ou arquivos anexados. A importação é aditiva e ainda não é transacional: se houver falha no meio, parte dos registros pode já ter sido gravada. Cada backup é identificado por SHA-256 e registrado em `import_jobs`; uma tentativa concluída ou interrompida bloqueia a repetição automática do mesmo conteúdo. Em caso de falha parcial, confira os registros antes de solicitar uma recuperação manual.
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
