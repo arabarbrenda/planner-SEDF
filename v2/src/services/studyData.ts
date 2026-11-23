@@ -365,7 +365,7 @@ export async function createErrorEntry(input: ErrorNotebookInsert): Promise<Erro
 
 export async function updateErrorEntry(entryId: string, input: Partial<ErrorNotebookInsert>): Promise<void> {
   if (input.question_text !== undefined && !input.question_text.trim()) throw new Error("Descreva a questão ou o motivo do erro.");
-  const { error } = await requireSupabase().from("error_notebook").update({
+  const { data, error } = await requireSupabase().from("error_notebook").update({
     ...(input.subject_id !== undefined && { subject_id: input.subject_id }),
     ...(input.topic_id !== undefined && { topic_id: input.topic_id }),
     ...(input.question_reference !== undefined && { question_reference: input.question_reference?.trim() || null }),
@@ -433,7 +433,7 @@ export async function createJurisprudenceEntry(input: JurisprudenceInsert): Prom
 export async function updateJurisprudenceEntry(entryId: string, input: Partial<JurisprudenceInsert>): Promise<void> {
   if (input.title !== undefined && !input.title.trim()) throw new Error("Informe o título do registro.");
   const sourceUrl = input.source_url === undefined ? undefined : normalizeHttpUrl(input.source_url);
-  const { error } = await requireSupabase().from("jurisprudence_entries").update({
+  const { data, error } = await requireSupabase().from("jurisprudence_entries").update({
     ...(input.title !== undefined && { title: input.title.trim() }),
     ...(input.court !== undefined && { court: input.court?.trim() || null }),
     ...(input.case_reference !== undefined && { case_reference: input.case_reference?.trim() || null }),
