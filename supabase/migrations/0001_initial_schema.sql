@@ -233,6 +233,10 @@ create table if not exists public.import_jobs (
   completed_at timestamptz
 );
 
+create unique index if not exists import_jobs_user_source_file_unique
+  on public.import_jobs (user_id, source, file_name)
+  where file_name is not null;
+
 -- Enable row-level security and owner-only policies on every user-owned table.
 do $$
 declare
