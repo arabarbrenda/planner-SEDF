@@ -2,6 +2,7 @@ import { LogOut, ShieldCheck } from "lucide-react";
 import { AuthPage } from "./auth/AuthPage";
 import { RecoveryPage } from "./auth/RecoveryPage";
 import { useAuth } from "./auth/AuthProvider";
+import { StudyHome } from "./features/StudyHome";
 import { isSupabaseConfigured, requireSupabase } from "./lib/supabase";
 
 export function App() {
@@ -20,5 +21,5 @@ export function App() {
     if (error) console.error("Falha ao sair:", error.message);
   }
 
-  return <main className="welcome-screen"><header className="app-topbar"><div className="brand"><span className="brand-mark">✦</span> planner <b>da bre</b><span className="brand-version">V2</span></div><button className="signout-button" onClick={signOut}><LogOut size={16}/> Sair</button></header><section className="welcome-card"><span className="eyebrow">ACESSO CONFIRMADO</span><h1>Bem-vinda à sua nova fase.</h1><p>Você entrou como <b>{user.email}</b>.</p><div className="coming-soon"><ShieldCheck size={19}/> Sua área de estudos está sendo construída com segurança.</div></section></main>;
+  return <><StudyHome email={user.email ?? "Conta Planner da Bre"}/><button className="floating-signout" onClick={signOut} aria-label="Sair da conta"><LogOut size={17}/><span>Sair</span></button></>;
 }
