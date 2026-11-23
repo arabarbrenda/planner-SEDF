@@ -56,7 +56,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
 - [x] Exportar backup JSON completo da V2 com paginação, incluindo configurações e registros de estudo, questões, revisões, planejamento, simulados, caderno de erros e jurisprudência
 - [x] Restaurar backup JSON da V2 por função PostgreSQL transacional, preservando IDs e vínculos e atribuindo os registros ao usuário autenticado
-- [x] Testar restauração, idempotência por ID, isolamento do usuário e rollback integral em PostgreSQL 15 temporário no CI
+- [x] Testar restauração, idempotência por ID, isolamento do usuário e rollback integral em PostgreSQL 15 temporário no CI, inclusive em conflito com a regra de um único plano ativo por usuário
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
 - [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (aplicação da migration, integridade referencial, unicidade do planejamento e isolamento RLS)\n- [x] Agregação das métricas do dashboard no PostgreSQL, respeitando RLS e sem limite de paginação do cliente\n- [ ] Testes automatizados adicionais dos fluxos completos
