@@ -352,6 +352,7 @@ declare
   section_name text;
   section_data jsonb;
   target_table text;
+  conflict_column text;
   inserted_count bigint := 0;
   section_count bigint;
   sections text[] := array[
@@ -379,10 +380,11 @@ begin
 
   foreach section_name in array sections loop
     target_table := section_name;
+    conflict_column := case when section_name = 'study_settings' then 'user_id' else 'id' end;
     section_data := p_backup -> 'data' -> section_name;
     execute format(
-      'insert into public.%I select (jsonb_populate_recordset(null::public.%I, $1)).* on conflict do nothing',
-      target_table, target_table
+      'insert into public.%I select (jsonb_populate_recordset(null::public.%I, $1)).* on conflict (%I) do nothing',
+      target_table, target_table, conflict_column
     )
     using (
       select coalesce(
