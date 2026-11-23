@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Download, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
-import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam, exportPlannerBackup } from "../services/studyData";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Download, Upload, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
+import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam, exportPlannerBackup, restorePlannerBackup } from "../services/studyData";
 import type { MockExam, Revision, RevisionResult, StudyPlan, StudyPlanItem, Subject, Topic, TopicStatus } from "../types/database";
 import { LearningLibrary } from "./LearningLibrary";
 import { LegacyImport } from "./LegacyImport";
@@ -59,6 +59,8 @@ export function StudyHome({ email }: { email: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const backupInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const filteredMockExams = mockExams.filter(exam => [exam.title, exam.examining_board, exam.notes, exam.exam_date].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(mockSearch.trim().toLocaleLowerCase("pt-BR")));
@@ -105,6 +107,39 @@ export function StudyHome({ email }: { email: string }) {
       setError(err instanceof Error ? err.message : "Não foi possível gerar o backup.");
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function handleRestoreBackup(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      setError("O arquivo ultrapassa o limite de 25 MB.");
+      return;
+    }
+    setError(""); setNotice("");
+    try {
+      const backup: unknown = JSON.parse(await file.text());
+      if (!backup || typeof backup !== "object" ||
+          (backup as { format?: unknown }).format !== "planner-da-bre-v2" ||
+          (backup as { version?: unknown }).version !== 1 ||
+          !(backup as { data?: unknown }).data ||
+          typeof (backup as { data?: unknown }).data !== "object") {
+        throw new Error("Este arquivo não é um backup compatível do Planner da Bre V2.");
+      }
+      const confirmed = window.confirm(
+        "A restauração é aditiva: registros com IDs já existentes serão preservados, e novos registros serão acrescentados. Deseja continuar?"
+      );
+      if (!confirmed) return;
+      setRestoring(true);
+      const inserted = await restorePlannerBackup(backup);
+      await refresh();
+      setNotice(`Restauração concluída: ${inserted} novos registros adicionados. Registros existentes foram preservados.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível restaurar este backup.");
+    } finally {
+      setRestoring(false);
     }
   }
 
@@ -248,7 +283,7 @@ export function StudyHome({ email }: { email: string }) {
       <div className="user-chip"><span className="user-dot"/><span>{email}</span></div>
     </header>
     <section className="workspace-content">
-      <div className="welcome-row"><div><span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span><h1>Vamos avançar no seu ritmo.</h1><p>Um passo consistente de cada vez. Seu progresso começa aqui.</p></div><div className="header-actions"><button className="refresh-button" onClick={()=>void handleExportBackup()} aria-label="Baixar backup dos dados" title="Baixar backup JSON" disabled={exporting || loading}><Download size={17}/></button><button className="refresh-button" onClick={()=>void refresh()} aria-label="Atualizar dados" disabled={loading}><RefreshCw size={17}/></button></div></div>
+      <div className="welcome-row"><div><span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span><h1>Vamos avançar no seu ritmo.</h1><p>Um passo consistente de cada vez. Seu progresso começa aqui.</p></div><div className="header-actions"><input ref={backupInputRef} type="file" accept="application/json,.json" onChange={handleRestoreBackup} hidden/><button className="refresh-button" onClick={()=>backupInputRef.current?.click()} aria-label="Restaurar backup V2" title="Restaurar backup V2" disabled={restoring || loading}><Upload size={17}/></button><button className="refresh-button" onClick={()=>void handleExportBackup()} aria-label="Baixar backup dos dados" title="Baixar backup JSON" disabled={exporting || loading}><Download size={17}/></button><button className="refresh-button" onClick={()=>void refresh()} aria-label="Atualizar dados" disabled={loading}><RefreshCw size={17}/></button></div></div>
       {error && <p className="feedback error" role="alert">{error}</p>}
       {notice && <p className="feedback success" role="status">{notice}</p>}
       <div className="metric-grid">
