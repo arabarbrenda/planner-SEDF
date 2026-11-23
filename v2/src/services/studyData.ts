@@ -1,5 +1,5 @@
 import { requireSupabase } from "../lib/supabase";
-import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult, StudyPlan, StudyPlanItem, StudyPlanItemInsert } from "../types/database";
+import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult, StudyPlan, StudyPlanItem, StudyPlanItemInsert, MockExam, MockExamInsert } from "../types/database";
 
 function currentUserId() {
   return requireSupabase().auth.getUser().then(({ data, error }) => {
@@ -211,5 +211,48 @@ export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<S
 
 export async function deleteStudyPlanItem(itemId: string): Promise<void> {
   const { error } = await requireSupabase().from("study_plan_items").delete().eq("id", itemId);
+  if (error) throw error;
+}
+
+
+export async function listMockExams(): Promise<MockExam[]> {
+  const { data, error } = await requireSupabase().from("mock_exams")
+    .select("*").order("exam_date", { ascending: false }).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as MockExam[];
+}
+
+export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
+  const total = input.total_questions;
+  const correct = input.correct_answers;
+  const blank = input.blank_answers ?? 0;
+  const incorrect = input.incorrect_answers ?? total - correct - blank;
+  if (!Number.isInteger(total) || total <= 0 || !Number.isInteger(correct) || correct < 0 ||
+      !Number.isInteger(incorrect) || incorrect < 0 || !Number.isInteger(blank) || blank < 0 ||
+      correct + incorrect + blank !== total) {
+    throw new Error("A soma de acertos, erros e questões em branco deve ser igual ao total.");
+  }
+  if (input.duration_minutes != null && (!Number.isInteger(input.duration_minutes) || input.duration_minutes <= 0)) {
+    throw new Error("A duração do simulado deve ser um número positivo de minutos.");
+  }
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("mock_exams").insert({
+    user_id: userId,
+    title: input.title.trim(),
+    exam_date: input.exam_date,
+    examining_board: input.examining_board?.trim() || null,
+    total_questions: total,
+    correct_answers: correct,
+    incorrect_answers: incorrect,
+    blank_answers: blank,
+    duration_minutes: input.duration_minutes ?? null,
+    notes: input.notes ?? ""
+  }).select("*").single();
+  if (error) throw error;
+  return data as MockExam;
+}
+
+export async function deleteMockExam(examId: string): Promise<void> {
+  const { error } = await requireSupabase().from("mock_exams").delete().eq("id", examId);
   if (error) throw error;
 }
