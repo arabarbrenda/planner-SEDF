@@ -6,6 +6,8 @@ on:
       - feature/planner-bre-v2
     paths:
       - "v2/**"
+      - "supabase/migrations/**"
+      - "docs/ARCHITECTURE_V2.md"
       - ".github/workflows/v2-build.yml"
   pull_request:
     paths:
