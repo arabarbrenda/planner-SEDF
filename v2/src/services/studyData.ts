@@ -57,8 +57,9 @@ export async function createTopic(input: TopicInsert): Promise<Topic> {
 }
 
 export async function updateTopicStatus(topicId: string, status: TopicStatus): Promise<void> {
-  const { error } = await requireSupabase().from("topics").update({ status }).eq("id", topicId);
+  const { data, error } = await requireSupabase().from("topics").update({ status }).eq("id", topicId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Tópico não encontrado ou sem permissão para alterá-lo.");
 }
 
 export async function createStudySession(input: StudySessionInsert): Promise<StudySession> {
@@ -153,20 +154,22 @@ export async function createRevision(input: RevisionInsert): Promise<Revision> {
 }
 
 export async function completeRevision(revisionId: string, result: RevisionResult, notes?: string): Promise<void> {
-  const { error } = await requireSupabase().from("revisions").update({
+  const { data, error } = await requireSupabase().from("revisions").update({
     completed_at: new Date().toISOString(),
     result,
     ...(notes === undefined ? {} : { notes })
-  }).eq("id", revisionId).is("completed_at", null);
+  }).eq("id", revisionId).is("completed_at", null).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Revisão não encontrada, já concluída ou sem permissão para alterá-la.");
 }
 
 export async function reopenRevision(revisionId: string): Promise<void> {
-  const { error } = await requireSupabase().from("revisions").update({
+  const { data, error } = await requireSupabase().from("revisions").update({
     completed_at: null,
     result: null
-  }).eq("id", revisionId);
+  }).eq("id", revisionId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Revisão não encontrada ou sem permissão para alterá-la.");
 }
 
 export async function getActiveStudyPlan(): Promise<StudyPlan> {
@@ -230,8 +233,9 @@ export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<S
 }
 
 export async function deleteStudyPlanItem(itemId: string): Promise<void> {
-  const { error } = await requireSupabase().from("study_plan_items").delete().eq("id", itemId);
+  const { data, error } = await requireSupabase().from("study_plan_items").delete().eq("id", itemId).select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error("Bloco não encontrado ou sem permissão para excluí-lo.");
 }
 
 
@@ -282,18 +286,20 @@ export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
 
 export async function updateMockExam(examId: string, input: MockExamInsert): Promise<void> {
   const { total, correct, blank, incorrect } = validateMockExam(input);
-  const { error } = await requireSupabase().from("mock_exams").update({
+  const { data, error } = await requireSupabase().from("mock_exams").update({
     title: input.title.trim(), exam_date: input.exam_date,
     examining_board: input.examining_board?.trim() || null,
     total_questions: total, correct_answers: correct, incorrect_answers: incorrect,
     blank_answers: blank, duration_minutes: input.duration_minutes ?? null, notes: input.notes ?? ""
-  }).eq("id", examId);
+  }).eq("id", examId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Simulado não encontrado ou sem permissão para alterá-lo.");
 }
 
 export async function deleteMockExam(examId: string): Promise<void> {
-  const { error } = await requireSupabase().from("mock_exams").delete().eq("id", examId);
+  const { data, error } = await requireSupabase().from("mock_exams").delete().eq("id", examId).select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error("Simulado não encontrado ou sem permissão para excluí-lo.");
 }
 
 
@@ -368,18 +374,21 @@ export async function updateErrorEntry(entryId: string, input: Partial<ErrorNote
     ...(input.correct_answer !== undefined && { correct_answer: input.correct_answer?.trim() || null }),
     ...(input.explanation !== undefined && { explanation: input.explanation }),
     ...(input.tags !== undefined && { tags: input.tags })
-  }).eq("id", entryId);
+  }).eq("id", entryId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Registro de erro não encontrado ou sem permissão para alterá-lo.");
 }
 
 export async function updateErrorStatus(entryId: string, status: ErrorStatus): Promise<void> {
-  const { error } = await requireSupabase().from("error_notebook").update({ status }).eq("id", entryId);
+  const { data, error } = await requireSupabase().from("error_notebook").update({ status }).eq("id", entryId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Registro de erro não encontrado ou sem permissão para alterá-lo.");
 }
 
 export async function deleteErrorEntry(entryId: string): Promise<void> {
-  const { error } = await requireSupabase().from("error_notebook").delete().eq("id", entryId);
+  const { data, error } = await requireSupabase().from("error_notebook").delete().eq("id", entryId).select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error("Registro de erro não encontrado ou sem permissão para excluí-lo.");
 }
 
 export async function listJurisprudence(): Promise<JurisprudenceEntry[]> {
@@ -432,13 +441,15 @@ export async function updateJurisprudenceEntry(entryId: string, input: Partial<J
     ...(input.summary !== undefined && { summary: input.summary }),
     ...(input.source_url !== undefined && { source_url: sourceUrl ?? null }),
     ...(input.tags !== undefined && { tags: input.tags })
-  }).eq("id", entryId);
+  }).eq("id", entryId).select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error("Jurisprudência não encontrada ou sem permissão para alterá-la.");
 }
 
 export async function deleteJurisprudenceEntry(entryId: string): Promise<void> {
-  const { error } = await requireSupabase().from("jurisprudence_entries").delete().eq("id", entryId);
+  const { data, error } = await requireSupabase().from("jurisprudence_entries").delete().eq("id", entryId).select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error("Jurisprudência não encontrada ou sem permissão para excluí-la.");
 }
 
 
