@@ -340,6 +340,67 @@ $fn$;
 revoke all on function public.get_study_summary() from public, anon;
 grant execute on function public.get_study_summary() to authenticated;
 
+
+-- Restore a V2 JSON backup atomically. Rows are always assigned to the caller;
+-- existing IDs are left untouched so repeated imports do not duplicate records.
+create or replace function public.restore_planner_backup(p_backup jsonb)
+returns table (inserted_rows bigint)
+language plpgsql
+set search_path = ''
+as $restore$
+declare
+  section_name text;
+  section_data jsonb;
+  target_table text;
+  inserted_count bigint := 0;
+  section_count bigint;
+  sections text[] := array[
+    'study_settings','subjects','topics','study_plans','study_sessions',
+    'question_attempts','revisions','study_plan_items','mock_exams',
+    'error_notebook','jurisprudence_entries'
+  ];
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_backup) <> 'object'
+     or p_backup ->> 'format' <> 'planner-da-bre-v2'
+     or p_backup ->> 'version' <> '1'
+     or jsonb_typeof(p_backup -> 'data') <> 'object' then
+    raise exception 'Unsupported or invalid Planner V2 backup';
+  end if;
+
+  foreach section_name in array sections loop
+    section_data := p_backup -> 'data' -> section_name;
+    if section_data is null or jsonb_typeof(section_data) <> 'array' then
+      raise exception 'Invalid backup section: %', section_name;
+    end if;
+  end loop;
+
+  foreach section_name in array sections loop
+    target_table := section_name;
+    section_data := p_backup -> 'data' -> section_name;
+    execute format(
+      'insert into public.%I select (jsonb_populate_recordset(null::public.%I, $1)).* on conflict do nothing',
+      target_table, target_table
+    )
+    using (
+      select coalesce(
+        jsonb_agg(jsonb_set(item, '{user_id}', to_jsonb(auth.uid()), true)),
+        '[]'::jsonb
+      )
+      from jsonb_array_elements(section_data) as elements(item)
+    );
+    get diagnostics section_count = row_count;
+    inserted_count := inserted_count + section_count;
+  end loop;
+
+  return query select inserted_count;
+end;
+$restore$;
+revoke all on function public.restore_planner_backup(jsonb) from public, anon;
+grant execute on function public.restore_planner_backup(jsonb) to authenticated;
+
 -- Explicit API privileges complement RLS; RLS remains the row-level boundary.
 grant usage on schema public to authenticated;
 grant select, update on public.profiles to authenticated;
