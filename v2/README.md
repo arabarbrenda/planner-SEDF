@@ -55,6 +55,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Adicionar pesquisa textual na biblioteca de jurisprudência e no histórico de simulados
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
 - [x] Exportar backup JSON completo da V2 com paginação, incluindo configurações e registros de estudo, questões, revisões, planejamento, simulados, caderno de erros e jurisprudência
+- [x] Restaurar backup JSON da V2 por função PostgreSQL transacional, preservando IDs e vínculos e atribuindo os registros ao usuário autenticado
+- [x] Testar restauração, idempotência por ID, isolamento do usuário e rollback integral em PostgreSQL 15 temporário no CI
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
 - [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (aplicação da migration, integridade referencial, unicidade do planejamento e isolamento RLS)\n- [x] Agregação das métricas do dashboard no PostgreSQL, respeitando RLS e sem limite de paginação do cliente\n- [ ] Testes automatizados adicionais dos fluxos completos
@@ -69,7 +71,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O módulo de simulados permite criar, editar e excluir resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; o histórico também exibe um gráfico cronológico com média e melhor desempenho dos últimos oito simulados. A validação automatizada de TypeScript e build é executada pelo GitHub Actions em cada atualização desta pasta.
 - O caderno de erros permite criar, editar, excluir, pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite criar, editar, excluir e pesquisar por tema, tribunal, processo e resumo. O formulário ainda não expõe edição de etiquetas.
 - Sessões e tentativas de questões recebem a data atual automaticamente no fuso de Brasília; simulados e revisões usam datas informadas no formulário. Edição retroativa de sessões/tentativas e filtros por período ainda serão implementados.
-- A migration foi aplicada e testada em PostgreSQL 15 temporário no CI, com objetos mínimos de compatibilidade Supabase; isso não equivale à aplicação ou validação no projeto Supabase hospedado. Nenhum fluxo de autenticação foi validado em ambiente real. O importador ainda precisa de testes com backups reais anonimizados antes de uso em dados importantes.
+- A migration e os testes de restauração foram executados com sucesso em PostgreSQL 15 temporário no CI, com objetos mínimos de compatibilidade Supabase; isso não equivale à aplicação ou validação no projeto Supabase hospedado. Nenhum fluxo de autenticação ou restauração foi validado em ambiente real. O importador V1 ainda precisa de testes com backups reais anonimizados antes de uso em dados importantes.
 
 ## Dados e segurança
 
