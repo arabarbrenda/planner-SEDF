@@ -17,6 +17,34 @@ type LegacyData = {
   jurisprudencia?: Array<Record<string, unknown>>;
 };
 
+function validateLegacyData(parsed: LegacyData): void {
+  if (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) {
+    throw new Error("A lista de jurisprudência do backup não tem um formato válido.");
+  }
+  for (const [subjectIndex, subject] of parsed.materias.entries()) {
+    if (!subject.nome?.trim() || !Array.isArray(subject.topicos)) {
+      throw new Error(`A disciplina ${subjectIndex + 1} precisa ter nome e uma lista válida de assuntos.`);
+    }
+    for (const [topicIndex, topic] of subject.topicos.entries()) {
+      if (!topic || typeof topic.nome !== "string" || !topic.nome.trim()) {
+        throw new Error(`O assunto ${topicIndex + 1} da disciplina "${subject.nome}" está sem nome válido.`);
+      }
+      const total = topic.questoesTotal ?? 0;
+      const correct = topic.questoesAcertos ?? 0;
+      if (![total, correct].every(Number.isSafeInteger) || total < 0 || correct < 0 || correct > total) {
+        throw new Error(`Os totais de questões do assunto "${topic.nome}" são inválidos. Confira o backup antes de importar.`);
+      }
+    }
+  }
+  for (const [index, exam] of parsed.simulados.entries()) {
+    if (!exam || (exam.qTotal !== undefined && (!Number.isSafeInteger(exam.qTotal) || exam.qTotal < 0)) ||
+        (exam.qAcertos !== undefined && (!Number.isSafeInteger(exam.qAcertos) || exam.qAcertos < 0)) ||
+        (exam.qTotal !== undefined && exam.qAcertos !== undefined && exam.qAcertos > exam.qTotal)) {
+      throw new Error(`Os quantitativos do simulado ${index + 1} são inválidos. Confira o backup antes de importar.`);
+    }
+  }
+}
+
 function asDate(value: unknown): string | undefined {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const date = new Date(value + "T12:00:00");
@@ -76,9 +104,7 @@ export function LegacyImport() {
       if (!parsed || !Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) || !Array.isArray(parsed.simulados)) {
         throw new Error("Este arquivo não parece ser um backup JSON válido da V1.");
       }
-      if (parsed.materias.some(s => !s || typeof s.nome !== "string" || !Array.isArray(s.topicos))) {
-        throw new Error("A estrutura das disciplinas ou dos assuntos não é válida.");
-      }
+      validateLegacyData(parsed);
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
       const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
       setData(parsed); setFileName(file.name); setFingerprint(hash);
