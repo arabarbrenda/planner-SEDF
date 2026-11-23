@@ -23,9 +23,9 @@ describe("buildWeeklyCalendar", () => {
   });
 
   it("moves a past weekday to the next week and escapes event text", () => {
-    const result = buildWeeklyCalendar([item({ weekday: 1, notes: "A, B; C\\nD" })], "2026-11-24");
+    const result = buildWeeklyCalendar([item({ weekday: 1, notes: "A, B; C\nD" })], "2026-11-24");
     expect(result.calendar).toContain("DTSTART;TZID=America/Sao_Paulo:20261130T143000");
-    expect(result.calendar).toContain("SUMMARY:Direito Administrativo \\— Atos administrativos");
+    expect(result.calendar).toContain("SUMMARY:Direito Administrativo — Atos administrativos");
     expect(result.calendar).toContain("DESCRIPTION:A\\, B\\; C\\nD");
   });
 
