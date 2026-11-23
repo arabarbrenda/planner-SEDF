@@ -125,3 +125,40 @@ export type MockExam = {
 };
 export type MockExamInsert = Pick<MockExam, "title" | "exam_date" | "total_questions" | "correct_answers"> &
   Partial<Pick<MockExam, "examining_board" | "incorrect_answers" | "blank_answers" | "duration_minutes" | "notes">>;
+
+
+export type ErrorStatus = "open" | "reviewing" | "resolved";
+export type ErrorNotebookEntry = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
+  question_reference: string | null;
+  question_text: string;
+  user_answer: string | null;
+  correct_answer: string | null;
+  explanation: string;
+  tags: string[];
+  status: ErrorStatus;
+  created_at: string;
+  updated_at: string;
+  subjects?: { name: string } | null;
+  topics?: { name: string } | null;
+};
+export type ErrorNotebookInsert = Pick<ErrorNotebookEntry, "question_text"> &
+  Partial<Pick<ErrorNotebookEntry, "subject_id" | "topic_id" | "question_reference" | "user_answer" | "correct_answer" | "explanation" | "tags" | "status">>;
+export type JurisprudenceEntry = {
+  id: string;
+  user_id: string;
+  title: string;
+  court: string | null;
+  case_reference: string | null;
+  judgment_date: string | null;
+  summary: string;
+  source_url: string | null;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+};
+export type JurisprudenceInsert = Pick<JurisprudenceEntry, "title"> &
+  Partial<Pick<JurisprudenceEntry, "court" | "case_reference" | "judgment_date" | "summary" | "source_url" | "tags">>;
