@@ -31,7 +31,7 @@
 - `import_jobs`: import audit trail and validation results.
 
 ## Analytics rules
-1. Study hours come only from `study_sessions.duration_minutes`.
+1. Study hours come only from `study_sessions.duration_minutes`; the dashboard uses the `get_study_summary()` SQL function to aggregate in the database without client pagination limits.
 2. Question totals and accuracy come only from `question_attempts`.
 3. Mock-exam analytics are reported separately unless an explicit analytics query intentionally includes them; do not silently duplicate mock-exam questions into question attempts.
 4. A topic with zero attempts has unknown accuracy, not 100%.
@@ -41,7 +41,7 @@
 - Supabase Auth identifies the user.
 - Every user-owned row includes `user_id`.
 - Row Level Security is enabled on all user-owned tables.
-- Initial policies allow authenticated users to access only rows where `user_id = auth.uid()`; profiles are readable/updatable only by their owner.
+- Initial policies allow authenticated users to access only rows where `user_id = auth.uid()`; profiles are readable/updatable only by their owner. The dashboard aggregate function runs as SECURITY INVOKER so underlying table RLS remains effective.
 - Never put a service-role key or database password in frontend code or Git.
 - The Supabase publishable key is designed for client use, but only alongside correctly configured RLS.
 
