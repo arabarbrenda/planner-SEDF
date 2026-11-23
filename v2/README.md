@@ -27,7 +27,7 @@ Antes de testar autenticação:
 - Habilite o provedor Google em Authentication > Sign In / Providers e configure as credenciais OAuth do Google.
 - Revise a configuração de confirmação de e-mail.
 - Configure o endereço de redirecionamento de recuperação de senha.
-- Aplique a migration `supabase/migrations/0001_initial_schema.sql` somente após revisão e em um projeto de desenvolvimento.
+- Aplique a migration `../supabase/migrations/0001_initial_schema.sql` somente após revisão e em um projeto de desenvolvimento.
 
 A criação do projeto Supabase não configura automaticamente o provedor Google. O botão Google só funcionará depois dessa configuração.
 
