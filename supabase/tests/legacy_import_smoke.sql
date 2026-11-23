@@ -80,3 +80,29 @@ end
 $test$;
 
 reset role;
+
+-- The same content fingerprint is scoped to the owner, not globally. User two
+-- can import their own copy and must not see user one's import job or records.
+set role authenticated;
+set request.jwt.claim.sub = '22222222-2222-4222-8222-222222222222';
+
+select public.import_legacy_v1_backup(
+  repeat('a',64), 'legacy.json',
+  '{"subjects":[{"legacy_id":"s2","name":"User two subject"}],"topics":[],"sessions":[],"question_attempts":[],"mock_exams":[],"jurisprudence":[]}'::jsonb
+);
+
+do $test$
+begin
+  if (select count(*) from public.import_jobs where file_name = repeat('a',64)) <> 1 then
+    raise exception 'RLS exposed another user import job or hid the caller job';
+  end if;
+  if exists (select 1 from public.subjects where name = 'Direito') then
+    raise exception 'RLS exposed user one legacy subject to user two';
+  end if;
+  if not exists (select 1 from public.subjects where user_id = auth.uid() and name = 'User two subject') then
+    raise exception 'User two legacy import did not create an owned subject';
+  end if;
+end
+$test$;
+
+reset role;
