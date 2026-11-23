@@ -71,7 +71,7 @@
 - Run the documented authentication, RLS, export and restore checklist in a separate Supabase development project. This has not been done against the hosted project.
 - Inspect an anonymized Tec Concursos export before implementing a real parser.
 - Implement Google Calendar export from saved plan items, honoring the local timezone.
-- Review dependency audit findings and update dependencies deliberately; do not apply force upgrades without compatibility review.
+- Dependency hygiene: CI runs `npm audit --audit-level=moderate` and currently passes with zero advisories in the resolved dependency graph. The workflow generates and uploads `package-lock.json` as a short-lived artifact, but the lockfile is not yet committed; dependency resolution can therefore change between runs. Commit and review a lockfile before treating installs as fully reproducible.
 - Consider whether export needs a consistent database snapshot if writes can occur during a backup. Current export paginates each table independently; it is not a cross-table transactional snapshot.
 - Complete manual accessibility and responsive-browser review.
 
