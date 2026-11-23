@@ -212,7 +212,10 @@ export function StudyHome({ email }: { email: string }) {
   function handleExportCalendar() {
     setError(""); setNotice("");
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
-    const result = buildWeeklyCalendar(planItems, today);
+    const time = new Date().toLocaleTimeString("en-GB", {
+      timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    });
+    const result = buildWeeklyCalendar(planItems, today, time);
     if (result.exported === 0) {
       setNotice("Nenhum bloco com dia, horário de início e duração válidos para exportar.");
       return;
