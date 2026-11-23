@@ -6,13 +6,15 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   insert: vi.fn(),
   select: vi.fn(),
-  single: vi.fn()
+  single: vi.fn(),
+  rpc: vi.fn()
 }));
 
 vi.mock("../src/lib/supabase", () => ({
   requireSupabase: () => ({
     auth: { getUser: mocks.getUser },
-    from: mocks.from
+    from: mocks.from,
+    rpc: mocks.rpc
   })
 }));
 
@@ -60,5 +62,41 @@ describe("studyData session and question records", () => {
       blank_answers: 0,
       source: "manual"
     }));
+  });
+});
+
+
+describe("V2 backup restoration service", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("sends the backup unchanged to the transactional restore RPC", async () => {
+    const backup = { format: "planner-da-bre-v2", version: 1, data: {} };
+    mocks.rpc.mockResolvedValue({ data: [{ inserted_rows: 7 }], error: null });
+
+    await expect((await import("../src/services/studyData")).restorePlannerBackup(backup)).resolves.toBe(7);
+    expect(mocks.rpc).toHaveBeenCalledWith("restore_planner_backup", { p_backup: backup });
+  });
+
+  it("accepts a numeric string returned by PostgreSQL", async () => {
+    mocks.rpc.mockResolvedValue({ data: { inserted_rows: "12" }, error: null });
+    const { restorePlannerBackup } = await import("../src/services/studyData");
+
+    await expect(restorePlannerBackup({})).resolves.toBe(12);
+  });
+
+  it("rejects an invalid inserted-row count", async () => {
+    mocks.rpc.mockResolvedValue({ data: { inserted_rows: "not-a-number" }, error: null });
+    const { restorePlannerBackup } = await import("../src/services/studyData");
+
+    await expect(restorePlannerBackup({})).rejects.toThrow("resultado inválido");
+  });
+
+  it("propagates database errors without reporting a successful restore", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: new Error("restore failed") });
+    const { restorePlannerBackup } = await import("../src/services/studyData");
+
+    await expect(restorePlannerBackup({})).rejects.toThrow("restore failed");
   });
 });
