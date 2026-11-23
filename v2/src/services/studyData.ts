@@ -107,20 +107,14 @@ export async function createQuestionAttempt(input: QuestionAttemptInsert): Promi
 }
 
 export async function getStudySummary() {
-  const client = requireSupabase();
-  const [subjects, sessions, attempts] = await Promise.all([
-    client.from("subjects").select("id", { count: "exact", head: true }),
-    client.from("study_sessions").select("duration_minutes"),
-    client.from("question_attempts").select("total_questions,correct_answers")
-  ]);
-  if (subjects.error) throw subjects.error;
-  if (sessions.error) throw sessions.error;
-  if (attempts.error) throw attempts.error;
-  const minutes = (sessions.data ?? []).reduce((sum, row) => sum + row.duration_minutes, 0);
-  const totalQuestions = (attempts.data ?? []).reduce((sum, row) => sum + row.total_questions, 0);
-  const correctAnswers = (attempts.data ?? []).reduce((sum, row) => sum + row.correct_answers, 0);
+  const { data, error } = await requireSupabase().rpc("get_study_summary").single();
+  if (error) throw error;
+  const subjectCount = Number(data.subject_count);
+  const minutes = Number(data.study_minutes);
+  const totalQuestions = Number(data.total_questions);
+  const correctAnswers = Number(data.correct_answers);
   return {
-    subjectCount: subjects.count ?? 0,
+    subjectCount,
     studyMinutes: minutes,
     totalQuestions,
     correctAnswers,
