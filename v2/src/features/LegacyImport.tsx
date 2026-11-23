@@ -84,7 +84,7 @@ export function LegacyImport() {
   async function importData() {
     if (!data || !confirm) return;
     setBusy(true); setError("");
-    let importedSubjects = 0, importedTopics = 0, importedSessions = 0, importedQuestions = 0, importedMocks = 0, importedCases = 0;
+    let importedSubjects = 0, importedTopics = 0, importedSessions = 0, importedQuestions = 0, importedMocks = 0, importedCases = 0, skippedSessions = 0, skippedMocks = 0;
     try {
       const subjectMap = new Map<string, string>();
       const topicMap = new Map<string, string>();
@@ -119,10 +119,11 @@ export function LegacyImport() {
       }
       for (const old of data.registrosEstudo ?? []) {
         const duration = minutes(old.tempo);
-        if (!duration) continue;
+        const studiedOn = asDate(old.data);
+        if (!duration || !studiedOn) { skippedSessions++; continue; }
         await createStudySession({
           subject_id: old.materiaId ? subjectMap.get(old.materiaId) : undefined,
-          studied_on: asDate(old.data),
+          studied_on: studiedOn,
           duration_minutes: duration, platform: old.plataforma,
           notes: old.obs ?? "Importado da V1."
         });
@@ -132,9 +133,10 @@ export function LegacyImport() {
       for (const old of data.simulados ?? []) {
         const total = Math.max(0, Math.floor(Number(old.qTotal) || 0));
         const correct = Math.max(0, Math.min(total, Math.floor(Number(old.qAcertos) || 0)));
-        if (!old.nome?.trim() || total <= 0) continue;
+        const examDate = asDate(old.data);
+        if (!old.nome?.trim() || total <= 0 || !examDate) { skippedMocks++; continue; }
         await createMockExam({
-          title: old.nome.trim(), exam_date: asDate(old.data) ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
+          title: old.nome.trim(), exam_date: examDate,
           examining_board: old.banca, total_questions: total, correct_answers: correct,
           incorrect_answers: total - correct, blank_answers: 0,
           duration_minutes: durationFromLegacy(old.tempo),
@@ -158,7 +160,7 @@ export function LegacyImport() {
       }
       setProgress("Importação concluída.");
       setDone(true);
-      setProgress("Importados: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência.");
+      setProgress("Importados: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência. Ignorados: " + skippedSessions + " sessões e " + skippedMocks + " simulados sem data, duração ou quantidade válida.");
     } catch (e) {
       setError((e instanceof Error ? e.message : "Falha inesperada.") + " A importação pode ter sido parcial. Confira os dados antes de tentar novamente.");
       setProgress("Até a falha: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência.");
