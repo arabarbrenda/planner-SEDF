@@ -98,7 +98,7 @@ export function StudyHome({ email }: { email: string }) {
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       const total = Object.values(backup.data).reduce((sum, rows) => sum + rows.length, 0);
       setNotice(`Backup V2 gerado com sucesso: ${total} registros exportados.`);
     } catch (err) {
