@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, RotateCcw } from "lucide-react";
+import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2, CalendarDays } from "lucide-react";
 import { completeRevision, createQuestionAttempt, createRevision, createStudySession, createSubject, createTopic, getStudySummary, listRevisions, listSubjects, listTopics, updateTopicStatus } from "../services/studyData";
 import type { Revision, RevisionResult, Subject, Topic, TopicStatus } from "../types/database";
 
@@ -12,7 +12,7 @@ const statusLabels: Record<TopicStatus, string> = {
 
 export function StudyHome({ email }: { email: string }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);\n  const [revisions, setRevisions] = useState<Revision[]>([]);\n  const [revisionTopic, setRevisionTopic] = useState("");\n  const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));\n  const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
+  const [topics, setTopics] = useState<Topic[]>([]);\n  const [allTopics, setAllTopics] = useState<Topic[]>([]);\n  const [revisions, setRevisions] = useState<Revision[]>([]);\n  const [revisionTopic, setRevisionTopic] = useState("");\n  const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));\n  const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [summary, setSummary] = useState({ subjectCount: 0, studyMinutes: 0, totalQuestions: 0, correctAnswers: 0, accuracy: null as number | null });
   const [name, setName] = useState("");
@@ -34,9 +34,9 @@ export function StudyHome({ email }: { email: string }) {
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const [nextSubjects, nextSummary, nextRevisions] = await Promise.all([listSubjects(), getStudySummary(), listRevisions()]);
+      const [nextSubjects, nextSummary, nextRevisions, nextTopics] = await Promise.all([listSubjects(), getStudySummary(), listRevisions(), listTopics()]);
       setSubjects(nextSubjects);
-      setSummary(nextSummary);\n      setRevisions(nextRevisions);
+      setSummary(nextSummary);\n      setRevisions(nextRevisions);\n      setAllTopics(nextTopics);
       if (selectedSubject && !nextSubjects.some(s => s.id === selectedSubject)) setSelectedSubject("");
       if (selectedSubject) setTopics(await listTopics(selectedSubject));
     } catch (err) {
@@ -140,7 +140,7 @@ export function StudyHome({ email }: { email: string }) {
       </section>}
       <section className="detail-section revision-section">
         <div className="section-heading"><div><span className="eyebrow">MEMÓRIA DE LONGO PRAZO</span><h2>Revisões</h2><p>Acompanhe o que precisa ser revisado e registre sua evolução.</p></div><button className="add-button" onClick={()=>setShowRevisionForm(v=>!v)}><Plus size={17}/>{showRevisionForm ? "Fechar" : "Agendar revisão"}</button></div>
-        {showRevisionForm && <form className="entry-form" onSubmit={handleCreateRevision}><h3>Agendar uma revisão</h3><label htmlFor="revision-topic">Assunto</label><select id="revision-topic" value={revisionTopic} onChange={e=>setRevisionTopic(e.target.value)} required><option value="">Selecione um assunto</option>{subjects.flatMap(subject=>topics.filter(topic=>topic.subject_id===subject.id).map(topic=><option value={topic.id} key={topic.id}>{subject.name} — {topic.name}</option>))}</select><label htmlFor="revision-date">Data da revisão</label><input id="revision-date" type="date" value={revisionDate} onChange={e=>setRevisionDate(e.target.value)} required/><button className="submit-button" disabled={saving || !revisionTopic}>{saving ? "Salvando..." : "Agendar revisão"}</button><small className="form-hint">A lista de assuntos é carregada ao selecionar cada disciplina. Se o assunto desejado não aparecer, selecione a disciplina acima para carregá-lo.</small></form>}
+        {showRevisionForm && <form className="entry-form" onSubmit={handleCreateRevision}><h3>Agendar uma revisão</h3><label htmlFor="revision-topic">Assunto</label><select id="revision-topic" value={revisionTopic} onChange={e=>setRevisionTopic(e.target.value)} required><option value="">Selecione um assunto</option>{subjects.flatMap(subject=>allTopics.filter(topic=>topic.subject_id===subject.id).map(topic=><option value={topic.id} key={topic.id}>{subject.name} — {topic.name}</option>))}</select><label htmlFor="revision-date">Data da revisão</label><input id="revision-date" type="date" value={revisionDate} onChange={e=>setRevisionDate(e.target.value)} required/><button className="submit-button" disabled={saving || !revisionTopic}>{saving ? "Salvando..." : "Agendar revisão"}</button><small className="form-hint">Selecione qualquer assunto já cadastrado em suas disciplinas.</small></form>}
         {revisions.length === 0 ? <div className="empty-state"><span className="empty-icon"><CalendarDays size={23}/></span><h3>Nenhuma revisão agendada.</h3><p>Cadastre assuntos e programe revisões para acompanhar sua retenção.</p></div> : <div className="revision-list">{revisions.map(revision=>{const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Sao_Paulo"});const done=Boolean(revision.completed_at);const due=revision.scheduled_for<today?"Atrasada":revision.scheduled_for===today?"Hoje":"Programada";return <article className={`revision-row ${done?"revision-done":revision.scheduled_for<today?"revision-overdue":""}`} key={revision.id}><div className="revision-main"><span className="revision-date">{new Date(revision.scheduled_for+"T12:00:00").toLocaleDateString("pt-BR")}</span><strong>{revision.topics?.name ?? "Assunto indisponível"}</strong><small>{done ? `Concluída · resultado: ${revision.result ?? "não informado"}` : due}</small></div>{done ? <span className="revision-completed"><CheckCircle2 size={15}/> Concluída</span> : <div className="revision-controls"><select aria-label="Resultado da revisão" value={revisionResult} onChange={e=>setRevisionResult(e.target.value as RevisionResult)}><option value="easy">Fácil</option><option value="medium">Médio</option><option value="hard">Difícil</option><option value="again">Preciso rever</option></select><button type="button" className="complete-button" onClick={()=>void handleCompleteRevision(revision.id)}>Concluir</button></div>}</article>})}</div>}
       </section>
       <footer className="workspace-footer">PLANNER DA BRE V2 <span>·</span> SEUS DADOS SINCRONIZADOS COM SEGURANÇA</footer>
