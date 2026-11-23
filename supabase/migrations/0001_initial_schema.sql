@@ -291,3 +291,36 @@ begin
     );
   end loop;
 end $$;
+
+-- Explicit API privileges complement RLS; RLS remains the row-level boundary.
+grant usage on schema public to authenticated;
+grant select, update on public.profiles to authenticated;
+grant select, insert, update, delete on
+  public.study_settings,
+  public.subjects,
+  public.topics,
+  public.study_sessions,
+  public.question_attempts,
+  public.revisions,
+  public.study_plans,
+  public.study_plan_items,
+  public.mock_exams,
+  public.error_notebook,
+  public.jurisprudence_entries,
+  public.import_jobs
+to authenticated;
+
+revoke all on public.profiles,
+  public.study_settings,
+  public.subjects,
+  public.topics,
+  public.study_sessions,
+  public.question_attempts,
+  public.revisions,
+  public.study_plans,
+  public.study_plan_items,
+  public.mock_exams,
+  public.error_notebook,
+  public.jurisprudence_entries,
+  public.import_jobs
+from anon;
