@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { FileWarning, Plus, Scale, Trash2 } from "lucide-react";
 import {
   createErrorEntry, createJurisprudenceEntry, deleteErrorEntry, deleteJurisprudenceEntry,
-  listErrorNotebook, listJurisprudence, updateErrorStatus
+  listErrorNotebook, listJurisprudence, updateErrorStatus, updateErrorEntry, updateJurisprudenceEntry
 } from "../services/studyData";
 import type { ErrorNotebookEntry, ErrorStatus, JurisprudenceEntry, Subject, Topic } from "../types/database";
 
@@ -30,6 +30,8 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   const [errorSearch, setErrorSearch] = useState("");
   const [errorStatusFilter, setErrorStatusFilter] = useState("all");
   const [caseSearch, setCaseSearch] = useState("");
+  const [editingErrorId, setEditingErrorId] = useState<string | null>(null);
+  const [editingCaseId, setEditingCaseId] = useState<string | null>(null);
 
   async function refresh() {
     const [nextErrors, nextCases] = await Promise.all([listErrorNotebook(), listJurisprudence()]);
