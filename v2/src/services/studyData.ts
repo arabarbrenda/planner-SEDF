@@ -379,9 +379,23 @@ export async function listJurisprudence(): Promise<JurisprudenceEntry[]> {
   return (data ?? []) as JurisprudenceEntry[];
 }
 
+function normalizeHttpUrl(value: string | null | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if ((parsed.protocol !== "http:" && parsed.protocol !== "https:") || !parsed.hostname) {
+      throw new Error();
+    }
+    return trimmed;
+  } catch {
+    throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  }
+}
+
 export async function createJurisprudenceEntry(input: JurisprudenceInsert): Promise<JurisprudenceEntry> {
   if (!input.title.trim()) throw new Error("Informe o título do registro.");
-  if (input.source_url && !/^https?:\/\//i.test(input.source_url)) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  const sourceUrl = normalizeHttpUrl(input.source_url);
   const userId = await currentUserId();
   const { data, error } = await requireSupabase().from("jurisprudence_entries").insert({
     user_id: userId,
@@ -390,7 +404,7 @@ export async function createJurisprudenceEntry(input: JurisprudenceInsert): Prom
     case_reference: input.case_reference?.trim() || null,
     judgment_date: input.judgment_date ?? null,
     summary: input.summary ?? "",
-    source_url: input.source_url?.trim() || null,
+    source_url: sourceUrl,
     tags: input.tags ?? []
   }).select("*").single();
   if (error) throw error;
@@ -399,15 +413,14 @@ export async function createJurisprudenceEntry(input: JurisprudenceInsert): Prom
 
 export async function updateJurisprudenceEntry(entryId: string, input: Partial<JurisprudenceInsert>): Promise<void> {
   if (input.title !== undefined && !input.title.trim()) throw new Error("Informe o título do registro.");
-  const sourceUrl = input.source_url?.trim() ?? "";
-  if (sourceUrl && !/^https?:\/\//i.test(sourceUrl)) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  const sourceUrl = input.source_url === undefined ? undefined : normalizeHttpUrl(input.source_url);
   const { error } = await requireSupabase().from("jurisprudence_entries").update({
     ...(input.title !== undefined && { title: input.title.trim() }),
     ...(input.court !== undefined && { court: input.court?.trim() || null }),
     ...(input.case_reference !== undefined && { case_reference: input.case_reference?.trim() || null }),
     ...(input.judgment_date !== undefined && { judgment_date: input.judgment_date || null }),
     ...(input.summary !== undefined && { summary: input.summary }),
-    ...(input.source_url !== undefined && { source_url: sourceUrl || null }),
+    ...(input.source_url !== undefined && { source_url: sourceUrl ?? null }),
     ...(input.tags !== undefined && { tags: input.tags })
   }).eq("id", entryId);
   if (error) throw error;
