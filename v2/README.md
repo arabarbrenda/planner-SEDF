@@ -54,7 +54,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 ## Limitações conhecidas nesta etapa
 
 - O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
-- A fila de revisões, planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.
+- O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
+- Planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
 - Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.
 
