@@ -14,7 +14,16 @@ export function StudyHome({ email }: { email: string }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [allTopics, setAllTopics] = useState<Topic[]>([]);
-  const [revisions, setRevisions] = useState<Revision[]>([]);\n  const [activePlan, setActivePlan] = useState<StudyPlan | null>(null);\n  const [planItems, setPlanItems] = useState<StudyPlanItem[]>([]);\n  const [planWeekday, setPlanWeekday] = useState("1");\n  const [planSubject, setPlanSubject] = useState("");\n  const [planTopic, setPlanTopic] = useState("");\n  const [planTime, setPlanTime] = useState("14:00");\n  const [planDuration, setPlanDuration] = useState("60");\n  const [planNotes, setPlanNotes] = useState("");\n  const [showPlanForm, setShowPlanForm] = useState(false);
+  const [revisions, setRevisions] = useState<Revision[]>([]);
+  const [activePlan, setActivePlan] = useState<StudyPlan | null>(null);
+  const [planItems, setPlanItems] = useState<StudyPlanItem[]>([]);
+  const [planWeekday, setPlanWeekday] = useState("1");
+  const [planSubject, setPlanSubject] = useState("");
+  const [planTopic, setPlanTopic] = useState("");
+  const [planTime, setPlanTime] = useState("14:00");
+  const [planDuration, setPlanDuration] = useState("60");
+  const [planNotes, setPlanNotes] = useState("");
+  const [showPlanForm, setShowPlanForm] = useState(false);
   const [revisionTopic, setRevisionTopic] = useState("");
   const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));
   const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
@@ -44,7 +53,9 @@ export function StudyHome({ email }: { email: string }) {
       setSubjects(nextSubjects);
       setSummary(nextSummary);
       setRevisions(nextRevisions);
-      setAllTopics(nextTopics);\n      setActivePlan(nextPlan);\n      setPlanItems(await listStudyPlanItems(nextPlan.id));
+      setAllTopics(nextTopics);
+      setActivePlan(nextPlan);
+      setPlanItems(await listStudyPlanItems(nextPlan.id));
       if (selectedSubject && !nextSubjects.some(s => s.id === selectedSubject)) setSelectedSubject("");
       if (selectedSubject) setTopics(await listTopics(selectedSubject));
     } catch (err) {
@@ -88,7 +99,25 @@ export function StudyHome({ email }: { email: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Não foi possível atualizar o assunto."); }
   }
 
-  async function handleCreatePlanItem(event: FormEvent<HTMLFormElement>) {\n    event.preventDefault();\n    if (!activePlan || !planSubject) { setError("Selecione uma disciplina para o bloco de estudo."); return; }\n    const mins = Number(planDuration);\n    if (!Number.isInteger(mins) || mins < 5 || mins > 720) { setError("A duração deve ficar entre 5 e 720 minutos."); return; }\n    setSaving(true); setError("");\n    try {\n      await createStudyPlanItem({ plan_id: activePlan.id, weekday: Number(planWeekday), subject_id: planSubject, topic_id: planTopic || undefined, start_time: planTime || undefined, duration_minutes: mins, notes: planNotes.trim() });\n      setShowPlanForm(false); setPlanNotes(""); setNotice("Bloco adicionado ao planejamento!"); setPlanItems(await listStudyPlanItems(activePlan.id));\n    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível adicionar o bloco."); }\n    finally { setSaving(false); }\n  }\n\n  async function handleDeletePlanItem(id: string) {\n    try { await deleteStudyPlanItem(id); if (activePlan) setPlanItems(await listStudyPlanItems(activePlan.id)); setNotice("Bloco removido do planejamento."); }\n    catch (err) { setError(err instanceof Error ? err.message : "Não foi possível remover o bloco."); }\n  }\n\n  async function handleCreateRevision(event: FormEvent<HTMLFormElement>) {
+  async function handleCreatePlanItem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activePlan || !planSubject) { setError("Selecione uma disciplina para o bloco de estudo."); return; }
+    const mins = Number(planDuration);
+    if (!Number.isInteger(mins) || mins < 5 || mins > 720) { setError("A duração deve ficar entre 5 e 720 minutos."); return; }
+    setSaving(true); setError("");
+    try {
+      await createStudyPlanItem({ plan_id: activePlan.id, weekday: Number(planWeekday), subject_id: planSubject, topic_id: planTopic || undefined, start_time: planTime || undefined, duration_minutes: mins, notes: planNotes.trim() });
+      setShowPlanForm(false); setPlanNotes(""); setNotice("Bloco adicionado ao planejamento!"); setPlanItems(await listStudyPlanItems(activePlan.id));
+    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível adicionar o bloco."); }
+    finally { setSaving(false); }
+  }
+
+  async function handleDeletePlanItem(id: string) {
+    try { await deleteStudyPlanItem(id); if (activePlan) setPlanItems(await listStudyPlanItems(activePlan.id)); setNotice("Bloco removido do planejamento."); }
+    catch (err) { setError(err instanceof Error ? err.message : "Não foi possível remover o bloco."); }
+  }
+
+  async function handleCreateRevision(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!revisionTopic || !revisionDate) { setError("Selecione um assunto e a data da revisão."); return; }
     setSaving(true); setError("");
