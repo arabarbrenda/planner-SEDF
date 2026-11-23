@@ -50,8 +50,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
-        run: npm install
+      - name: Resolve and verify dependency graph
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          npm ci
+          npm audit --json > npm-audit.json || echo "npm audit reported advisories; inspect the uploaded report"
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: planner-v2-dependency-audit
+          path: v2/npm-audit.json
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Type-check and build
         run: npm run build
       - name: Run automated frontend and data-service tests
