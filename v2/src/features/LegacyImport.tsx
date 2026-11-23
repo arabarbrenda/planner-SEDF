@@ -245,7 +245,7 @@ export function LegacyImport() {
         <li>Simulados antigos não registravam questões em branco; serão considerados zero em branco.</li>
         <li>Planejamento/ciclo, tema visual, configurações e arquivos anexados não são migrados nesta etapa.</li>
       </ul>
-      {!done && <label className="legacy-confirm"><input type="checkbox" checked={confirm} onChange={e => setConfirm(e.target.checked)}/> Entendi que os dados serão adicionados à minha conta, que não substituem registros existentes e que o mesmo arquivo não poderá ser importado novamente automaticamente.</label>}
+      {!done && <label className="legacy-confirm"><input type="checkbox" checked={confirm} onChange={e => setConfirm(e.target.checked)}/> Entendi que os dados serão adicionados à minha conta, sem substituir registros existentes. A importação é atômica: em caso de falha, nenhum dado parcial será mantido.</label>}
       {!done && <button className="submit-button" disabled={!confirm || busy || !fingerprint} onClick={() => void importData()}>{busy ? "Importando..." : "Confirmar importação"}</button>}
     </div>}
     {progress && <p className="form-hint" role="status">{progress}</p>}
