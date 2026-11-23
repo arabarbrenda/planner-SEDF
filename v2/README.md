@@ -65,7 +65,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
 - O módulo de simulados já registra resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; edição de registros e gráficos de evolução ainda estão pendentes.
-- O caderno de erros permite pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite pesquisa textual por tema, tribunal, processo, resumo e etiquetas.
+- O caderno de erros permite criar, editar, excluir, pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite criar, editar, excluir e pesquisar por tema, tribunal, processo, resumo e etiquetas.
 - O caderno de erros permite cadastro, vínculo a disciplina/assunto, acompanhamento de status e exclusão; edição dos registros e filtros avançados ainda estão pendentes.
 - A biblioteca de jurisprudência permite cadastro e exclusão de referências; edição, etiquetas e pesquisa externa ainda estão pendentes.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
