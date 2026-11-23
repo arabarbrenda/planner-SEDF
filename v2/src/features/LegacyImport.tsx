@@ -1,9 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { FileUp, ShieldCheck } from "lucide-react";
-import {
-  createMockExam, createQuestionAttempt, createStudySession, createSubject, createTopic, createJurisprudenceEntry,
-  startLegacyImport, finishLegacyImport
-} from "../services/studyData";
+import { importLegacyV1Backup } from "../services/studyData";
 
 type LegacyTopic = {
   id?: string; nome?: string; status?: string; checklist?: Record<string, boolean>;
@@ -128,22 +125,31 @@ export function LegacyImport() {
   async function importData() {
     if (!data || !confirm || !fingerprint) return;
     setBusy(true); setError("");
-    let importedSubjects = 0, importedTopics = 0, importedSessions = 0, importedQuestions = 0, importedMocks = 0, importedCases = 0, skippedSessions = 0, skippedMocks = 0;
-    let jobId: string | null = null;
+    let skippedSessions = 0, skippedMocks = 0;
     try {
-      jobId = await startLegacyImport(fingerprint, fileName);
-      setProgress("Preparando importação segura...");
-      const subjectMap = new Map<string, string>();
-      for (const oldSubject of data.materias ?? []) {
-        const subject = await createSubject({ name: oldSubject.nome!.trim(), icon: oldSubject.icone, priority: priority(oldSubject.prioridade) });
-        importedSubjects++;
-        if (oldSubject.id) subjectMap.set(oldSubject.id, subject.id);
-        for (const oldTopic of oldSubject.topicos ?? []) {
-          const checklist = oldTopic.checklist ?? {};
-          const topic = await createTopic({
-            subject_id: subject.id, name: (oldTopic.nome ?? "Assunto importado").trim(),
-            status: topicStatus(oldTopic.status),
-            annotations: oldTopic.anotaçoes ?? oldTopic.anotacoes ?? "",
+      setProgress("Validando e preparando os registros...");
+      const subjects = data.materias!.map((subject, index) => ({
+        legacy_id: subject.id || `subject-${index}`,
+        name: subject.nome!.trim(),
+        icon: subject.icone || null,
+        priority: priority(subject.prioridade)
+      }));
+      const subjectIds = new Map(data.materias!.map((subject, index) => [
+        subject.id || `subject-${index}`, subject.id || `subject-${index}`
+      ]));
+      const topics: Array<Record<string, unknown>> = [];
+      const questionAttempts: Array<Record<string, unknown>> = [];
+      data.materias!.forEach((subject, subjectIndex) => {
+        const subjectLegacyId = subject.id || `subject-${subjectIndex}`;
+        (subject.topicos ?? []).forEach((topic, topicIndex) => {
+          const topicLegacyId = topic.id || `topic-${subjectIndex}-${topicIndex}`;
+          const checklist = topic.checklist ?? {};
+          topics.push({
+            legacy_id: topicLegacyId,
+            subject_legacy_id: subjectLegacyId,
+            name: topic.nome!.trim(),
+            status: topicStatus(topic.status),
+            annotations: topic.anotaçoes ?? topic.anotacoes ?? "",
             checklist: {
               theory: Boolean(checklist.teoria ?? checklist.theory),
               law: Boolean(checklist.lei ?? checklist.law),
@@ -152,67 +158,71 @@ export function LegacyImport() {
               revision: Boolean(checklist.revisao ?? checklist.revision)
             }
           });
-          importedTopics++;
-          const total = Math.max(0, Math.floor(Number(oldTopic.questoesTotal) || 0));
-          const correct = Math.max(0, Math.min(total, Math.floor(Number(oldTopic.questoesAcertos) || 0)));
-          if (total > 0) {
-            await createQuestionAttempt({ subject_id: subject.id, topic_id: topic.id, source: "other", total_questions: total, correct_answers: correct, notes: "Importado dos totais acumulados do tópico na V1." });
-            importedQuestions++;
-          }
-        }
-        setProgress("Disciplinas e assuntos importados...");
-      }
-      for (const old of data.registrosEstudo ?? []) {
+          const total = Number(topic.questoesTotal ?? 0);
+          const correct = Number(topic.questoesAcertos ?? 0);
+          if (total > 0) questionAttempts.push({
+            subject_legacy_id: subjectLegacyId,
+            topic_legacy_id: topicLegacyId,
+            total_questions: total,
+            correct_answers: correct,
+            notes: "Importado dos totais acumulados do tópico na V1."
+          });
+        });
+      });
+      const sessions = data.registrosEstudo!.flatMap(old => {
         const duration = minutes(old.tempo);
         const studiedOn = asDate(old.data);
-        if (!duration || !studiedOn) { skippedSessions++; continue; }
-        await createStudySession({
-          subject_id: old.materiaId ? subjectMap.get(old.materiaId) : undefined,
+        if (!duration || !studiedOn) { skippedSessions++; return []; }
+        const knownSubject = old.materiaId ? subjectIds.get(old.materiaId) : undefined;
+        return [{
+          ...(knownSubject ? { subject_legacy_id: knownSubject } : {}),
           studied_on: studiedOn,
-          duration_minutes: duration, platform: old.plataforma,
+          duration_minutes: duration,
+          platform: old.plataforma || null,
           notes: old.obs ?? "Importado da V1."
-        });
-        importedSessions++;
-        setProgress("Histórico de sessões importado...");
-      }
-      for (const old of data.simulados ?? []) {
-        const total = Math.max(0, Math.floor(Number(old.qTotal) || 0));
-        const correct = Math.max(0, Math.min(total, Math.floor(Number(old.qAcertos) || 0)));
+        }];
+      });
+      const mockExams = data.simulados!.flatMap(old => {
+        const total = Number(old.qTotal ?? 0);
+        const correct = Number(old.qAcertos ?? 0);
         const examDate = asDate(old.data);
-        if (!old.nome?.trim() || total <= 0 || !examDate) { skippedMocks++; continue; }
-        await createMockExam({
-          title: old.nome.trim(), exam_date: examDate,
-          examining_board: old.banca, total_questions: total, correct_answers: correct,
-          incorrect_answers: total - correct, blank_answers: 0,
-          duration_minutes: durationFromLegacy(old.tempo),
+        if (!old.nome?.trim() || total <= 0 || !examDate) { skippedMocks++; return []; }
+        return [{
+          title: old.nome.trim(),
+          exam_date: examDate,
+          examining_board: old.banca || null,
+          total_questions: total,
+          correct_answers: correct,
+          incorrect_answers: total - correct,
+          duration_minutes: durationFromLegacy(old.tempo) ?? null,
           notes: [old.obs, "Importado da V1; a versão anterior não armazenava separadamente questões em branco."].filter(Boolean).join(" ")
-        });
-        importedMocks++;
-      }
-      for (const old of data.jurisprudencia ?? []) {
+        }];
+      });
+      const jurisprudence = (data.jurisprudencia ?? []).flatMap(old => {
         const title = String(old.tema ?? old.titulo ?? old.title ?? old.nome ?? "").trim();
-        if (!title) continue;
+        if (!title) return [];
         const source = String(old.fonte ?? old.source_url ?? old.link ?? "").trim();
-        await createJurisprudenceEntry({
-          title, court: String(old.tribunal ?? old.court ?? "").trim() || undefined,
-          case_reference: String(old.processo ?? old.referencia ?? old.case_reference ?? "").trim() || undefined,
-          judgment_date: asDate(old.data ?? old.julgamento ?? old.judgment_date),
+        const judgmentDate = asDate(old.data ?? old.julgamento ?? old.judgment_date);
+        return [{
+          title,
+          court: String(old.tribunal ?? old.court ?? "").trim() || null,
+          case_reference: String(old.processo ?? old.referencia ?? old.case_reference ?? "").trim() || null,
+          judgment_date: judgmentDate ?? null,
           summary: String(old.tese ?? old.resumo ?? old.summary ?? old.descricao ?? ""),
-          source_url: /^https?:\/\//i.test(source) ? source : undefined,
+          source_url: /^https?:\/\//i.test(source) ? source : null,
           tags: String(old.materia ?? "").trim() ? [String(old.materia).trim()] : []
-        });
-        importedCases++;
-      }
-      const rowsImported = importedSubjects + importedTopics + importedSessions + importedQuestions + importedMocks + importedCases;
-      if (jobId) await finishLegacyImport(jobId, rowsImported);
-      setProgress("Importação concluída.");
+        }];
+      });
+      setProgress("Enviando todos os registros em uma única transação...");
+      const rowsImported = await importLegacyV1Backup(fingerprint, fileName, {
+        subjects, topics, sessions, question_attempts: questionAttempts, mock_exams: mockExams, jurisprudence
+      });
       setDone(true);
-      setProgress("Importados: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência. Ignorados: " + skippedSessions + " sessões e " + skippedMocks + " simulados sem data, duração ou quantidade válida.");
+      setProgress(`Importação concluída: ${subjects.length} disciplinas, ${topics.length} assuntos, ${sessions.length} sessões, ${questionAttempts.length} lotes de questões, ${mockExams.length} simulados e ${jurisprudence.length} registros de jurisprudência. Ignorados: ${skippedSessions} sessões e ${skippedMocks} simulados sem data, duração ou quantidade válida. Total gravado: ${rowsImported} registros.`);
     } catch (e) {
       const failureMessage = e instanceof Error ? e.message : "Falha inesperada.";
-      if (jobId) { try { await finishLegacyImport(jobId, importedSubjects + importedTopics + importedSessions + importedQuestions + importedMocks + importedCases, true, failureMessage); } catch { /* Preserve the original import error. */ } }
-      setError(failureMessage + (jobId ? " A tentativa foi registrada e não poderá ser repetida automaticamente para evitar duplicações. Confira os dados antes de qualquer nova tentativa." : ""));
-      setProgress("Até a falha: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência.");
+      setError(failureMessage);
+      setProgress("Nenhum registro parcial foi mantido: a operação é transacional. Se a falha foi registrada, o mesmo arquivo poderá ser tentado novamente após a correção.");
     } finally { setBusy(false); }
   }
 
