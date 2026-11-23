@@ -317,6 +317,29 @@ end $$;
 revoke all on function public.handle_new_user() from public, anon, authenticated;
 revoke all on function public.set_updated_at() from public, anon, authenticated;
 
+-- Aggregate on the database side to avoid Supabase's default row limit truncating analytics.
+-- SECURITY INVOKER is intentional: underlying table RLS applies to the caller.
+create or replace function public.get_study_summary()
+returns table (
+  subject_count bigint,
+  study_minutes bigint,
+  total_questions bigint,
+  correct_answers bigint
+)
+language sql
+stable
+set search_path = ''
+as $fn$
+  select
+    (select count(*) from public.subjects),
+    coalesce((select sum(duration_minutes)::bigint from public.study_sessions), 0::bigint),
+    coalesce((select sum(total_questions)::bigint from public.question_attempts), 0::bigint),
+    coalesce((select sum(correct_answers)::bigint from public.question_attempts), 0::bigint);
+$fn$;
+
+revoke all on function public.get_study_summary() from public, anon;
+grant execute on function public.get_study_summary() to authenticated;
+
 -- Explicit API privileges complement RLS; RLS remains the row-level boundary.
 grant usage on schema public to authenticated;
 grant select, update on public.profiles to authenticated;
