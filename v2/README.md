@@ -47,9 +47,18 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar dashboard com métricas, cadastro de disciplinas/assuntos e alteração de status
 - [x] Implementar registro manual de tempo de estudo e desempenho em questões
 - [ ] Implementar importação e validação dos dados exportados da V1
+- [x] Criar serviços de agendamento, listagem e conclusão de revisões
+- [x] Adicionar painel de revisões programadas, atrasadas e concluídas
 - [ ] Testes automatizados de segurança, migração e analytics
 
-## Limitações conhecidas nesta etapa\n\n- O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.\n- A fila de revisões, planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.\n- Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.\n- Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.\n\n## Dados e segurança
+## Limitações conhecidas nesta etapa
+
+- O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
+- A fila de revisões, planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.
+- Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
+- Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.
+
+## Dados e segurança
 
 A chave publishable é própria para uso no cliente, desde que as políticas RLS estejam corretamente habilitadas. Nunca publique uma chave secreta/service-role nem a senha do banco. Cada tabela de dados pessoais usa `user_id` e políticas que limitam o acesso ao usuário autenticado.
 
