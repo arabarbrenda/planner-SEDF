@@ -242,19 +242,27 @@ export async function listMockExams(): Promise<MockExam[]> {
   return (data ?? []) as MockExam[];
 }
 
-export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
+function validateMockExam(input: MockExamInsert) {
+  if (!input.title.trim() || !input.exam_date) {
+    throw new Error("Informe o nome e a data do simulado.");
+  }
   const total = input.total_questions;
   const correct = input.correct_answers;
   const blank = input.blank_answers ?? 0;
   const incorrect = input.incorrect_answers ?? total - correct - blank;
-  if (!Number.isInteger(total) || total <= 0 || !Number.isInteger(correct) || correct < 0 ||
-      !Number.isInteger(incorrect) || incorrect < 0 || !Number.isInteger(blank) || blank < 0 ||
+  if (![total, correct, incorrect, blank].every(Number.isInteger) ||
+      total <= 0 || correct < 0 || incorrect < 0 || blank < 0 ||
       correct + incorrect + blank !== total) {
     throw new Error("A soma de acertos, erros e questões em branco deve ser igual ao total.");
   }
   if (input.duration_minutes != null && (!Number.isInteger(input.duration_minutes) || input.duration_minutes <= 0)) {
     throw new Error("A duração do simulado deve ser um número positivo de minutos.");
   }
+  return { total, correct, blank, incorrect };
+}
+
+export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
+  const { total, correct, blank, incorrect } = validateMockExam(input);
   const userId = await currentUserId();
   const { data, error } = await requireSupabase().from("mock_exams").insert({
     user_id: userId,
@@ -273,17 +281,7 @@ export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
 }
 
 export async function updateMockExam(examId: string, input: MockExamInsert): Promise<void> {
-  const total = input.total_questions;
-  const correct = input.correct_answers;
-  const blank = input.blank_answers ?? 0;
-  const incorrect = input.incorrect_answers ?? total - correct - blank;
-  if (!input.title.trim() || !input.exam_date) throw new Error("Informe o nome e a data do simulado.");
-  if (![total, correct, incorrect, blank].every(Number.isInteger) || total <= 0 || correct < 0 || incorrect < 0 || blank < 0 || correct + incorrect + blank !== total) {
-    throw new Error("A soma de acertos, erros e questões em branco deve ser igual ao total.");
-  }
-  if (input.duration_minutes != null && (!Number.isInteger(input.duration_minutes) || input.duration_minutes <= 0)) {
-    throw new Error("A duração do simulado deve ser um número positivo de minutos.");
-  }
+  const { total, correct, blank, incorrect } = validateMockExam(input);
   const { error } = await requireSupabase().from("mock_exams").update({
     title: input.title.trim(), exam_date: input.exam_date,
     examining_board: input.examining_board?.trim() || null,
@@ -401,14 +399,15 @@ export async function createJurisprudenceEntry(input: JurisprudenceInsert): Prom
 
 export async function updateJurisprudenceEntry(entryId: string, input: Partial<JurisprudenceInsert>): Promise<void> {
   if (input.title !== undefined && !input.title.trim()) throw new Error("Informe o título do registro.");
-  if (input.source_url && !(input.source_url.startsWith("https://") || input.source_url.startsWith("http://"))) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  const sourceUrl = input.source_url?.trim() ?? "";
+  if (sourceUrl && !/^https?:\\/\\//i.test(sourceUrl)) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
   const { error } = await requireSupabase().from("jurisprudence_entries").update({
     ...(input.title !== undefined && { title: input.title.trim() }),
     ...(input.court !== undefined && { court: input.court?.trim() || null }),
     ...(input.case_reference !== undefined && { case_reference: input.case_reference?.trim() || null }),
     ...(input.judgment_date !== undefined && { judgment_date: input.judgment_date || null }),
     ...(input.summary !== undefined && { summary: input.summary }),
-    ...(input.source_url !== undefined && { source_url: input.source_url?.trim() || null }),
+    ...(input.source_url !== undefined && { source_url: sourceUrl || null }),
     ...(input.tags !== undefined && { tags: input.tags })
   }).eq("id", entryId);
   if (error) throw error;
