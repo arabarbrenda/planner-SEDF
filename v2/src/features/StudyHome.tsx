@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2 } from "lucide-react";
-import { createQuestionAttempt, createStudySession, createSubject, createTopic, getStudySummary, listSubjects, listTopics, updateTopicStatus } from "../services/studyData";
-import type { Subject, Topic, TopicStatus } from "../types/database";
+import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, RotateCcw } from "lucide-react";
+import { completeRevision, createQuestionAttempt, createRevision, createStudySession, createSubject, createTopic, getStudySummary, listRevisions, listSubjects, listTopics, updateTopicStatus } from "../services/studyData";
+import type { Revision, RevisionResult, Subject, Topic, TopicStatus } from "../types/database";
 
 const statusLabels: Record<TopicStatus, string> = {
   not_started: "Não iniciado",
@@ -12,7 +12,7 @@ const statusLabels: Record<TopicStatus, string> = {
 
 export function StudyHome({ email }: { email: string }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);\n  const [revisions, setRevisions] = useState<Revision[]>([]);\n  const [revisionTopic, setRevisionTopic] = useState("");\n  const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));\n  const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [summary, setSummary] = useState({ subjectCount: 0, studyMinutes: 0, totalQuestions: 0, correctAnswers: 0, accuracy: null as number | null });
   const [name, setName] = useState("");
@@ -25,7 +25,7 @@ export function StudyHome({ email }: { email: string }) {
   const [showForm, setShowForm] = useState(false);
   const [showTopicForm, setShowTopicForm] = useState(false);
   const [showSessionForm, setShowSessionForm] = useState(false);
-  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);\n  const [showRevisionForm, setShowRevisionForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -34,9 +34,9 @@ export function StudyHome({ email }: { email: string }) {
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const [nextSubjects, nextSummary] = await Promise.all([listSubjects(), getStudySummary()]);
+      const [nextSubjects, nextSummary, nextRevisions] = await Promise.all([listSubjects(), getStudySummary(), listRevisions()]);
       setSubjects(nextSubjects);
-      setSummary(nextSummary);
+      setSummary(nextSummary);\n      setRevisions(nextRevisions);
       if (selectedSubject && !nextSubjects.some(s => s.id === selectedSubject)) setSelectedSubject("");
       if (selectedSubject) setTopics(await listTopics(selectedSubject));
     } catch (err) {
@@ -80,7 +80,7 @@ export function StudyHome({ email }: { email: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Não foi possível atualizar o assunto."); }
   }
 
-  async function handleSession(event: FormEvent<HTMLFormElement>) {
+  async function handleCreateRevision(event: FormEvent<HTMLFormElement>) {\n    event.preventDefault();\n    if (!revisionTopic || !revisionDate) { setError("Selecione um assunto e a data da revisão."); return; }\n    setSaving(true); setError("");\n    try {\n      await createRevision({ topic_id: revisionTopic, scheduled_for: revisionDate });\n      setShowRevisionForm(false); setNotice("Revisão agendada!"); setRevisions(await listRevisions());\n    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível agendar a revisão."); }\n    finally { setSaving(false); }\n  }\n\n  async function handleCompleteRevision(id: string) {\n    setError("");\n    try { await completeRevision(id, revisionResult); setRevisions(await listRevisions()); setNotice("Revisão concluída!"); }\n    catch (err) { setError(err instanceof Error ? err.message : "Não foi possível concluir a revisão."); }\n  }\n\n  async function handleSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const mins = Number(duration);
     if (!Number.isInteger(mins) || mins <= 0 || mins > 1440) { setError("Informe uma duração entre 1 e 1.440 minutos."); return; }
@@ -138,6 +138,11 @@ export function StudyHome({ email }: { email: string }) {
         {showSessionForm && <form className="entry-form" onSubmit={handleSession}><h3>Nova sessão de estudo</h3><label htmlFor="session-duration">Duração em minutos</label><input id="session-duration" type="number" min="1" max="1440" value={duration} onChange={e=>setDuration(e.target.value)} required/><label htmlFor="session-notes">Observações (opcional)</label><input id="session-notes" value={sessionNotes} onChange={e=>setSessionNotes(e.target.value)} maxLength={1000} placeholder="O que você estudou?"/><button className="submit-button" disabled={saving}>{saving ? "Salvando..." : "Salvar sessão"}</button></form>}
         {showQuestionForm && <form className="entry-form" onSubmit={handleQuestions}><h3>Desempenho em questões</h3><label htmlFor="questions-total">Total de questões</label><input id="questions-total" type="number" min="1" value={questionTotal} onChange={e=>setQuestionTotal(e.target.value)} required/><label htmlFor="questions-correct">Quantidade de acertos</label><input id="questions-correct" type="number" min="0" max={questionTotal} value={questionCorrect} onChange={e=>setQuestionCorrect(e.target.value)} required/><label htmlFor="questions-notes">Observações (opcional)</label><input id="questions-notes" value={questionNotes} onChange={e=>setQuestionNotes(e.target.value)} maxLength={1000} placeholder="Banca, assunto, dificuldades..."/><button className="submit-button" disabled={saving}>{saving ? "Salvando..." : "Salvar desempenho"}</button></form>}
       </section>}
+      <section className="detail-section revision-section">
+        <div className="section-heading"><div><span className="eyebrow">MEMÓRIA DE LONGO PRAZO</span><h2>Revisões</h2><p>Acompanhe o que precisa ser revisado e registre sua evolução.</p></div><button className="add-button" onClick={()=>setShowRevisionForm(v=>!v)}><Plus size={17}/>{showRevisionForm ? "Fechar" : "Agendar revisão"}</button></div>
+        {showRevisionForm && <form className="entry-form" onSubmit={handleCreateRevision}><h3>Agendar uma revisão</h3><label htmlFor="revision-topic">Assunto</label><select id="revision-topic" value={revisionTopic} onChange={e=>setRevisionTopic(e.target.value)} required><option value="">Selecione um assunto</option>{subjects.flatMap(subject=>topics.filter(topic=>topic.subject_id===subject.id).map(topic=><option value={topic.id} key={topic.id}>{subject.name} — {topic.name}</option>))}</select><label htmlFor="revision-date">Data da revisão</label><input id="revision-date" type="date" value={revisionDate} onChange={e=>setRevisionDate(e.target.value)} required/><button className="submit-button" disabled={saving || !revisionTopic}>{saving ? "Salvando..." : "Agendar revisão"}</button><small className="form-hint">A lista de assuntos é carregada ao selecionar cada disciplina. Se o assunto desejado não aparecer, selecione a disciplina acima para carregá-lo.</small></form>}
+        {revisions.length === 0 ? <div className="empty-state"><span className="empty-icon"><CalendarDays size={23}/></span><h3>Nenhuma revisão agendada.</h3><p>Cadastre assuntos e programe revisões para acompanhar sua retenção.</p></div> : <div className="revision-list">{revisions.map(revision=>{const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Sao_Paulo"});const done=Boolean(revision.completed_at);const due=revision.scheduled_for<today?"Atrasada":revision.scheduled_for===today?"Hoje":"Programada";return <article className={`revision-row ${done?"revision-done":revision.scheduled_for<today?"revision-overdue":""}`} key={revision.id}><div className="revision-main"><span className="revision-date">{new Date(revision.scheduled_for+"T12:00:00").toLocaleDateString("pt-BR")}</span><strong>{revision.topics?.name ?? "Assunto indisponível"}</strong><small>{done ? `Concluída · resultado: ${revision.result ?? "não informado"}` : due}</small></div>{done ? <span className="revision-completed"><CheckCircle2 size={15}/> Concluída</span> : <div className="revision-controls"><select aria-label="Resultado da revisão" value={revisionResult} onChange={e=>setRevisionResult(e.target.value as RevisionResult)}><option value="easy">Fácil</option><option value="medium">Médio</option><option value="hard">Difícil</option><option value="again">Preciso rever</option></select><button type="button" className="complete-button" onClick={()=>void handleCompleteRevision(revision.id)}>Concluir</button></div>}</article>})}</div>}
+      </section>
       <footer className="workspace-footer">PLANNER DA BRE V2 <span>·</span> SEUS DADOS SINCRONIZADOS COM SEGURANÇA</footer>
     </section>
   </main>;
