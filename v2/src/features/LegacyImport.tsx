@@ -147,11 +147,12 @@ export function LegacyImport() {
         if (!title) continue;
         const source = String(old.fonte ?? old.source_url ?? old.link ?? "").trim();
         await createJurisprudenceEntry({
-          title, court: [String(old.tribunal ?? old.court ?? "").trim(), String(old.materia ?? "").trim()].filter(Boolean).join(" · ") || undefined,
+          title, court: String(old.tribunal ?? old.court ?? "").trim() || undefined,
           case_reference: String(old.processo ?? old.referencia ?? old.case_reference ?? "").trim() || undefined,
           judgment_date: asDate(old.data ?? old.julgamento ?? old.judgment_date),
           summary: String(old.tese ?? old.resumo ?? old.summary ?? old.descricao ?? ""),
-          source_url: /^https?:\/\//i.test(source) ? source : undefined
+          source_url: /^https?:\/\//i.test(source) ? source : undefined,
+          tags: String(old.materia ?? "").trim() ? [String(old.materia).trim()] : []
         });
         importedCases++;
       }
