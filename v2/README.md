@@ -27,7 +27,7 @@ Antes de testar autenticação:
 - Habilite o provedor Google em Authentication > Sign In / Providers e configure as credenciais OAuth do Google.
 - Revise a configuração de confirmação de e-mail.
 - Configure o endereço de redirecionamento de recuperação de senha.
-- Aplique a migration `../supabase/migrations/0001_initial_schema.sql` somente após revisão e em um projeto de desenvolvimento.
+- Aplique, em ordem, as migrations `../supabase/migrations/0001_initial_schema.sql` e `../supabase/migrations/0002_atomic_legacy_import.sql` somente após revisão e em um projeto de desenvolvimento isolado.
 
 A criação do projeto Supabase não configura automaticamente o provedor Google. O botão Google só funcionará depois dessa configuração.
 
@@ -41,7 +41,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Esqueleto do app autenticado
 - [x] Primeira migration SQL e documentação de arquitetura
 - [x] Validar TypeScript e build de produção pelo GitHub Actions
-- [ ] Validar migration no banco de desenvolvimento
+- [ ] Validar as duas migrations no banco de desenvolvimento
 - [ ] Configurar e testar Google OAuth e e-mail
 - [x] Criar serviços Supabase para disciplinas, assuntos, sessões e tentativas de questões
 - [x] Implementar dashboard com métricas, cadastro de disciplinas/assuntos e alteração de status
@@ -61,13 +61,14 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
 - [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (aplicação da migration, integridade referencial, unicidade do planejamento e isolamento RLS)\n- [x] Agregação das métricas do dashboard no PostgreSQL, respeitando RLS e sem limite de paginação do cliente\n- [x] Testes automatizados dos fluxos de login, cadastro, recuperação de senha, erros de autenticação e início do Google OAuth
+- [x] Testes automatizados de integração para importação V1 transacional, isolamento entre contas, bloqueio de acesso anônimo e rollback integral
 - [ ] Testes automatizados adicionais dos fluxos completos
 
 ## Limitações conhecidas nesta etapa
 
 - O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
 - A V2 permite exportar e restaurar backup JSON completo. A restauração é aditiva: IDs já existentes são ignorados, novos registros são inseridos e conflitos de integridade fazem a transação inteira falhar. Ela ainda não foi validada contra o projeto Supabase hospedado; mantenha cópias independentes dos arquivos de backup.
-- O importador da V1 aceita o backup JSON e adiciona disciplinas, assuntos, sessões, totais de questões por assunto, simulados e registros de jurisprudência reconhecidos. Não migra planejamento/ciclo, tema visual ou arquivos anexados. A importação é aditiva e ainda não é transacional: se houver falha no meio, parte dos registros pode já ter sido gravada. Cada backup é identificado por SHA-256 e registrado em `import_jobs`; uma tentativa concluída ou interrompida bloqueia a repetição automática do mesmo conteúdo. Em caso de falha parcial, confira os registros antes de solicitar uma recuperação manual.
+- O importador da V1 aceita o backup JSON e adiciona disciplinas, assuntos, sessões, totais de questões por assunto, simulados e registros de jurisprudência reconhecidos. Não migra planejamento/ciclo, tema visual ou arquivos anexados. A importação é aditiva e transacional, executada pela função `import_legacy_v1_backup`: em caso de falha, os registros de dados são revertidos integralmente e a tentativa fica registrada como `failed`, permitindo nova tentativa com o mesmo fingerprint. Cada backup é identificado por SHA-256 e registrado em `import_jobs`; uma importação concluída ou em andamento bloqueia a repetição automática do mesmo conteúdo. A função exige usuário autenticado, atribui os registros ao usuário da sessão e opera sob RLS.
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
 - O módulo de simulados permite criar, editar e excluir resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; o histórico também exibe um gráfico cronológico com média e melhor desempenho dos últimos oito simulados. A validação automatizada de TypeScript, build e testes de interface é executada pelo GitHub Actions em cada atualização desta pasta.
