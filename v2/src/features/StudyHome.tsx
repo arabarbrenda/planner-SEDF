@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Download, Upload, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
+import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Download, Upload, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList, CalendarPlus } from "lucide-react";
 import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam, exportPlannerBackup, restorePlannerBackup } from "../services/studyData";
 import type { MockExam, Revision, RevisionResult, StudyPlan, StudyPlanItem, Subject, Topic, TopicStatus } from "../types/database";
 import { LearningLibrary } from "./LearningLibrary";
 import { LegacyImport } from "./LegacyImport";
+import { buildWeeklyCalendar } from "../services/weeklyCalendar";
 
 const statusLabels: Record<TopicStatus, string> = {
   not_started: "Não iniciado",
@@ -208,6 +209,26 @@ export function StudyHome({ email }: { email: string }) {
     finally { setSaving(false); }
   }
 
+  function handleExportCalendar() {
+    setError(""); setNotice("");
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    const result = buildWeeklyCalendar(planItems, today);
+    if (result.exported === 0) {
+      setNotice("Nenhum bloco com dia, horário de início e duração válidos para exportar.");
+      return;
+    }
+    const blob = new Blob([result.calendar], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "planner-da-bre-planejamento-semanal.ics";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setNotice(`Arquivo de calendário gerado: ${result.exported} blocos exportados como eventos semanais recorrentes.${result.skipped ? ` ${result.skipped} blocos sem horário foram ignorados.` : ""}`);
+  }
+
   async function handleDeletePlanItem(id: string) {
     try { await deleteStudyPlanItem(id); if (activePlan) setPlanItems(await listStudyPlanItems(activePlan.id)); setNotice("Bloco removido do planejamento."); }
     catch (err) { setError(err instanceof Error ? err.message : "Não foi possível remover o bloco."); }
@@ -327,6 +348,7 @@ export function StudyHome({ email }: { email: string }) {
         <div className="section-heading"><div><span className="eyebrow">ROTINA COM INTENÇÃO</span><h2>Planejamento semanal</h2><p>Monte seus blocos de estudo por dia, horário e disciplina.</p></div><button className="add-button" onClick={()=>setShowPlanForm(v=>!v)}><Plus size={17}/>{showPlanForm ? "Fechar" : "Adicionar bloco"}</button></div>
         {showPlanForm && <form className="entry-form plan-form" onSubmit={handleCreatePlanItem}><h3>Novo bloco de estudo</h3><label htmlFor="plan-weekday">Dia da semana</label><select id="plan-weekday" value={planWeekday} onChange={e=>setPlanWeekday(e.target.value)}>{["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"].map((day,index)=><option value={String(index)} key={day}>{day}</option>)}</select><label htmlFor="plan-subject">Disciplina</label><select id="plan-subject" value={planSubject} onChange={e=>{setPlanSubject(e.target.value);setPlanTopic("");}} required><option value="">Selecione</option>{subjects.map(subject=><option value={subject.id} key={subject.id}>{subject.name}</option>)}</select><label htmlFor="plan-topic">Assunto (opcional)</label><select id="plan-topic" value={planTopic} onChange={e=>setPlanTopic(e.target.value)}><option value="">Sem assunto específico</option>{allTopics.filter(topic=>topic.subject_id===planSubject).map(topic=><option value={topic.id} key={topic.id}>{topic.name}</option>)}</select><label htmlFor="plan-time">Horário de início</label><input id="plan-time" type="time" value={planTime} onChange={e=>setPlanTime(e.target.value)}/><label htmlFor="plan-duration">Duração (minutos)</label><input id="plan-duration" type="number" min="5" max="720" value={planDuration} onChange={e=>setPlanDuration(e.target.value)} required/><label htmlFor="plan-notes">Observações (opcional)</label><input id="plan-notes" value={planNotes} onChange={e=>setPlanNotes(e.target.value)} maxLength={500} placeholder="Ex.: teoria + questões"/><button className="submit-button" disabled={saving || !planSubject}>{saving ? "Salvando..." : "Salvar bloco"}</button></form>}
         <div className="week-grid">{["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"].map((day,index)=>{const dayItems=planItems.filter(item=>item.weekday===index);return <article className="week-day" key={day}><div className="week-day-heading"><strong>{day}</strong><span>{dayItems.reduce((sum,item)=>sum+item.duration_minutes,0)} min</span></div>{dayItems.length===0?<p className="week-empty">Sem blocos programados</p>:dayItems.map(item=><div className="plan-item" key={item.id}><div className="plan-item-time">{item.start_time?.slice(0,5) ?? "Horário livre"} · {item.duration_minutes} min</div><strong>{item.subjects?.name ?? "Disciplina"}</strong>{item.topics?.name && <small>{item.topics.name}</small>}{item.notes && <small>{item.notes}</small>}<button type="button" className="remove-plan-item" onClick={()=>void handleDeletePlanItem(item.id)} aria-label="Remover bloco"><Trash2 size={14}/></button></div>)}</article>})}</div>
+        <div className="week-calendar-export"><button type="button" className="refresh-button" onClick={handleExportCalendar} disabled={planItems.length===0} aria-label="Exportar planejamento semanal para calendário" title="Exportar para Google Calendar ou outro calendário"><CalendarPlus size={17}/> Exportar calendário</button></div>
         <div className="week-total"><CalendarRange size={16}/> <span>Total programado na semana: <strong>{planItems.reduce((sum,item)=>sum+item.duration_minutes,0)} minutos</strong> ({(planItems.reduce((sum,item)=>sum+item.duration_minutes,0)/60).toFixed(1)} h)</span></div>
       </section>
       <section className="detail-section revision-section">
