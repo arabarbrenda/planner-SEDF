@@ -46,6 +46,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Criar serviços Supabase para disciplinas, assuntos, sessões e tentativas de questões
 - [x] Implementar dashboard com métricas, cadastro de disciplinas/assuntos e alteração de status
 - [x] Implementar registro manual de tempo de estudo e desempenho em questões
+- [x] Implementar planejamento semanal por dia, disciplina, assunto, horário e duração
+- [x] Exibir carga horária semanal e permitir remover blocos de estudo
 - [ ] Implementar importação e validação dos dados exportados da V1
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
@@ -55,7 +57,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 
 - O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
-- Planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.
+- O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
+- Simulados e caderno de erros ainda não têm interface funcional nesta etapa.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
 - Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.
 
