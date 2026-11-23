@@ -3,6 +3,8 @@ import {
   createErrorEntry,
   createJurisprudenceEntry,
   createMockExam,
+  deleteErrorEntry,
+  deleteJurisprudenceEntry,
   deleteMockExam,
   updateErrorStatus,
   updateMockExam
@@ -117,6 +119,38 @@ describe("studyData mock exams and learning records", () => {
     expect(mocks.from).toHaveBeenCalledWith("mock_exams");
     expect(mocks.delete).toHaveBeenCalled();
     expect(mocks.eq).toHaveBeenCalledWith("id", "exam-1");
+  });
+
+  it("reports when deleting an error notebook entry affects no row", async () => {
+    mocks.deleteResult = { data: [], error: null };
+    await expect(deleteErrorEntry("missing-entry"))
+      .rejects.toThrow("Registro de erro não encontrado ou sem permissão");
+    expect(mocks.from).toHaveBeenCalledWith("error_notebook");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "missing-entry");
+  });
+
+  it("deletes an error notebook entry when the target row exists", async () => {
+    await expect(deleteErrorEntry("entry-1")).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("error_notebook");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "entry-1");
+  });
+
+  it("reports when deleting a jurisprudence entry affects no row", async () => {
+    mocks.deleteResult = { data: [], error: null };
+    await expect(deleteJurisprudenceEntry("missing-case"))
+      .rejects.toThrow("Jurisprudência não encontrada ou sem permissão");
+    expect(mocks.from).toHaveBeenCalledWith("jurisprudence_entries");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "missing-case");
+  });
+
+  it("deletes a jurisprudence entry when the target row exists", async () => {
+    await expect(deleteJurisprudenceEntry("case-1")).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("jurisprudence_entries");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "case-1");
   });
 
   it("reports when an error status update affects no row", async () => {
