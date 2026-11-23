@@ -49,6 +49,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar planejamento semanal por dia, disciplina, assunto, horário e duração
 - [x] Exibir carga horária semanal e permitir remover blocos de estudo
 - [x] Implementar registro e histórico de simulados com banca, data, duração e distribuição de acertos/erros/em branco
+- [x] Implementar caderno de erros com vínculo a disciplina/assunto, respostas, explicação, etiquetas e status
+- [x] Implementar biblioteca de jurisprudência com tribunal, referência, data, resumo e link da fonte
 - [ ] Implementar importação e validação dos dados exportados da V1
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
@@ -60,7 +62,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
 - O módulo de simulados já registra resultados e apresenta histórico; edição de registros e gráficos de evolução ainda estão pendentes.
-- O caderno de erros ainda não tem interface funcional nesta etapa.
+- O caderno de erros permite cadastro, vínculo a disciplina/assunto, acompanhamento de status e exclusão; edição dos registros e filtros avançados ainda estão pendentes.
+- A biblioteca de jurisprudência permite cadastro e exclusão de referências; edição, etiquetas e pesquisa externa ainda estão pendentes.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
 - Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.
 
