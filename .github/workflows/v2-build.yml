@@ -52,7 +52,7 @@ jobs:
         run: npm install
       - name: Type-check and build
         run: npm run build
-      - name: Run authentication UI tests
+      - name: Run automated frontend and data-service tests
         run: npm test
       - name: Validate PostgreSQL migration syntax
         run: |
