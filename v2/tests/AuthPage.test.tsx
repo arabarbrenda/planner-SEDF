@@ -47,7 +47,7 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "password123" } });
     fireEvent.click(screen.getByRole("button", { name: /Criar minha conta/ }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Confira seu e-mail");
+    expect((await screen.findByRole("status")).textContent).toContain("Confira seu e-mail");
     expect(mocks.signUp).toHaveBeenCalledWith({
       email: "new@example.com",
       password: "password123",
@@ -61,7 +61,7 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "brenda@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Enviar instruções" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Se houver uma conta");
+    expect((await screen.findByRole("status")).textContent).toContain("Se houver uma conta");
     expect(mocks.resetPasswordForEmail).toHaveBeenCalledWith("brenda@example.com", {
       redirectTo: window.location.origin
     });
@@ -74,7 +74,7 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "password123" } });
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Credenciais inválidas");
+    expect((await screen.findByRole("alert")).textContent).toContain("Credenciais inválidas");
   });
 
   it("starts Google OAuth with the current app origin", async () => {
