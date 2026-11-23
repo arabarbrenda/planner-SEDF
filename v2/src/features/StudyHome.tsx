@@ -61,6 +61,9 @@ export function StudyHome({ email }: { email: string }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const filteredMockExams = mockExams.filter(exam => [exam.title, exam.examining_board, exam.notes, exam.exam_date].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(mockSearch.trim().toLocaleLowerCase("pt-BR")));
+  const mockTrend = [...mockExams].sort((a, b) => a.exam_date.localeCompare(b.exam_date) || a.created_at.localeCompare(b.created_at)).slice(-8).map(exam => ({ ...exam, accuracy: Math.round(exam.correct_answers / exam.total_questions * 100) }));
+  const mockAverage = mockTrend.length ? Math.round(mockTrend.reduce((sum, exam) => sum + exam.accuracy, 0) / mockTrend.length) : null;
+  const mockBest = mockTrend.length ? Math.max(...mockTrend.map(exam => exam.accuracy)) : null;
 
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
@@ -257,6 +260,14 @@ export function StudyHome({ email }: { email: string }) {
       </section>
       <section className="detail-section mock-exam-section">
         <div className="section-heading"><div><span className="eyebrow">TESTE SEU DESEMPENHO</span><h2>Simulados</h2><p>Registre resultados completos e acompanhe seu histórico.</p></div><button className="add-button" onClick={()=>setShowMockExamForm(v=>{ if(v) setEditingMockExamId(null); return !v; })}><Plus size={17}/>{showMockExamForm ? "Fechar" : "Novo simulado"}</button></div>
+        {mockTrend.length > 0 && <div className="mock-trend" aria-label="Evolução do percentual de acertos nos últimos simulados">
+          <div className="mock-trend-heading"><div><strong>Evolução de desempenho</strong><small>Percentual de acertos nos últimos {mockTrend.length} simulados</small></div><div className="mock-trend-stats"><span><strong>{mockAverage}%</strong><small>média</small></span><span><strong>{mockBest}%</strong><small>melhor</small></span></div></div>
+          <div className="mock-trend-chart">{mockTrend.map((exam, index) => <div className="mock-trend-column" key={exam.id} title={exam.title + ": " + exam.accuracy + "%"}>
+            <strong>{exam.accuracy}%</strong><div className="mock-trend-track"><span style={{ height: exam.accuracy + "%" }} /></div>
+            <small>{new Date(exam.exam_date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</small><small className="mock-trend-index">#{index + 1}</small>
+          </div>)}</div>
+          <p className="mock-trend-note">Cada coluna representa um simulado, em ordem cronológica. A média considera apenas os simulados exibidos.</p>
+        </div>}
         {showMockExamForm && <form className="entry-form mock-exam-form" onSubmit={handleCreateMockExam}>
           <h3>{editingMockExamId ? "Editar simulado" : "Registrar simulado"}</h3>
           <label htmlFor="mock-title">Nome do simulado</label><input id="mock-title" value={mockTitle} onChange={e=>setMockTitle(e.target.value)} placeholder="Ex.: Simulado geral — SEDF" maxLength={160} required/>
