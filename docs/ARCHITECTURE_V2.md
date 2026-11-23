@@ -65,12 +65,13 @@
 - V1 JSON import preview and additive migration through `import_legacy_v1_backup`. The server validates normalized sections, rebuilds subject/topic relationships from legacy IDs, records an import audit row, and writes all imported records in one transaction. A failed data write rolls back all imported rows while preserving a failed audit record; retrying that fingerprint is allowed after failure, while a completed fingerprint is rejected. The import remains additive and does not replace existing V2 records.
 - V1 migration intentionally imports topic-level accumulated question totals as question-attempt batches; session-level `qTotal`/`qAcertos` are not imported to avoid double counting. Legacy mock exams are imported with zero blank answers because V1 did not store that value separately. Planning/cycle, visual theme, settings and attachments are not imported.
 - V2 JSON backup export, paginated in batches of 500, and transactional restore through the `restore_planner_backup` RPC.
+- Weekly study-plan export as an `.ics` calendar file, using the saved weekday, start time, duration, subject/topic labels and `America/Sao_Paulo` timezone; entries without a start time are skipped rather than assigned an invented time.
 - Automated frontend/service tests and CI checks using a temporary PostgreSQL 15 environment with minimal Supabase-compatible objects.
 
 ### Remaining before a production decision
 - Run the documented authentication, RLS, export and restore checklist in a separate Supabase development project. This has not been done against the hosted project.
 - Inspect an anonymized Tec Concursos export before implementing a real parser.
-- Implement Google Calendar export from saved plan items, honoring the local timezone.
+- Manually verify the weekly `.ics` export in Google Calendar and another calendar client. Exported blocks with a start time become weekly recurring events in `America/Sao_Paulo`; blocks without a start time are intentionally skipped.
 - Dependency hygiene: CI runs `npm audit --audit-level=moderate` and currently passes with zero advisories in the resolved dependency graph. The workflow generates and uploads `package-lock.json` as a short-lived artifact, but the lockfile is not yet committed; dependency resolution can therefore change between runs. Commit and review a lockfile before treating installs as fully reproducible.
 - Consider whether export needs a consistent database snapshot if writes can occur during a backup. Current export paginates each table independently; it is not a cross-table transactional snapshot.
 - Complete manual accessibility and responsive-browser review.
