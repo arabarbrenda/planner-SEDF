@@ -35,6 +35,14 @@ describe("studyData mock exams and learning records", () => {
     mocks.eq.mockResolvedValue({ error: null });
   });
 
+  it("rejects a mock exam without a title or date before accessing Supabase", async () => {
+    await expect(createMockExam({
+      title: "   ", exam_date: "2026-11-23",
+      total_questions: 10, correct_answers: 8
+    })).rejects.toThrow("nome e a data");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
   it("rejects mock exam scores that do not add up before accessing Supabase", async () => {
     await expect(createMockExam({
       title: "Simulado 1", exam_date: "2026-11-23",
@@ -103,6 +111,15 @@ describe("studyData mock exams and learning records", () => {
       title: "Tema", source_url: "javascript:alert(1)"
     })).rejects.toThrow("HTTP ou HTTPS");
     expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("normalizes whitespace and accepts case-insensitive HTTPS URLs on update", async () => {
+    await import("../src/services/studyData").then(({ updateJurisprudenceEntry }) =>
+      updateJurisprudenceEntry("case-1", { source_url: "  HTTPS://example.org/case  " })
+    );
+    expect(mocks.from).toHaveBeenCalledWith("jurisprudence_entries");
+    expect(mocks.update).toHaveBeenCalledWith({ source_url: "HTTPS://example.org/case" });
+    expect(mocks.eq).toHaveBeenCalledWith("id", "case-1");
   });
 
   it("creates a jurisprudence entry with normalized fields and authenticated ownership", async () => {
