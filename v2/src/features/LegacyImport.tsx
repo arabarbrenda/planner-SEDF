@@ -1,7 +1,8 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { FileUp, ShieldCheck } from "lucide-react";
 import {
-  createMockExam, createQuestionAttempt, createStudySession, createSubject, createTopic, createJurisprudenceEntry
+  createMockExam, createQuestionAttempt, createStudySession, createSubject, createTopic, createJurisprudenceEntry,
+  startLegacyImport, finishLegacyImport
 } from "../services/studyData";
 
 type LegacyTopic = {
@@ -48,6 +49,7 @@ function durationFromLegacy(value: unknown): number | undefined {
 export function LegacyImport() {
   const [data, setData] = useState<LegacyData | null>(null);
   const [fileName, setFileName] = useState("");
+  const [fingerprint, setFingerprint] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
@@ -65,18 +67,21 @@ export function LegacyImport() {
 
   async function readFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    setData(null); setDone(false); setConfirm(false); setError(""); setProgress("");
+    setData(null); setFileName(""); setFingerprint(""); setDone(false); setConfirm(false); setError(""); setProgress("");
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { setError("O arquivo ultrapassa o limite de 10 MB."); return; }
     try {
-      const parsed = JSON.parse(await file.text()) as LegacyData;
+      const raw = await file.text();
+      const parsed = JSON.parse(raw) as LegacyData;
       if (!parsed || !Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) || !Array.isArray(parsed.simulados)) {
         throw new Error("Este arquivo não parece ser um backup JSON válido da V1.");
       }
       if (parsed.materias.some(s => !s || typeof s.nome !== "string" || !Array.isArray(s.topicos))) {
         throw new Error("A estrutura das disciplinas ou dos assuntos não é válida.");
       }
-      setData(parsed); setFileName(file.name);
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+      const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+      setData(parsed); setFileName(file.name); setFingerprint(hash);
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível ler o arquivo."); }
     finally { event.target.value = ""; }
   }
