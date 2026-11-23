@@ -13,7 +13,8 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   eq: vi.fn(),
   select: vi.fn(),
-  single: vi.fn()
+  single: vi.fn(),
+  maybeSingle: vi.fn()
 }));
 
 vi.mock("../src/lib/supabase", () => ({
@@ -29,10 +30,11 @@ describe("studyData mock exams and learning records", () => {
     mocks.getUser.mockResolvedValue({ data: { user: { id: "user-789" } }, error: null });
     mocks.from.mockReturnValue({ insert: mocks.insert, update: mocks.update });
     mocks.insert.mockReturnValue({ select: mocks.select });
-    mocks.select.mockReturnValue({ single: mocks.single });
+    mocks.select.mockReturnValue({ single: mocks.single, maybeSingle: mocks.maybeSingle });
     mocks.single.mockResolvedValue({ data: { id: "record-3" }, error: null });
+    mocks.maybeSingle.mockResolvedValue({ data: { id: "record-3" }, error: null });
     mocks.update.mockReturnValue({ eq: mocks.eq });
-    mocks.eq.mockResolvedValue({ error: null });
+    mocks.eq.mockReturnValue({ select: mocks.select });
   });
 
   it("rejects a mock exam without a title or date before accessing Supabase", async () => {
@@ -83,6 +85,7 @@ describe("studyData mock exams and learning records", () => {
       correct_answers: 8, incorrect_answers: 1, blank_answers: 1
     }));
     expect(mocks.eq).toHaveBeenCalledWith("id", "exam-1");
+    expect(mocks.maybeSingle).toHaveBeenCalled();
     expect(mocks.getUser).not.toHaveBeenCalled();
   });
 
@@ -120,6 +123,7 @@ describe("studyData mock exams and learning records", () => {
     expect(mocks.from).toHaveBeenCalledWith("jurisprudence_entries");
     expect(mocks.update).toHaveBeenCalledWith({ source_url: "HTTPS://example.org/case" });
     expect(mocks.eq).toHaveBeenCalledWith("id", "case-1");
+    expect(mocks.maybeSingle).toHaveBeenCalled();
   });
 
   it("trims a valid source URL before validating and saving it", async () => {
