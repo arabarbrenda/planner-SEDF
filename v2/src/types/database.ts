@@ -108,3 +108,20 @@ export type StudyPlanItem = {
   topics?: { name: string } | null;
 };
 export type StudyPlanItemInsert = Pick<StudyPlanItem, "plan_id" | "weekday" | "duration_minutes"> & Partial<Pick<StudyPlanItem, "subject_id" | "topic_id" | "start_time" | "sort_order" | "notes">>;
+
+export type MockExam = {
+  id: string;
+  user_id: string;
+  title: string;
+  exam_date: string;
+  examining_board: string | null;
+  total_questions: number;
+  correct_answers: number;
+  incorrect_answers: number;
+  blank_answers: number;
+  duration_minutes: number | null;
+  notes: string;
+  created_at: string;
+};
+export type MockExamInsert = Pick<MockExam, "title" | "exam_date" | "total_questions" | "correct_answers"> &
+  Partial<Pick<MockExam, "examining_board" | "incorrect_answers" | "blank_answers" | "duration_minutes" | "notes">>;
