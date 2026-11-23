@@ -86,4 +86,32 @@ begin
 end
 $test$;
 
+
+-- A secondary unique constraint must fail the whole restore instead of being silently ignored.
+do $test$
+begin
+  begin
+    perform * from public.restore_planner_backup($backup$
+    {
+      "format":"planner-da-bre-v2","version":1,
+      "data":{
+        "study_settings":[],
+        "subjects":[{"id":"abababab-4444-4444-8444-444444444444","user_id":"22222222-2222-4222-8222-222222222222","name":"Must roll back on unique conflict","priority":"medium","sort_order":0,"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
+        "topics":[],
+        "study_plans":[{"id":"abababab-5555-4555-8555-555555555555","user_id":"22222222-2222-4222-8222-222222222222","name":"Conflicting active plan","is_active":true,"settings":{},"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
+        "study_sessions":[],"question_attempts":[],"revisions":[],"study_plan_items":[],
+        "mock_exams":[],"error_notebook":[],"jurisprudence_entries":[]
+      }
+    }
+    $backup$::jsonb);
+    raise exception 'Active-plan unique conflict was unexpectedly accepted';
+  exception when unique_violation then
+    null;
+  end;
+  if exists (select 1 from public.subjects where id = 'abababab-4444-4444-8444-444444444444') then
+    raise exception 'Unique-conflict restore did not roll back earlier inserts';
+  end if;
+end
+$test$;
+
 reset role;
