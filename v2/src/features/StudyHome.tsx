@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
-import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, deleteMockExam } from "../services/studyData";
+import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam } from "../services/studyData";
 import type { MockExam, Revision, RevisionResult, StudyPlan, StudyPlanItem, Subject, Topic, TopicStatus } from "../types/database";
 import { LearningLibrary } from "./LearningLibrary";
 import { LegacyImport } from "./LegacyImport";
@@ -20,6 +20,7 @@ export function StudyHome({ email }: { email: string }) {
   const [mockExams, setMockExams] = useState<MockExam[]>([]);
   const [mockSearch, setMockSearch] = useState("");
   const [showMockExamForm, setShowMockExamForm] = useState(false);
+  const [editingMockExamId, setEditingMockExamId] = useState<string | null>(null);
   const [mockTitle, setMockTitle] = useState("");
   const [mockDate, setMockDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));
   const [mockBoard, setMockBoard] = useState("");
@@ -144,11 +145,22 @@ export function StudyHome({ email }: { email: string }) {
     if (durationMins !== null && (!Number.isInteger(durationMins) || durationMins <= 0)) { setError("Informe uma duração válida em minutos."); return; }
     setSaving(true); setError("");
     try {
-      await createMockExam({ title: mockTitle.trim(), exam_date: mockDate, examining_board: mockBoard.trim() || undefined, total_questions: total, correct_answers: correct, incorrect_answers: incorrect, blank_answers: blank, duration_minutes: durationMins ?? undefined, notes: mockNotes.trim() });
-      setMockTitle(""); setMockBoard(""); setMockNotes(""); setShowMockExamForm(false);
-      setNotice("Simulado registrado!"); setMockExams(await listMockExams());
+      const input = { title: mockTitle.trim(), exam_date: mockDate, examining_board: mockBoard.trim() || undefined, total_questions: total, correct_answers: correct, incorrect_answers: incorrect, blank_answers: blank, duration_minutes: durationMins ?? undefined, notes: mockNotes.trim() };
+      const wasEditing = Boolean(editingMockExamId);
+      if (editingMockExamId) await updateMockExam(editingMockExamId, input); else await createMockExam(input);
+      setMockTitle(""); setMockBoard(""); setMockNotes(""); setMockDate(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));
+      setMockTotal("80"); setMockCorrect("50"); setMockIncorrect("30"); setMockBlank("0"); setMockDuration("");
+      setEditingMockExamId(null); setShowMockExamForm(false);
+      setNotice(wasEditing ? "Simulado atualizado!" : "Simulado registrado!"); setMockExams(await listMockExams());
     } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível registrar o simulado."); }
     finally { setSaving(false); }
+  }
+
+  function editMockExam(exam: MockExam) {
+    setEditingMockExamId(exam.id); setMockTitle(exam.title); setMockDate(exam.exam_date); setMockBoard(exam.examining_board ?? "");
+    setMockTotal(String(exam.total_questions)); setMockCorrect(String(exam.correct_answers)); setMockIncorrect(String(exam.incorrect_answers));
+    setMockBlank(String(exam.blank_answers)); setMockDuration(exam.duration_minutes ? String(exam.duration_minutes) : ""); setMockNotes(exam.notes);
+    setShowMockExamForm(true); setError(""); setNotice("");
   }
 
   async function handleDeleteMockExam(id: string) {
@@ -244,9 +256,9 @@ export function StudyHome({ email }: { email: string }) {
         {revisions.length === 0 ? <div className="empty-state"><span className="empty-icon"><CalendarDays size={23}/></span><h3>Nenhuma revisão agendada.</h3><p>Cadastre assuntos e programe revisões para acompanhar sua retenção.</p></div> : <div className="revision-list">{revisions.map(revision=>{const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Sao_Paulo"});const done=Boolean(revision.completed_at);const due=revision.scheduled_for<today?"Atrasada":revision.scheduled_for===today?"Hoje":"Programada";return <article className={`revision-row ${done?"revision-done":revision.scheduled_for<today?"revision-overdue":""}`} key={revision.id}><div className="revision-main"><span className="revision-date">{new Date(revision.scheduled_for+"T12:00:00").toLocaleDateString("pt-BR")}</span><strong>{revision.topics?.name ?? "Assunto indisponível"}</strong><small>{done ? `Concluída · resultado: ${revision.result ?? "não informado"}` : due}</small></div>{done ? <span className="revision-completed"><CheckCircle2 size={15}/> Concluída</span> : <div className="revision-controls"><select aria-label="Resultado da revisão" value={revisionResult} onChange={e=>setRevisionResult(e.target.value as RevisionResult)}><option value="easy">Fácil</option><option value="medium">Médio</option><option value="hard">Difícil</option><option value="again">Preciso rever</option></select><button type="button" className="complete-button" onClick={()=>void handleCompleteRevision(revision.id)}>Concluir</button></div>}</article>})}</div>}
       </section>
       <section className="detail-section mock-exam-section">
-        <div className="section-heading"><div><span className="eyebrow">TESTE SEU DESEMPENHO</span><h2>Simulados</h2><p>Registre resultados completos e acompanhe seu histórico.</p></div><button className="add-button" onClick={()=>setShowMockExamForm(v=>!v)}><Plus size={17}/>{showMockExamForm ? "Fechar" : "Novo simulado"}</button></div>
+        <div className="section-heading"><div><span className="eyebrow">TESTE SEU DESEMPENHO</span><h2>Simulados</h2><p>Registre resultados completos e acompanhe seu histórico.</p></div><button className="add-button" onClick={()=>setShowMockExamForm(v=>{ if(v) setEditingMockExamId(null); return !v; })}><Plus size={17}/>{showMockExamForm ? "Fechar" : "Novo simulado"}</button></div>
         {showMockExamForm && <form className="entry-form mock-exam-form" onSubmit={handleCreateMockExam}>
-          <h3>Registrar simulado</h3>
+          <h3>{editingMockExamId ? "Editar simulado" : "Registrar simulado"}</h3>
           <label htmlFor="mock-title">Nome do simulado</label><input id="mock-title" value={mockTitle} onChange={e=>setMockTitle(e.target.value)} placeholder="Ex.: Simulado geral — SEDF" maxLength={160} required/>
           <label htmlFor="mock-date">Data</label><input id="mock-date" type="date" value={mockDate} onChange={e=>setMockDate(e.target.value)} required/>
           <label htmlFor="mock-board">Banca (opcional)</label><input id="mock-board" value={mockBoard} onChange={e=>setMockBoard(e.target.value)} placeholder="Ex.: Cebraspe" maxLength={100}/>
@@ -257,9 +269,9 @@ export function StudyHome({ email }: { email: string }) {
           <label htmlFor="mock-duration">Duração em minutos (opcional)</label><input id="mock-duration" type="number" min="1" value={mockDuration} onChange={e=>setMockDuration(e.target.value)} placeholder="Ex.: 240"/>
           <label htmlFor="mock-notes">Observações (opcional)</label><input id="mock-notes" value={mockNotes} onChange={e=>setMockNotes(e.target.value)} maxLength={1500} placeholder="Dificuldades, temas para revisar..."/>
           <small className="form-hint">A soma de acertos, erros e questões em branco precisa corresponder ao total.</small>
-          <button className="submit-button" disabled={saving || !mockTitle.trim()}>{saving ? "Salvando..." : "Salvar simulado"}</button>
+          <button className="submit-button" disabled={saving || !mockTitle.trim()}>{saving ? "Salvando..." : editingMockExamId ? "Salvar alterações" : "Salvar simulado"}</button>
         </form>}
-        {mockExams.length === 0 ? <div className="empty-state"><span className="empty-icon"><ClipboardList size={23}/></span><h3>Seu histórico começa aqui.</h3><p>Registre um simulado para acompanhar sua evolução.</p></div> : <><div className="library-filters"><input aria-label="Pesquisar simulados" value={mockSearch} onChange={e=>setMockSearch(e.target.value)} placeholder="Pesquisar por nome, banca, data ou observação..."/></div>{filteredMockExams.length === 0 ? <div className="empty-state"><h3>Nenhum simulado encontrado.</h3><p>Tente outro termo de pesquisa.</p></div> : <div className="mock-exam-list">{filteredMockExams.map(exam=><article className="mock-exam-row" key={exam.id}><div className="mock-exam-main"><span className="revision-date">{new Date(exam.exam_date+"T12:00:00").toLocaleDateString("pt-BR")}{exam.examining_board ? " · "+exam.examining_board : ""}</span><strong>{exam.title}</strong><small>{exam.total_questions} questões · {exam.correct_answers} acertos · {exam.incorrect_answers} erros · {exam.blank_answers} em branco{exam.duration_minutes ? " · "+exam.duration_minutes+" min" : ""}</small>{exam.notes && <small>{exam.notes}</small>}</div><div className="mock-exam-score"><strong>{Math.round(exam.correct_answers / exam.total_questions * 100)}%</strong><small>de acertos</small><button type="button" className="remove-plan-item" aria-label={`Excluir ${exam.title}`} onClick={()=>void handleDeleteMockExam(exam.id)}><Trash2 size={15}/></button></div></article>)}</div>}</>}
+        {mockExams.length === 0 ? <div className="empty-state"><span className="empty-icon"><ClipboardList size={23}/></span><h3>Seu histórico começa aqui.</h3><p>Registre um simulado para acompanhar sua evolução.</p></div> : <><div className="library-filters"><input aria-label="Pesquisar simulados" value={mockSearch} onChange={e=>setMockSearch(e.target.value)} placeholder="Pesquisar por nome, banca, data ou observação..."/></div>{filteredMockExams.length === 0 ? <div className="empty-state"><h3>Nenhum simulado encontrado.</h3><p>Tente outro termo de pesquisa.</p></div> : <div className="mock-exam-list">{filteredMockExams.map(exam=><article className="mock-exam-row" key={exam.id}><div className="mock-exam-main"><span className="revision-date">{new Date(exam.exam_date+"T12:00:00").toLocaleDateString("pt-BR")}{exam.examining_board ? " · "+exam.examining_board : ""}</span><strong>{exam.title}</strong><small>{exam.total_questions} questões · {exam.correct_answers} acertos · {exam.incorrect_answers} erros · {exam.blank_answers} em branco{exam.duration_minutes ? " · "+exam.duration_minutes+" min" : ""}</small>{exam.notes && <small>{exam.notes}</small>}</div><div className="mock-exam-score"><strong>{Math.round(exam.correct_answers / exam.total_questions * 100)}%</strong><small>de acertos</small><div className="notebook-actions"><button type="button" className="edit-entry-button" onClick={()=>editMockExam(exam)}>Editar</button><button type="button" className="remove-plan-item" aria-label={`Excluir ${exam.title}`} onClick={()=>void handleDeleteMockExam(exam.id)}><Trash2 size={15}/></button></div></div></article>)}</div>}</>}
       </section>
       <LegacyImport />
       <LearningLibrary subjects={subjects} topics={allTopics} />
