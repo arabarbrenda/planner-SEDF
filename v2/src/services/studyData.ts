@@ -279,6 +279,30 @@ export async function deleteMockExam(examId: string): Promise<void> {
 }
 
 
+export async function startLegacyImport(fingerprint: string, originalFileName: string): Promise<string> {
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("import_jobs").insert({
+    user_id: userId, source: "v1_backup", file_name: fingerprint,
+    status: "pending", rows_imported: 0,
+    error_details: { original_file_name: originalFileName }
+  }).select("id").single();
+  if (error) {
+    if (error.code === "23505") throw new Error("Este backup já foi processado ou teve uma tentativa iniciada. Para evitar duplicações, a importação foi bloqueada. Confira seus registros antes de qualquer nova tentativa.");
+    throw error;
+  }
+  return data.id as string;
+}
+
+export async function finishLegacyImport(jobId: string, rowsImported: number, failed = false, details = ""): Promise<void> {
+  const { error } = await requireSupabase().from("import_jobs").update({
+    status: failed ? "failed" : "completed",
+    rows_imported: Math.max(0, Math.floor(rowsImported)),
+    error_details: details ? { message: details } : {},
+    completed_at: new Date().toISOString()
+  }).eq("id", jobId);
+  if (error) throw error;
+}
+
 export async function listErrorNotebook(): Promise<ErrorNotebookEntry[]> {
   const { data, error } = await requireSupabase().from("error_notebook")
     .select("*, subjects(name), topics(name)").order("created_at", { ascending: false });
