@@ -56,7 +56,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
-- [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (smoke test de esquema, integridade referencial e isolamento RLS simulado)\n- [ ] Testes automatizados adicionais de analytics e fluxos completos
+- [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (aplicação da migration, integridade referencial, unicidade do planejamento e isolamento RLS)\n- [x] Agregação das métricas do dashboard no PostgreSQL, respeitando RLS e sem limite de paginação do cliente\n- [ ] Testes automatizados adicionais dos fluxos completos
 
 ## Limitações conhecidas nesta etapa
 
@@ -67,7 +67,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O módulo de simulados permite criar, editar e excluir resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; o histórico também exibe um gráfico cronológico com média e melhor desempenho dos últimos oito simulados. A validação automatizada de TypeScript e build é executada pelo GitHub Actions em cada atualização desta pasta.
 - O caderno de erros permite criar, editar, excluir, pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite criar, editar, excluir e pesquisar por tema, tribunal, processo e resumo. O formulário ainda não expõe edição de etiquetas.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
-- Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real. O importador ainda precisa de testes com backups reais anonimizados antes de uso em dados importantes.
+- A migration foi aplicada e testada em PostgreSQL 15 temporário no CI, com objetos mínimos de compatibilidade Supabase; isso não equivale à aplicação ou validação no projeto Supabase hospedado. Nenhum fluxo de autenticação foi validado em ambiente real. O importador ainda precisa de testes com backups reais anonimizados antes de uso em dados importantes.
 
 ## Dados e segurança
 
