@@ -62,7 +62,8 @@
 - Typed data services and study dashboard, including subjects, topics, sessions, question batches, revisions and weekly planning.
 - Mock exams with validation and chronological performance trend.
 - Error notebook and jurisprudence records with search, filters and editing.
-- V1 JSON import preview and additive migration with duplicate fingerprint protection. This import is not transactional; a failed attempt can leave partial records and requires manual reconciliation.
+- V1 JSON import preview and additive migration through `import_legacy_v1_backup`. The server validates normalized sections, rebuilds subject/topic relationships from legacy IDs, records an import audit row, and writes all imported records in one transaction. A failed data write rolls back all imported rows while preserving a failed audit record; retrying that fingerprint is allowed after failure, while a completed fingerprint is rejected. The import remains additive and does not replace existing V2 records.
+- V1 migration intentionally imports topic-level accumulated question totals as question-attempt batches; session-level `qTotal`/`qAcertos` are not imported to avoid double counting. Legacy mock exams are imported with zero blank answers because V1 did not store that value separately. Planning/cycle, visual theme, settings and attachments are not imported.
 - V2 JSON backup export, paginated in batches of 500, and transactional restore through the `restore_planner_backup` RPC.
 - Automated frontend/service tests and CI checks using a temporary PostgreSQL 15 environment with minimal Supabase-compatible objects.
 
@@ -74,11 +75,9 @@
 - Consider whether export needs a consistent database snapshot if writes can occur during a backup. Current export paginates each table independently; it is not a cross-table transactional snapshot.
 - Complete manual accessibility and responsive-browser review.
 
-## Migration and rollout
-1. Keep V1 and its GitHub Pages deployment unchanged.
-2. Continue V2 work only on `feature/planner-bre-v2`.
-3. Export a V1 JSON backup before any data migration.
-4. Review the V1 import preview and preserve uncertain legacy aggregates rather than fabricating history.
-5. Validate V2 in a separate, disposable Supabase development project using `docs/SUPABASE_DEV_VALIDATION.md`.
-6. Verify row counts, representative records, authentication and RLS with at least two test accounts.
-7. Obtain explicit approval before applying migrations to the hosted project, importing personal data, merging branches or deploying V2.
+## Production gate
+- The new import migration and atomic import smoke test pass in CI's temporary PostgreSQL 15 environment. This is not a hosted Supabase validation.
+- No hosted migration has been applied, no personal data has been imported, and no production authentication/RLS/runtime test has been performed.
+- Validate V2 in a separate, disposable Supabase development project using `docs/SUPABASE_DEV_VALIDATION.md`.
+- Verify row counts, representative records, authentication and RLS with at least two test accounts.
+- Obtain explicit approval before applying migrations to the hosted project, importing personal data, merging branches or deploying V2.
