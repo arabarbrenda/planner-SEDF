@@ -87,10 +87,13 @@ export function LegacyImport() {
   }
 
   async function importData() {
-    if (!data || !confirm) return;
+    if (!data || !confirm || !fingerprint) return;
     setBusy(true); setError("");
     let importedSubjects = 0, importedTopics = 0, importedSessions = 0, importedQuestions = 0, importedMocks = 0, importedCases = 0, skippedSessions = 0, skippedMocks = 0;
+    let jobId: string | null = null;
     try {
+      jobId = await startLegacyImport(fingerprint, fileName);
+      setProgress("Preparando importação segura...");
       const subjectMap = new Map<string, string>();
       const topicMap = new Map<string, string>();
       for (const oldSubject of data.materias ?? []) {
@@ -163,11 +166,15 @@ export function LegacyImport() {
         });
         importedCases++;
       }
+      const rowsImported = importedSubjects + importedTopics + importedSessions + importedQuestions + importedMocks + importedCases;
+      if (jobId) await finishLegacyImport(jobId, rowsImported);
       setProgress("Importação concluída.");
       setDone(true);
       setProgress("Importados: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência. Ignorados: " + skippedSessions + " sessões e " + skippedMocks + " simulados sem data, duração ou quantidade válida.");
     } catch (e) {
-      setError((e instanceof Error ? e.message : "Falha inesperada.") + " A importação pode ter sido parcial. Confira os dados antes de tentar novamente.");
+      const failureMessage = e instanceof Error ? e.message : "Falha inesperada.";
+      if (jobId) { try { await finishLegacyImport(jobId, importedSubjects + importedTopics + importedSessions + importedQuestions + importedMocks + importedCases, true, failureMessage); } catch { /* Preserve the original import error. */ } }
+      setError(failureMessage + (jobId ? " A tentativa foi registrada e não poderá ser repetida automaticamente para evitar duplicações. Confira os dados antes de qualquer nova tentativa." : ""));
       setProgress("Até a falha: " + importedSubjects + " disciplinas, " + importedTopics + " assuntos, " + importedSessions + " sessões, " + importedQuestions + " lotes de questões, " + importedMocks + " simulados e " + importedCases + " registros de jurisprudência.");
     } finally { setBusy(false); }
   }
