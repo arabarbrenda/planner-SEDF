@@ -1,6 +1,6 @@
 # Checklist de validação em ambiente Supabase de desenvolvimento
 
-Este roteiro é apenas preparatório. **Não aplique a migration nem execute testes no projeto hospedado sem autorização explícita da Brenda.** A validação automatizada atual usa PostgreSQL 15 temporário com objetos mínimos de compatibilidade Supabase; ela não substitui os testes abaixo.
+Este roteiro é apenas preparatório. **Não aplique migrations nem execute testes no projeto hospedado sem autorização explícita da Brenda.** A validação automatizada atual usa PostgreSQL 15 temporário com objetos mínimos de compatibilidade Supabase; ela não substitui os testes abaixo.
 
 ## 1. Isolamento e preparação
 
@@ -11,12 +11,13 @@ Este roteiro é apenas preparatório. **Não aplique a migration nem execute tes
 - [ ] Configurar confirmação de e-mail e recuperação de senha.
 - [ ] Configurar Google OAuth separadamente, incluindo credenciais e URLs de redirecionamento.
 
-## 2. Revisão e aplicação da migration
+## 2. Revisão e aplicação das migrations
 
-- [ ] Revisar integralmente `supabase/migrations/0001_initial_schema.sql`.
+- [ ] Revisar integralmente `supabase/migrations/0001_initial_schema.sql` e `supabase/migrations/0002_atomic_legacy_import.sql`.
 - [ ] Confirmar a versão PostgreSQL compatível (15 ou superior).
-- [ ] Aplicar a migration somente no projeto de desenvolvimento isolado.
+- [ ] Aplicar as migrations **na ordem numérica**, somente no projeto de desenvolvimento isolado.
 - [ ] Conferir criação das tabelas, índices, triggers, funções e políticas RLS.
+- [ ] Conferir permissões das RPCs: funções de restauração e importação executáveis apenas por `authenticated`, não por `anon` ou `public`.
 - [ ] Confirmar que nenhuma tabela de dados do usuário permite leitura ou escrita anônima.
 
 ## 3. Autenticação
@@ -33,8 +34,9 @@ Este roteiro é apenas preparatório. **Não aplique a migration nem execute tes
 - [ ] Na conta B, confirmar que os registros da conta A não aparecem.
 - [ ] Tentar acessar ou associar IDs da conta A a registros da conta B; a operação deve ser negada.
 - [ ] Confirmar que a função de resumo retorna somente métricas do usuário autenticado.
+- [ ] Confirmar que a conta B não consegue ler nem alterar o histórico de importação da conta A.
 
-## 5. Backup e restauração
+## 5. Backup e restauração V2
 
 - [ ] Criar registros de teste e exportar um backup JSON.
 - [ ] Guardar uma cópia do arquivo fora do projeto de teste.
@@ -44,19 +46,32 @@ Este roteiro é apenas preparatório. **Não aplique a migration nem execute tes
 - [ ] Testar conflito com a regra de um único plano ativo; toda a transação deve sofrer rollback.
 - [ ] Confirmar que um backup contendo `user_id` diferente não grava registros em nome de outro usuário.
 
-## 6. Critérios para considerar a validação concluída
+## 6. Importação legada V1
+
+- [ ] Usar somente um backup V1 fictício ou anonimizado, nunca o backup pessoal real nos primeiros testes.
+- [ ] Conferir a prévia e as contagens antes de confirmar a importação.
+- [ ] Confirmar o mapeamento de disciplinas e assuntos e os vínculos das sessões, simulados e jurisprudência.
+- [ ] Confirmar que os totais de questões por assunto são importados uma única vez e que os totais das sessões não são somados novamente.
+- [ ] Forçar uma falha durante a importação e confirmar rollback dos dados importados.
+- [ ] Repetir a importação após falha com o mesmo fingerprint e confirmar que a tentativa pode ser refeita.
+- [ ] Repetir uma importação já concluída com o mesmo fingerprint e confirmar que ela é bloqueada.
+- [ ] Confirmar que usuários diferentes podem importar independentemente e não conseguem consultar ou alterar o histórico um do outro.
+- [ ] Registrar as limitações conhecidas: planejamento/ciclo e configurações não são importados; simulados V1 não possuem campo de questões em branco; importação real do Tec Concursos depende de uma amostra de exportação anonimizada.
+
+## 7. Critérios para considerar a validação concluída
 
 - [ ] Autenticação por e-mail testada com sucesso.
 - [ ] Google OAuth testado, se for requisito para o lançamento.
 - [ ] RLS verificada com pelo menos duas contas.
 - [ ] Exportação e restauração verificadas com dados descartáveis.
-- [ ] Falhas e conflitos confirmados como transacionais na restauração.
+- [ ] Importação V1 testada quanto a mapeamento, rollback, repetição segura e isolamento entre usuários.
+- [ ] Permissões de execução das RPCs conferidas para usuários autenticados e anônimos.
 - [ ] Resultados registrados antes de qualquer decisão sobre migração de dados reais.
 
-## 7. Limpeza
+## 8. Limpeza
 
 - [ ] Excluir contas e registros de teste, ou descartar o projeto Supabase de desenvolvimento.
 - [ ] Preservar os backups de teste apenas enquanto forem necessários e removê-los com segurança depois.
 - [ ] Não importar dados pessoais ou backups reais durante os testes iniciais.
 
-**Regra de rollout:** a V1 publicada permanece intacta. A migration no Supabase hospedado, a migração de dados reais, o merge e o deploy da V2 exigem aprovação explícita e etapas separadas.
+**Regra de rollout:** a V1 publicada permanece intacta. A aplicação de migrations no Supabase hospedado, a migração de dados reais, o merge e o deploy da V2 exigem aprovação explícita e etapas separadas.
