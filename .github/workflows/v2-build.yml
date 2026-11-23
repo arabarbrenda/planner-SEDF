@@ -73,4 +73,9 @@ jobs:
             echo "RLS unexpectedly allowed cross-user insert"
             exit 1
           fi
+          SUMMARY_ONE=$(PGPASSWORD=postgres PGOPTIONS="-c role=authenticated -c request.jwt.claim.sub=11111111-1111-4111-8111-111111111111" psql -qAt -F "," -h localhost -U postgres -d planner_test -c "SELECT * FROM public.get_study_summary();")
+          SUMMARY_TWO=$(PGPASSWORD=postgres PGOPTIONS="-c role=authenticated -c request.jwt.claim.sub=22222222-2222-4222-8222-222222222222" psql -qAt -F "," -h localhost -U postgres -d planner_test -c "SELECT * FROM public.get_study_summary();")
+          test "$SUMMARY_ONE" = "2,30,10,7"
+          test "$SUMMARY_TWO" = "1,0,0,0"
+          echo "RLS aggregate isolation: OK"
           echo "RLS isolation: OK"
