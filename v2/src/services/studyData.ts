@@ -210,7 +210,7 @@ export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<S
   if (!Number.isSafeInteger(input.duration_minutes) || input.duration_minutes <= 0) {
     throw new Error("A duração do bloco deve ser um número positivo de minutos.");
   }
-  if (!Number.isInteger(input.weekday) || input.weekday < 0 || input.weekday > 6) {
+  if (input.weekday == null || !Number.isInteger(input.weekday) || input.weekday < 0 || input.weekday > 6) {
     throw new Error("Selecione um dia válido da semana.");
   }
   const userId = await currentUserId();
