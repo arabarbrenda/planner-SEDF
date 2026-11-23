@@ -61,7 +61,7 @@ export function StudyHome({ email }: { email: string }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const filteredMockExams = mockExams.filter(exam => [exam.title, exam.examining_board, exam.notes, exam.exam_date].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(mockSearch.trim().toLocaleLowerCase("pt-BR")));
-  const mockTrend = [...mockExams].sort((a, b) => a.exam_date.localeCompare(b.exam_date) || a.created_at.localeCompare(b.created_at)).slice(-8).map(exam => ({ ...exam, accuracy: Math.round(exam.correct_answers / exam.total_questions * 100) }));
+  const mockTrend = [...mockExams].sort((a, b) => a.exam_date.localeCompare(b.exam_date) || a.created_at.localeCompare(b.created_at)).slice(-8).map(exam => ({ ...exam, accuracy: exam.total_questions > 0 ? Math.round(exam.correct_answers / exam.total_questions * 100) : 0 }));
   const mockAverage = mockTrend.length ? Math.round(mockTrend.reduce((sum, exam) => sum + exam.accuracy, 0) / mockTrend.length) : null;
   const mockBest = mockTrend.length ? Math.max(...mockTrend.map(exam => exam.accuracy)) : null;
 
