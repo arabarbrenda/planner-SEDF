@@ -451,7 +451,7 @@ export type PlannerBackup = {
   };
 };
 
-async function fetchAllRows<T>(
+export async function fetchAllRows<T>(
   fetchPage: (from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>
 ): Promise<T[]> {
   const rows: T[] = [];
