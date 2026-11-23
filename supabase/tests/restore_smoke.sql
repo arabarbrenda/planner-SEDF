@@ -69,7 +69,7 @@ begin
       "format":"planner-da-bre-v2","version":1,
       "data":{
         "study_settings":[],
-        "subjects":[{"id":"abababab-1111-4111-8111-111111111111","user_id":"22222222-2222-4222-8222-222222222222","name":"Must roll back"}],
+        "subjects":[{"id":"abababab-1111-4111-8111-111111111111","user_id":"22222222-2222-4222-8222-222222222222","name":"Must roll back","priority":"medium","sort_order":0,"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
         "topics":[{"id":"abababab-2222-4222-8222-222222222222","user_id":"22222222-2222-4222-8222-222222222222","subject_id":"abababab-3333-4333-8333-333333333333","name":"Broken topic"}],
         "study_plans":[],"study_sessions":[],"question_attempts":[],"revisions":[],
         "study_plan_items":[],"mock_exams":[],"error_notebook":[],"jurisprudence_entries":[]
