@@ -106,3 +106,39 @@ end
 $test$;
 
 reset role;
+
+-- User two cannot modify user one's import audit row (RLS yields zero rows).
+set role authenticated;
+set request.jwt.claim.sub = '22222222-2222-4222-8222-222222222222';
+do $test$
+declare
+  changed_rows integer;
+begin
+  update public.import_jobs
+  set status = 'failed'
+  where user_id = '11111111-1111-4111-8111-111111111111'
+    and file_name = repeat('a',64);
+  get diagnostics changed_rows = row_count;
+  if changed_rows <> 0 then
+    raise exception 'RLS allowed user two to modify user one import history';
+  end if;
+end
+$test$;
+reset role;
+
+-- Anonymous sessions must not have EXECUTE privilege on the import RPC.
+set role anon;
+do $test$
+begin
+  begin
+    perform public.import_legacy_v1_backup(
+      repeat('b',64), 'anonymous.json',
+      '{"subjects":[],"topics":[],"sessions":[],"question_attempts":[],"mock_exams":[],"jurisprudence":[]}'::jsonb
+    );
+    raise exception 'Anonymous legacy import was unexpectedly allowed';
+  exception when insufficient_privilege then
+    null;
+  end;
+end
+$test$;
+reset role;
