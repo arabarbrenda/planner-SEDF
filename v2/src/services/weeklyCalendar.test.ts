@@ -22,6 +22,16 @@ describe("buildWeeklyCalendar", () => {
     expect(result.calendar).toContain("RRULE:FREQ=WEEKLY;BYDAY=MO");
   });
 
+  it("moves a same-day block forward when its start time has passed", () => {
+    const result = buildWeeklyCalendar([item()], "2026-11-23", "15:00");
+    expect(result.calendar).toContain("DTSTART;TZID=America/Sao_Paulo:20261130T143000");
+  });
+
+  it("keeps a same-day block when its start time is still upcoming", () => {
+    const result = buildWeeklyCalendar([item()], "2026-11-23", "14:00");
+    expect(result.calendar).toContain("DTSTART;TZID=America/Sao_Paulo:20261123T143000");
+  });
+
   it("moves a past weekday to the next week and escapes event text", () => {
     const result = buildWeeklyCalendar([item({ weekday: 1, notes: "A, B; C\nD" })], "2026-11-24");
     expect(result.calendar).toContain("DTSTART;TZID=America/Sao_Paulo:20261130T143000");
