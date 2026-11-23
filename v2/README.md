@@ -54,6 +54,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Adicionar pesquisa textual e filtro por status no caderno de erros
 - [x] Adicionar pesquisa textual na biblioteca de jurisprudência e no histórico de simulados
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
+- [x] Exportar backup JSON completo da V2 com paginação, incluindo configurações e registros de estudo, questões, revisões, planejamento, simulados, caderno de erros e jurisprudência
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
 - [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (aplicação da migration, integridade referencial, unicidade do planejamento e isolamento RLS)\n- [x] Agregação das métricas do dashboard no PostgreSQL, respeitando RLS e sem limite de paginação do cliente\n- [ ] Testes automatizados adicionais dos fluxos completos
@@ -61,6 +62,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 ## Limitações conhecidas nesta etapa
 
 - O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.
+- A V2 já permite baixar um backup JSON completo. A restauração/importação desse formato V2 ainda não está implementada; mantenha o arquivo exportado em local seguro e não o considere um mecanismo de restauração até essa etapa ser concluída.
 - O importador da V1 aceita o backup JSON e adiciona disciplinas, assuntos, sessões, totais de questões por assunto, simulados e registros de jurisprudência reconhecidos. Não migra planejamento/ciclo, tema visual ou arquivos anexados. A importação é aditiva e ainda não é transacional: se houver falha no meio, parte dos registros pode já ter sido gravada. Cada backup é identificado por SHA-256 e registrado em `import_jobs`; uma tentativa concluída ou interrompida bloqueia a repetição automática do mesmo conteúdo. Em caso de falha parcial, confira os registros antes de solicitar uma recuperação manual.
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
