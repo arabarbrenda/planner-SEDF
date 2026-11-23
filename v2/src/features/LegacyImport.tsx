@@ -95,7 +95,6 @@ export function LegacyImport() {
       jobId = await startLegacyImport(fingerprint, fileName);
       setProgress("Preparando importação segura...");
       const subjectMap = new Map<string, string>();
-      const topicMap = new Map<string, string>();
       for (const oldSubject of data.materias ?? []) {
         const subject = await createSubject({ name: oldSubject.nome!.trim(), icon: oldSubject.icone, priority: priority(oldSubject.prioridade) });
         importedSubjects++;
@@ -115,7 +114,6 @@ export function LegacyImport() {
             }
           });
           importedTopics++;
-          if (oldTopic.id) topicMap.set(oldTopic.id, topic.id);
           const total = Math.max(0, Math.floor(Number(oldTopic.questoesTotal) || 0));
           const correct = Math.max(0, Math.min(total, Math.floor(Number(oldTopic.questoesAcertos) || 0)));
           if (total > 0) {
@@ -198,8 +196,8 @@ export function LegacyImport() {
         <li>Simulados antigos não registravam questões em branco; serão considerados zero em branco.</li>
         <li>Planejamento/ciclo, tema visual, configurações e arquivos anexados não são migrados nesta etapa.</li>
       </ul>
-      {!done && <label className="legacy-confirm"><input type="checkbox" checked={confirm} onChange={e => setConfirm(e.target.checked)}/> Entendi que os dados serão adicionados à minha conta e que a operação não substitui registros existentes.</label>}
-      {!done && <button className="submit-button" disabled={!confirm || busy} onClick={() => void importData()}>{busy ? "Importando..." : "Confirmar importação"}</button>}
+      {!done && <label className="legacy-confirm"><input type="checkbox" checked={confirm} onChange={e => setConfirm(e.target.checked)}/> Entendi que os dados serão adicionados à minha conta, que não substituem registros existentes e que o mesmo arquivo não poderá ser importado novamente automaticamente.</label>}
+      {!done && <button className="submit-button" disabled={!confirm || busy || !fingerprint} onClick={() => void importData()}>{busy ? "Importando..." : "Confirmar importação"}</button>}
     </div>}
     {progress && <p className="form-hint" role="status">{progress}</p>}
     {error && <p className="feedback error" role="alert">{error}</p>}
