@@ -10,14 +10,14 @@ type LegacyTopic = {
   anotaçoes?: string; anotacoes?: string; questoesTotal?: number; questoesAcertos?: number;
 };
 type LegacySubject = { id?: string; nome?: string; prioridade?: string; icone?: string; topicos?: LegacyTopic[] };
-type LegacyData = {
+export type LegacyData = {
   materias?: LegacySubject[];
   registrosEstudo?: Array<{ materiaId?: string; data?: string; plataforma?: string; tempo?: number; qTotal?: number; qAcertos?: number; obs?: string }>;
   simulados?: Array<{ nome?: string; data?: string; banca?: string; qTotal?: number; qAcertos?: number; tempo?: string | number; obs?: string }>;
   jurisprudencia?: Array<Record<string, unknown>>;
 };
 
-function validateLegacyData(parsed: LegacyData): void {
+export function validateLegacyData(parsed: LegacyData): void {
   if (!Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) || !Array.isArray(parsed.simulados)) {
     throw new Error("Este arquivo não parece ser um backup JSON válido da V1.");
   }
