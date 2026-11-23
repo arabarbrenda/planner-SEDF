@@ -1,5 +1,5 @@
 import { requireSupabase } from "../lib/supabase";
-import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus } from "../types/database";
+import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult } from "../types/database";
 
 function currentUserId() {
   return requireSupabase().auth.getUser().then(({ data, error }) => {
@@ -126,4 +126,43 @@ export async function getStudySummary() {
     correctAnswers,
     accuracy: totalQuestions > 0 ? Math.round(correctAnswers / totalQuestions * 100) : null
   };
+}
+
+export async function listRevisions(): Promise<Revision[]> {
+  const { data, error } = await requireSupabase()
+    .from("revisions")
+    .select("*, topics(name)")
+    .order("scheduled_for", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Revision[];
+}
+
+export async function createRevision(input: RevisionInsert): Promise<Revision> {
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("revisions").insert({
+    user_id: userId,
+    topic_id: input.topic_id,
+    scheduled_for: input.scheduled_for,
+    revision_type: input.revision_type ?? "standard",
+    notes: input.notes ?? ""
+  }).select("*, topics(name)").single();
+  if (error) throw error;
+  return data as Revision;
+}
+
+export async function completeRevision(revisionId: string, result: RevisionResult, notes?: string): Promise<void> {
+  const { error } = await requireSupabase().from("revisions").update({
+    completed_at: new Date().toISOString(),
+    result,
+    ...(notes === undefined ? {} : { notes })
+  }).eq("id", revisionId).is("completed_at", null);
+  if (error) throw error;
+}
+
+export async function reopenRevision(revisionId: string): Promise<void> {
+  const { error } = await requireSupabase().from("revisions").update({
+    completed_at: null,
+    result: null
+  }).eq("id", revisionId);
+  if (error) throw error;
 }
