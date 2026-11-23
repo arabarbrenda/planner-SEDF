@@ -1,5 +1,5 @@
 import { requireSupabase } from "../lib/supabase";
-import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult, StudyPlan, StudyPlanItem, StudyPlanItemInsert, MockExam, MockExamInsert } from "../types/database";
+import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult, StudyPlan, StudyPlanItem, StudyPlanItemInsert, MockExam, MockExamInsert, ErrorNotebookEntry, ErrorNotebookInsert, ErrorStatus, JurisprudenceEntry, JurisprudenceInsert } from "../types/database";
 
 function currentUserId() {
   return requireSupabase().auth.getUser().then(({ data, error }) => {
@@ -254,5 +254,72 @@ export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
 
 export async function deleteMockExam(examId: string): Promise<void> {
   const { error } = await requireSupabase().from("mock_exams").delete().eq("id", examId);
+  if (error) throw error;
+}
+
+
+export async function listErrorNotebook(): Promise<ErrorNotebookEntry[]> {
+  const { data, error } = await requireSupabase().from("error_notebook")
+    .select("*, subjects(name), topics(name)").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ErrorNotebookEntry[];
+}
+
+export async function createErrorEntry(input: ErrorNotebookInsert): Promise<ErrorNotebookEntry> {
+  if (!input.question_text.trim()) throw new Error("Descreva a questão ou o motivo do erro.");
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("error_notebook").insert({
+    user_id: userId,
+    subject_id: input.subject_id ?? null,
+    topic_id: input.topic_id ?? null,
+    question_reference: input.question_reference?.trim() || null,
+    question_text: input.question_text.trim(),
+    user_answer: input.user_answer?.trim() || null,
+    correct_answer: input.correct_answer?.trim() || null,
+    explanation: input.explanation ?? "",
+    tags: input.tags ?? [],
+    status: input.status ?? "open"
+  }).select("*, subjects(name), topics(name)").single();
+  if (error) throw error;
+  return data as ErrorNotebookEntry;
+}
+
+export async function updateErrorStatus(entryId: string, status: ErrorStatus): Promise<void> {
+  const { error } = await requireSupabase().from("error_notebook").update({ status }).eq("id", entryId);
+  if (error) throw error;
+}
+
+export async function deleteErrorEntry(entryId: string): Promise<void> {
+  const { error } = await requireSupabase().from("error_notebook").delete().eq("id", entryId);
+  if (error) throw error;
+}
+
+export async function listJurisprudence(): Promise<JurisprudenceEntry[]> {
+  const { data, error } = await requireSupabase().from("jurisprudence_entries")
+    .select("*").order("judgment_date", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as JurisprudenceEntry[];
+}
+
+export async function createJurisprudenceEntry(input: JurisprudenceInsert): Promise<JurisprudenceEntry> {
+  if (!input.title.trim()) throw new Error("Informe o título do registro.");
+  if (input.source_url && !/^https?:\/\//i.test(input.source_url)) throw new Error("A fonte deve ser um endereço HTTP ou HTTPS válido.");
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("jurisprudence_entries").insert({
+    user_id: userId,
+    title: input.title.trim(),
+    court: input.court?.trim() || null,
+    case_reference: input.case_reference?.trim() || null,
+    judgment_date: input.judgment_date ?? null,
+    summary: input.summary ?? "",
+    source_url: input.source_url?.trim() || null,
+    tags: input.tags ?? []
+  }).select("*").single();
+  if (error) throw error;
+  return data as JurisprudenceEntry;
+}
+
+export async function deleteJurisprudenceEntry(entryId: string): Promise<void> {
+  const { error } = await requireSupabase().from("jurisprudence_entries").delete().eq("id", entryId);
   if (error) throw error;
 }
