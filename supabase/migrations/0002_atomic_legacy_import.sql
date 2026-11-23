@@ -31,12 +31,12 @@ begin
   if jsonb_typeof(p_backup) <> 'object' then
     raise exception 'Invalid normalized V1 backup';
   end if;
-  if jsonb_typeof(p_backup -> 'subjects') <> 'array'
-     or jsonb_typeof(p_backup -> 'topics') <> 'array'
-     or jsonb_typeof(p_backup -> 'sessions') <> 'array'
-     or jsonb_typeof(p_backup -> 'question_attempts') <> 'array'
-     or jsonb_typeof(p_backup -> 'mock_exams') <> 'array'
-     or jsonb_typeof(p_backup -> 'jurisprudence') <> 'array' then
+  if jsonb_typeof(p_backup -> 'subjects') is distinct from 'array'
+     or jsonb_typeof(p_backup -> 'topics') is distinct from 'array'
+     or jsonb_typeof(p_backup -> 'sessions') is distinct from 'array'
+     or jsonb_typeof(p_backup -> 'question_attempts') is distinct from 'array'
+     or jsonb_typeof(p_backup -> 'mock_exams') is distinct from 'array'
+     or jsonb_typeof(p_backup -> 'jurisprudence') is distinct from 'array' then
     raise exception 'Invalid normalized V1 backup sections';
   end if;
 
