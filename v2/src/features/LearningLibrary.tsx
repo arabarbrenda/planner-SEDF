@@ -27,12 +27,23 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   const [judgmentDate, setJudgmentDate] = useState("");
   const [summary, setSummary] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [errorSearch, setErrorSearch] = useState("");
+  const [errorStatusFilter, setErrorStatusFilter] = useState("all");
+  const [caseSearch, setCaseSearch] = useState("");
 
   async function refresh() {
     const [nextErrors, nextCases] = await Promise.all([listErrorNotebook(), listJurisprudence()]);
     setErrors(nextErrors); setCases(nextCases);
   }
   useEffect(() => { void refresh().catch(e => setMessage(e instanceof Error ? e.message : "Falha ao carregar a biblioteca.")); }, []);
+
+  const normalizedErrorSearch = errorSearch.trim().toLocaleLowerCase("pt-BR");
+  const filteredErrors = errors.filter(entry => {
+    const text = [entry.question_reference, entry.question_text, entry.user_answer, entry.correct_answer, entry.explanation, entry.subjects?.name, entry.topics?.name, ...entry.tags].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
+    return (!normalizedErrorSearch || text.includes(normalizedErrorSearch)) && (errorStatusFilter === "all" || entry.status === errorStatusFilter);
+  });
+  const normalizedCaseSearch = caseSearch.trim().toLocaleLowerCase("pt-BR");
+  const filteredCases = cases.filter(entry => [entry.title, entry.court, entry.case_reference, entry.summary, ...entry.tags].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(normalizedCaseSearch));
 
   async function saveError(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
@@ -91,7 +102,8 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
         <label htmlFor="err-tags">Etiquetas (separadas por vírgula)</label><input id="err-tags" value={tags} onChange={e => setTags(e.target.value)} maxLength={300}/>
         <button className="submit-button" disabled={busy || !question.trim()}>{busy ? "Salvando..." : "Salvar no caderno"}</button>
       </form>}
-      {errors.length === 0 ? <div className="empty-state"><span className="empty-icon"><FileWarning size={23}/></span><h3>Nenhum erro registrado.</h3><p>Use este espaço para transformar dificuldades em pontos de revisão.</p></div> : <div className="notebook-list">{errors.map(entry => <article className="notebook-row" key={entry.id}><div className="notebook-main">{entry.subjects?.name && <span className="revision-date">{entry.subjects.name}{entry.topics?.name ? " · " + entry.topics.name : ""}</span>}<strong>{entry.question_reference || "Questão sem referência"}</strong><p>{entry.question_text}</p>{entry.user_answer && <small><b>Sua resposta:</b> {entry.user_answer}</small>}{entry.correct_answer && <small><b>Gabarito:</b> {entry.correct_answer}</small>}{entry.explanation && <small><b>Aprendizado:</b> {entry.explanation}</small>}{entry.tags.length > 0 && <small>Etiquetas: {entry.tags.join(", ")}</small>}</div><div className="notebook-controls"><select aria-label="Status do erro" value={entry.status} onChange={e => void changeStatus(entry.id, e.target.value as ErrorStatus)}><option value="open">Aberto</option><option value="reviewing">Revisando</option><option value="resolved">Resolvido</option></select><button type="button" className="remove-plan-item" aria-label="Excluir registro" onClick={() => void removeError(entry.id)}><Trash2 size={15}/></button></div></article>)}</div>}
+      {errors.length > 0 && <div className="library-filters"><input aria-label="Pesquisar caderno de erros" value={errorSearch} onChange={e => setErrorSearch(e.target.value)} placeholder="Pesquisar questão, disciplina, assunto ou etiqueta..."/><select aria-label="Filtrar erros por status" value={errorStatusFilter} onChange={e => setErrorStatusFilter(e.target.value)}><option value="all">Todos os status</option><option value="open">Abertos</option><option value="reviewing">Revisando</option><option value="resolved">Resolvidos</option></select></div>}
+      {errors.length === 0 ? <div className="empty-state"><span className="empty-icon"><FileWarning size={23}/></span><h3>Nenhum erro registrado.</h3><p>Use este espaço para transformar dificuldades em pontos de revisão.</p></div> : filteredErrors.length === 0 ? <div className="empty-state"><h3>Nenhum resultado encontrado.</h3><p>Altere os termos ou o status do filtro.</p></div> : <div className="notebook-list">{filteredErrors.map(entry => <article className="notebook-row" key={entry.id}><div className="notebook-main">{entry.subjects?.name && <span className="revision-date">{entry.subjects.name}{entry.topics?.name ? " · " + entry.topics.name : ""}</span>}<strong>{entry.question_reference || "Questão sem referência"}</strong><p>{entry.question_text}</p>{entry.user_answer && <small><b>Sua resposta:</b> {entry.user_answer}</small>}{entry.correct_answer && <small><b>Gabarito:</b> {entry.correct_answer}</small>}{entry.explanation && <small><b>Aprendizado:</b> {entry.explanation}</small>}{entry.tags.length > 0 && <small>Etiquetas: {entry.tags.join(", ")}</small>}</div><div className="notebook-controls"><select aria-label="Status do erro" value={entry.status} onChange={e => void changeStatus(entry.id, e.target.value as ErrorStatus)}><option value="open">Aberto</option><option value="reviewing">Revisando</option><option value="resolved">Resolvido</option></select><button type="button" className="remove-plan-item" aria-label="Excluir registro" onClick={() => void removeError(entry.id)}><Trash2 size={15}/></button></div></article>)}</div>}
     </section>
     <section className="detail-section">
       <div className="section-heading"><div><span className="eyebrow">CONSULTA E MEMÓRIA JURÍDICA</span><h2>Jurisprudência</h2><p>Guarde decisões, referências e resumos para revisar.</p></div><button className="add-button" onClick={() => setCaseForm(v => !v)}><Plus size={17}/>{caseForm ? "Fechar" : "Novo registro"}</button></div>
@@ -105,7 +117,8 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
         <label htmlFor="case-url">Link da fonte</label><input id="case-url" type="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} maxLength={1000} placeholder="https://..."/>
         <button className="submit-button" disabled={busy || !title.trim()}>{busy ? "Salvando..." : "Salvar registro"}</button>
       </form>}
-      {cases.length === 0 ? <div className="empty-state"><span className="empty-icon"><Scale size={23}/></span><h3>Sua biblioteca jurídica começa aqui.</h3><p>Salve referências e resumos de decisões importantes.</p></div> : <div className="notebook-list">{cases.map(entry => <article className="notebook-row" key={entry.id}><div className="notebook-main"><span className="revision-date">{[entry.court, entry.case_reference, entry.judgment_date ? new Date(entry.judgment_date + "T12:00:00").toLocaleDateString("pt-BR") : ""].filter(Boolean).join(" · ")}</span><strong>{entry.title}</strong>{entry.summary && <p>{entry.summary}</p>}{entry.source_url && <a href={entry.source_url} target="_blank" rel="noreferrer">Abrir fonte</a>}</div><button type="button" className="remove-plan-item" aria-label="Excluir registro" onClick={() => void removeCase(entry.id)}><Trash2 size={15}/></button></article>)}</div>}
+      {cases.length > 0 && <div className="library-filters"><input aria-label="Pesquisar jurisprudência" value={caseSearch} onChange={e => setCaseSearch(e.target.value)} placeholder="Pesquisar tema, tribunal, processo ou resumo..."/></div>}
+      {cases.length === 0 ? <div className="empty-state"><span className="empty-icon"><Scale size={23}/></span><h3>Sua biblioteca jurídica começa aqui.</h3><p>Salve referências e resumos de decisões importantes.</p></div> : filteredCases.length === 0 ? <div className="empty-state"><h3>Nenhum resultado encontrado.</h3><p>Tente outro termo de pesquisa.</p></div> : <div className="notebook-list">{filteredCases.map(entry => <article className="notebook-row" key={entry.id}><div className="notebook-main"><span className="revision-date">{[entry.court, entry.case_reference, entry.judgment_date ? new Date(entry.judgment_date + "T12:00:00").toLocaleDateString("pt-BR") : ""].filter(Boolean).join(" · ")}</span><strong>{entry.title}</strong>{entry.summary && <p>{entry.summary}</p>}{entry.source_url && <a href={entry.source_url} target="_blank" rel="noreferrer">Abrir fonte</a>}</div><button type="button" className="remove-plan-item" aria-label="Excluir registro" onClick={() => void removeCase(entry.id)}><Trash2 size={15}/></button></article>)}</div>}
     </section>
   </>;
 }
