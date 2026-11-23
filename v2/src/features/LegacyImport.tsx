@@ -19,7 +19,7 @@ type LegacyData = {
 function asDate(value: unknown): string | undefined {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const date = new Date(value + "T12:00:00");
-  return Number.isNaN(date.getTime()) ? undefined : value;
+  return Number.isNaN(date.getTime()) || date.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) !== value ? undefined : value;
 }
 function minutes(value: unknown): number | undefined {
   const n = Number(value);
