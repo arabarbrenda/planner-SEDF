@@ -12,7 +12,12 @@ const statusLabels: Record<TopicStatus, string> = {
 
 export function StudyHome({ email }: { email: string }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);\n  const [allTopics, setAllTopics] = useState<Topic[]>([]);\n  const [revisions, setRevisions] = useState<Revision[]>([]);\n  const [revisionTopic, setRevisionTopic] = useState("");\n  const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));\n  const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [allTopics, setAllTopics] = useState<Topic[]>([]);
+  const [revisions, setRevisions] = useState<Revision[]>([]);
+  const [revisionTopic, setRevisionTopic] = useState("");
+  const [revisionDate, setRevisionDate] = useState(new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }));
+  const [revisionResult, setRevisionResult] = useState<RevisionResult>("medium");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [summary, setSummary] = useState({ subjectCount: 0, studyMinutes: 0, totalQuestions: 0, correctAnswers: 0, accuracy: null as number | null });
   const [name, setName] = useState("");
@@ -25,7 +30,8 @@ export function StudyHome({ email }: { email: string }) {
   const [showForm, setShowForm] = useState(false);
   const [showTopicForm, setShowTopicForm] = useState(false);
   const [showSessionForm, setShowSessionForm] = useState(false);
-  const [showQuestionForm, setShowQuestionForm] = useState(false);\n  const [showRevisionForm, setShowRevisionForm] = useState(false);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [showRevisionForm, setShowRevisionForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +42,9 @@ export function StudyHome({ email }: { email: string }) {
     try {
       const [nextSubjects, nextSummary, nextRevisions, nextTopics] = await Promise.all([listSubjects(), getStudySummary(), listRevisions(), listTopics()]);
       setSubjects(nextSubjects);
-      setSummary(nextSummary);\n      setRevisions(nextRevisions);\n      setAllTopics(nextTopics);
+      setSummary(nextSummary);
+      setRevisions(nextRevisions);
+      setAllTopics(nextTopics);
       if (selectedSubject && !nextSubjects.some(s => s.id === selectedSubject)) setSelectedSubject("");
       if (selectedSubject) setTopics(await listTopics(selectedSubject));
     } catch (err) {
@@ -80,7 +88,24 @@ export function StudyHome({ email }: { email: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Não foi possível atualizar o assunto."); }
   }
 
-  async function handleCreateRevision(event: FormEvent<HTMLFormElement>) {\n    event.preventDefault();\n    if (!revisionTopic || !revisionDate) { setError("Selecione um assunto e a data da revisão."); return; }\n    setSaving(true); setError("");\n    try {\n      await createRevision({ topic_id: revisionTopic, scheduled_for: revisionDate });\n      setShowRevisionForm(false); setNotice("Revisão agendada!"); setRevisions(await listRevisions());\n    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível agendar a revisão."); }\n    finally { setSaving(false); }\n  }\n\n  async function handleCompleteRevision(id: string) {\n    setError("");\n    try { await completeRevision(id, revisionResult); setRevisions(await listRevisions()); setNotice("Revisão concluída!"); }\n    catch (err) { setError(err instanceof Error ? err.message : "Não foi possível concluir a revisão."); }\n  }\n\n  async function handleSession(event: FormEvent<HTMLFormElement>) {
+  async function handleCreateRevision(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!revisionTopic || !revisionDate) { setError("Selecione um assunto e a data da revisão."); return; }
+    setSaving(true); setError("");
+    try {
+      await createRevision({ topic_id: revisionTopic, scheduled_for: revisionDate });
+      setShowRevisionForm(false); setNotice("Revisão agendada!"); setRevisions(await listRevisions());
+    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível agendar a revisão."); }
+    finally { setSaving(false); }
+  }
+
+  async function handleCompleteRevision(id: string) {
+    setError("");
+    try { await completeRevision(id, revisionResult); setRevisions(await listRevisions()); setNotice("Revisão concluída!"); }
+    catch (err) { setError(err instanceof Error ? err.message : "Não foi possível concluir a revisão."); }
+  }
+
+  async function handleSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const mins = Number(duration);
     if (!Number.isInteger(mins) || mins <= 0 || mins > 1440) { setError("Informe uma duração entre 1 e 1.440 minutos."); return; }
