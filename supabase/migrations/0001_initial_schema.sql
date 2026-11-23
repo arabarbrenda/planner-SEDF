@@ -86,6 +86,7 @@ create table if not exists public.topics (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (id, user_id),
+  unique (id, user_id, subject_id),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete cascade,
   foreign key (parent_topic_id, user_id) references public.topics(id, user_id) on delete cascade
 );
@@ -103,7 +104,8 @@ create table if not exists public.study_sessions (
   notes text not null default '',
   created_at timestamptz not null default now(),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
+  foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
 );
 create index if not exists study_sessions_user_date_idx on public.study_sessions(user_id, studied_on desc);
 
@@ -126,7 +128,8 @@ create table if not exists public.question_attempts (
   created_at timestamptz not null default now(),
   check (correct_answers + incorrect_answers + blank_answers <= total_questions),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
+  foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
 );
 create index if not exists question_attempts_user_date_idx on public.question_attempts(user_id, attempted_on desc);
 create index if not exists question_attempts_user_topic_idx on public.question_attempts(user_id, topic_id);
@@ -169,7 +172,8 @@ create table if not exists public.study_plan_items (
   notes text not null default '',
   foreign key (plan_id, user_id) references public.study_plans(id, user_id) on delete cascade,
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
+  foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
 );
 create index if not exists study_plan_items_plan_idx on public.study_plan_items(user_id, plan_id, weekday, sort_order);
 
@@ -206,7 +210,8 @@ create table if not exists public.error_notebook (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
+  foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
 );
 
 create table if not exists public.jurisprudence_entries (
