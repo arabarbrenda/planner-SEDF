@@ -18,6 +18,9 @@ type LegacyData = {
 };
 
 function validateLegacyData(parsed: LegacyData): void {
+  if (!Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) || !Array.isArray(parsed.simulados)) {
+    throw new Error("Este arquivo não parece ser um backup JSON válido da V1.");
+  }
   if (parsed.jurisprudencia !== undefined && (!Array.isArray(parsed.jurisprudencia) ||
       parsed.jurisprudencia.some(entry => !entry || typeof entry !== "object" || Array.isArray(entry)))) {
     throw new Error("A lista de jurisprudência do backup não tem um formato válido.");
