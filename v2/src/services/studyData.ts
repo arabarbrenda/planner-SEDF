@@ -62,6 +62,9 @@ export async function updateTopicStatus(topicId: string, status: TopicStatus): P
 }
 
 export async function createStudySession(input: StudySessionInsert): Promise<StudySession> {
+  if (!Number.isSafeInteger(input.duration_minutes) || input.duration_minutes <= 0) {
+    throw new Error("A duração do estudo deve ser um número positivo de minutos.");
+  }
   const client = requireSupabase();
   const userId = await currentUserId();
   const { data, error } = await client.from("study_sessions").insert({
@@ -78,13 +81,12 @@ export async function createStudySession(input: StudySessionInsert): Promise<Stu
 }
 
 export async function createQuestionAttempt(input: QuestionAttemptInsert): Promise<QuestionAttempt> {
-  if (input.total_questions < 0 || input.correct_answers < 0 || input.correct_answers > input.total_questions) {
-    throw new Error("Confira a quantidade de questões e acertos.");
-  }
   const incorrect = input.incorrect_answers ?? Math.max(0, input.total_questions - input.correct_answers - (input.blank_answers ?? 0));
   const blank = input.blank_answers ?? 0;
-  if (input.correct_answers + incorrect + blank > input.total_questions) {
-    throw new Error("Acertos, erros e questões em branco não podem superar o total.");
+  if (![input.total_questions, input.correct_answers, incorrect, blank].every(Number.isSafeInteger) ||
+      input.total_questions < 0 || input.correct_answers < 0 || incorrect < 0 || blank < 0 ||
+      input.correct_answers + incorrect + blank > input.total_questions) {
+    throw new Error("Informe quantidades inteiras e não negativas; acertos, erros e questões em branco não podem superar o total.");
   }
   const client = requireSupabase();
   const userId = await currentUserId();
@@ -205,6 +207,12 @@ export async function listStudyPlanItems(planId: string): Promise<StudyPlanItem[
 }
 
 export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<StudyPlanItem> {
+  if (!Number.isSafeInteger(input.duration_minutes) || input.duration_minutes <= 0) {
+    throw new Error("A duração do bloco deve ser um número positivo de minutos.");
+  }
+  if (!Number.isInteger(input.weekday) || input.weekday < 0 || input.weekday > 6) {
+    throw new Error("Selecione um dia válido da semana.");
+  }
   const userId = await currentUserId();
   const { data, error } = await requireSupabase().from("study_plan_items").insert({
     user_id: userId,
