@@ -48,16 +48,16 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   async function saveError(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     try {
-      await createErrorEntry({
-        subject_id: subjectId || undefined, topic_id: topicId || undefined,
-        question_reference: reference || undefined, question_text: question,
-        user_answer: myAnswer || undefined, correct_answer: rightAnswer || undefined,
-        explanation, tags: tags.split(",").map(x => x.trim()).filter(Boolean)
-      });
+      const input = { subject_id: subjectId || null, topic_id: topicId || null, question_reference: reference, question_text: question, user_answer: myAnswer, correct_answer: rightAnswer, explanation, tags: tags.split(",").map(x => x.trim()).filter(Boolean) };
+      if (editingErrorId) await updateErrorEntry(editingErrorId, input);
+      else await createErrorEntry(input);
       setReference(""); setQuestion(""); setMyAnswer(""); setRightAnswer(""); setExplanation(""); setTags("");
-      setErrorForm(false); await refresh(); setMessage("Erro registrado.");
+      setEditingErrorId(null); setErrorForm(false); await refresh(); setMessage(editingErrorId ? "Registro atualizado." : "Erro registrado.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Falha ao salvar o erro."); }
     finally { setBusy(false); }
+  }
+  function editError(entry: ErrorNotebookEntry) {
+    setEditingErrorId(entry.id); setSubjectId(entry.subject_id ?? ""); setTopicId(entry.topic_id ?? ""); setReference(entry.question_reference ?? ""); setQuestion(entry.question_text); setMyAnswer(entry.user_answer ?? ""); setRightAnswer(entry.correct_answer ?? ""); setExplanation(entry.explanation); setTags(entry.tags.join(", ")); setErrorForm(true); setMessage("");
   }
   async function changeStatus(id: string, status: ErrorStatus) {
     try { await updateErrorStatus(id, status); await refresh(); }
@@ -71,14 +71,16 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   async function saveCase(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     try {
-      await createJurisprudenceEntry({
-        title, court: court || undefined, case_reference: caseRef || undefined,
-        judgment_date: judgmentDate || undefined, summary, source_url: sourceUrl || undefined
-      });
+      const input = { title, court, case_reference: caseRef, judgment_date: judgmentDate, summary, source_url: sourceUrl };
+      if (editingCaseId) await updateJurisprudenceEntry(editingCaseId, input);
+      else await createJurisprudenceEntry(input);
       setTitle(""); setCourt(""); setCaseRef(""); setJudgmentDate(""); setSummary(""); setSourceUrl("");
-      setCaseForm(false); await refresh(); setMessage("Jurisprudência registrada.");
+      setEditingCaseId(null); setCaseForm(false); await refresh(); setMessage(editingCaseId ? "Jurisprudência atualizada." : "Jurisprudência registrada.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Falha ao salvar a jurisprudência."); }
     finally { setBusy(false); }
+  }
+  function editCase(entry: JurisprudenceEntry) {
+    setEditingCaseId(entry.id); setTitle(entry.title); setCourt(entry.court ?? ""); setCaseRef(entry.case_reference ?? ""); setJudgmentDate(entry.judgment_date ?? ""); setSummary(entry.summary); setSourceUrl(entry.source_url ?? ""); setCaseForm(true); setMessage("");
   }
   async function removeCase(id: string) {
     if (!window.confirm("Excluir este registro de jurisprudência?")) return;
@@ -91,7 +93,7 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
     <section className="detail-section">
       <div className="section-heading"><div><span className="eyebrow">APRENDA COM CADA QUESTÃO</span><h2>Caderno de erros</h2><p>Registre a questão, entenda o erro e acompanhe sua revisão.</p></div><button className="add-button" onClick={() => setErrorForm(v => !v)}><Plus size={17}/>{errorForm ? "Fechar" : "Novo registro"}</button></div>
       {errorForm && <form className="entry-form notebook-form" onSubmit={saveError}>
-        <h3>Registrar erro</h3>
+        <h3>{editingErrorId ? "Editar registro" : "Registrar erro"}</h3>
         <label htmlFor="err-subject">Disciplina (opcional)</label><select id="err-subject" value={subjectId} onChange={e => { setSubjectId(e.target.value); setTopicId(""); }}><option value="">Não vinculada</option>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
         <label htmlFor="err-topic">Assunto (opcional)</label><select id="err-topic" value={topicId} onChange={e => setTopicId(e.target.value)}><option value="">Não vinculado</option>{topics.filter(t => t.subject_id === subjectId).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select>
         <label htmlFor="err-ref">Referência da questão</label><input id="err-ref" value={reference} onChange={e => setReference(e.target.value)} maxLength={300} placeholder="Ex.: Tec Concursos, questão 12345"/>
@@ -108,7 +110,7 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
     <section className="detail-section">
       <div className="section-heading"><div><span className="eyebrow">CONSULTA E MEMÓRIA JURÍDICA</span><h2>Jurisprudência</h2><p>Guarde decisões, referências e resumos para revisar.</p></div><button className="add-button" onClick={() => setCaseForm(v => !v)}><Plus size={17}/>{caseForm ? "Fechar" : "Novo registro"}</button></div>
       {caseForm && <form className="entry-form jurisprudence-form" onSubmit={saveCase}>
-        <h3>Adicionar jurisprudência</h3>
+        <h3>{editingCaseId ? "Editar jurisprudência" : "Adicionar jurisprudência"}</h3>
         <label htmlFor="case-title">Título / tema</label><input id="case-title" value={title} onChange={e => setTitle(e.target.value)} maxLength={220} required/>
         <label htmlFor="case-court">Tribunal</label><input id="case-court" value={court} onChange={e => setCourt(e.target.value)} maxLength={100} placeholder="Ex.: STF, STJ, TJDFT"/>
         <label htmlFor="case-ref">Processo / referência</label><input id="case-ref" value={caseRef} onChange={e => setCaseRef(e.target.value)} maxLength={180}/>
