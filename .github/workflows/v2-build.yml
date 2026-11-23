@@ -9,6 +9,7 @@ on:
       - "supabase/migrations/**"
       - "supabase/tests/**"
       - "docs/ARCHITECTURE_V2.md"
+      - "docs/SUPABASE_DEV_VALIDATION.md"
       - ".github/workflows/v2-build.yml"
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - "supabase/migrations/**"
       - "supabase/tests/**"
       - "docs/ARCHITECTURE_V2.md"
+      - "docs/SUPABASE_DEV_VALIDATION.md"
       - ".github/workflows/v2-build.yml"
 
 permissions:
