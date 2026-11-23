@@ -459,17 +459,17 @@ export async function exportPlannerBackup(): Promise<PlannerBackup> {
     studySettings, subjects, topics, studySessions, questionAttempts,
     revisions, studyPlans, studyPlanItems, mockExams, errorNotebook, jurisprudence
   ] = await Promise.all([
-    fetchAllRows(async (from, to) => await client.from("study_settings").select("*").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("subjects").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("topics").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("study_sessions").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("question_attempts").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("revisions").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("study_plans").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("study_plan_items").select("*").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("mock_exams").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("error_notebook").select("*").order("created_at").range(from, to)),
-    fetchAllRows(async (from, to) => await client.from("jurisprudence_entries").select("*").order("created_at").range(from, to))
+    fetchAllRows(async (from, to) => await client.from("study_settings").select("*").order("user_id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("subjects").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("topics").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_sessions").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("question_attempts").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("revisions").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_plans").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("study_plan_items").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("mock_exams").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("error_notebook").select("*").order("id").range(from, to)),
+    fetchAllRows(async (from, to) => await client.from("jurisprudence_entries").select("*").order("id").range(from, to))
   ]);
 
   return {
