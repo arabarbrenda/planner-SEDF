@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
-import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam } from "../services/studyData";
+import { BookOpen, Clock3, ListChecks, Plus, RefreshCw, Download, Target, GraduationCap, Timer, CheckCircle2, CalendarDays, Trash2, CalendarRange, ClipboardList } from "lucide-react";
+import { completeRevision, createQuestionAttempt, createRevision, createStudyPlanItem, createStudySession, createSubject, createTopic, deleteStudyPlanItem, getActiveStudyPlan, getStudySummary, listRevisions, listStudyPlanItems, listSubjects, listTopics, updateTopicStatus, listMockExams, createMockExam, updateMockExam, deleteMockExam, exportPlannerBackup } from "../services/studyData";
 import type { MockExam, Revision, RevisionResult, StudyPlan, StudyPlanItem, Subject, Topic, TopicStatus } from "../types/database";
 import { LearningLibrary } from "./LearningLibrary";
 import { LegacyImport } from "./LegacyImport";
@@ -58,6 +58,7 @@ export function StudyHome({ email }: { email: string }) {
   const [showRevisionForm, setShowRevisionForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const filteredMockExams = mockExams.filter(exam => [exam.title, exam.examining_board, exam.notes, exam.exam_date].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(mockSearch.trim().toLocaleLowerCase("pt-BR")));
@@ -84,6 +85,28 @@ export function StudyHome({ email }: { email: string }) {
   }, [selectedSubject]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  async function handleExportBackup() {
+    setExporting(true); setError(""); setNotice("");
+    try {
+      const backup = await exportPlannerBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `planner-da-bre-v2-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      const total = Object.values(backup.data).reduce((sum, rows) => sum + rows.length, 0);
+      setNotice(`Backup V2 gerado com sucesso: ${total} registros exportados.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível gerar o backup.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function selectSubject(id: string) {
     setSelectedSubject(id); setError(""); setNotice("");
@@ -225,7 +248,7 @@ export function StudyHome({ email }: { email: string }) {
       <div className="user-chip"><span className="user-dot"/><span>{email}</span></div>
     </header>
     <section className="workspace-content">
-      <div className="welcome-row"><div><span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span><h1>Vamos avançar no seu ritmo.</h1><p>Um passo consistente de cada vez. Seu progresso começa aqui.</p></div><button className="refresh-button" onClick={()=>void refresh()} aria-label="Atualizar dados" disabled={loading}><RefreshCw size={17}/></button></div>
+      <div className="welcome-row"><div><span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span><h1>Vamos avançar no seu ritmo.</h1><p>Um passo consistente de cada vez. Seu progresso começa aqui.</p></div><div className="header-actions"><button className="refresh-button" onClick={()=>void handleExportBackup()} aria-label="Baixar backup dos dados" title="Baixar backup JSON" disabled={exporting || loading}><Download size={17}/></button><button className="refresh-button" onClick={()=>void refresh()} aria-label="Atualizar dados" disabled={loading}><RefreshCw size={17}/></button></div></div>
       {error && <p className="feedback error" role="alert">{error}</p>}
       {notice && <p className="feedback success" role="status">{notice}</p>}
       <div className="metric-grid">
