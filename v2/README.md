@@ -51,6 +51,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar registro e histórico de simulados com banca, data, duração e distribuição de acertos/erros/em branco
 - [x] Implementar caderno de erros com vínculo a disciplina/assunto, respostas, explicação, etiquetas e status
 - [x] Implementar biblioteca de jurisprudência com tribunal, referência, data, resumo e link da fonte
+- [x] Adicionar pesquisa textual e filtro por status no caderno de erros
+- [x] Adicionar pesquisa textual na biblioteca de jurisprudência e no histórico de simulados
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
@@ -62,7 +64,8 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O importador da V1 aceita o backup JSON e adiciona disciplinas, assuntos, sessões, totais de questões por assunto, simulados e registros de jurisprudência reconhecidos. Não migra planejamento/ciclo, tema visual ou arquivos anexados. A importação é aditiva e ainda não é transacional: se houver falha no meio, parte dos registros pode já ter sido gravada; confira antes de tentar novamente.
 - O módulo de revisões já permite agendamento, identificação de atrasos e registro de conclusão; ainda faltam edição, reagendamento e filtros avançados.
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
-- O módulo de simulados já registra resultados e apresenta histórico; edição de registros e gráficos de evolução ainda estão pendentes.
+- O módulo de simulados já registra resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; edição de registros e gráficos de evolução ainda estão pendentes.
+- O caderno de erros permite pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite pesquisa textual por tema, tribunal, processo, resumo e etiquetas.
 - O caderno de erros permite cadastro, vínculo a disciplina/assunto, acompanhamento de status e exclusão; edição dos registros e filtros avançados ainda estão pendentes.
 - A biblioteca de jurisprudência permite cadastro e exclusão de referências; edição, etiquetas e pesquisa externa ainda estão pendentes.
 - Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
