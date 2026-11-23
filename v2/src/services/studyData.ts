@@ -170,15 +170,27 @@ export async function reopenRevision(revisionId: string): Promise<void> {
 export async function getActiveStudyPlan(): Promise<StudyPlan> {
   const client = requireSupabase();
   const { data: existing, error: listError } = await client.from("study_plans")
-    .select("*").eq("is_active", true).order("created_at", { ascending: true }).limit(1).maybeSingle();
+    .select("*").eq("is_active", true).maybeSingle();
   if (listError) throw listError;
   if (existing) return existing as StudyPlan;
+
   const userId = await currentUserId();
   const { data, error } = await client.from("study_plans").insert({
     user_id: userId, name: "Meu planejamento semanal", is_active: true
   }).select("*").single();
+
+  if (!error && data) return data as StudyPlan;
+
+  // Another tab may have created the active plan after our initial read.
+  if (error?.code === "23505") {
+    const { data: concurrentPlan, error: retryError } = await client.from("study_plans")
+      .select("*").eq("is_active", true).maybeSingle();
+    if (retryError) throw retryError;
+    if (concurrentPlan) return concurrentPlan as StudyPlan;
+  }
+
   if (error) throw error;
-  return data as StudyPlan;
+  throw new Error("Não foi possível carregar o planejamento ativo.");
 }
 
 export async function listStudyPlanItems(planId: string): Promise<StudyPlanItem[]> {
