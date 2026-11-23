@@ -122,6 +122,22 @@ describe("studyData mock exams and learning records", () => {
     expect(mocks.eq).toHaveBeenCalledWith("id", "case-1");
   });
 
+  it("trims a valid source URL before validating and saving it", async () => {
+    await createJurisprudenceEntry({
+      title: "Tema", source_url: "  HTTPS://example.org/case  "
+    });
+    expect(mocks.insert).toHaveBeenCalledWith(expect.objectContaining({
+      source_url: "HTTPS://example.org/case"
+    }));
+  });
+
+  it("rejects an HTTP URL without a hostname", async () => {
+    await expect(createJurisprudenceEntry({
+      title: "Tema", source_url: "https://"
+    })).rejects.toThrow("HTTP ou HTTPS");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
   it("creates a jurisprudence entry with normalized fields and authenticated ownership", async () => {
     await createJurisprudenceEntry({
       title: "  Tema repetitivo  ", court: "  STJ  ",
