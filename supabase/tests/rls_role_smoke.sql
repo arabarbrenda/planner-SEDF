@@ -1,5 +1,5 @@
 -- Run as postgres, then switch to the authenticated role for all assertions.
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 
 set role authenticated;
 set request.jwt.claim.sub = '22222222-2222-4222-8222-222222222222';
