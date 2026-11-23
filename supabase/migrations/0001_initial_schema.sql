@@ -101,7 +101,7 @@ create table if not exists public.study_sessions (
   notes text not null default '',
   created_at timestamptz not null default now(),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id) (topic_id)
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
 );
 create index if not exists study_sessions_user_date_idx on public.study_sessions(user_id, studied_on desc);
 
