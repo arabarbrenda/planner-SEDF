@@ -252,6 +252,27 @@ export async function createMockExam(input: MockExamInsert): Promise<MockExam> {
   return data as MockExam;
 }
 
+export async function updateMockExam(examId: string, input: MockExamInsert): Promise<void> {
+  const total = input.total_questions;
+  const correct = input.correct_answers;
+  const blank = input.blank_answers ?? 0;
+  const incorrect = input.incorrect_answers ?? total - correct - blank;
+  if (!input.title.trim() || !input.exam_date) throw new Error("Informe o nome e a data do simulado.");
+  if (![total, correct, incorrect, blank].every(Number.isInteger) || total <= 0 || correct < 0 || incorrect < 0 || blank < 0 || correct + incorrect + blank !== total) {
+    throw new Error("A soma de acertos, erros e questões em branco deve ser igual ao total.");
+  }
+  if (input.duration_minutes != null && (!Number.isInteger(input.duration_minutes) || input.duration_minutes <= 0)) {
+    throw new Error("A duração do simulado deve ser um número positivo de minutos.");
+  }
+  const { error } = await requireSupabase().from("mock_exams").update({
+    title: input.title.trim(), exam_date: input.exam_date,
+    examining_board: input.examining_board?.trim() || null,
+    total_questions: total, correct_answers: correct, incorrect_answers: incorrect,
+    blank_answers: blank, duration_minutes: input.duration_minutes ?? null, notes: input.notes ?? ""
+  }).eq("id", examId);
+  if (error) throw error;
+}
+
 export async function deleteMockExam(examId: string): Promise<void> {
   const { error } = await requireSupabase().from("mock_exams").delete().eq("id", examId);
   if (error) throw error;
