@@ -9,10 +9,10 @@ select public.restore_planner_backup($backup$
   "version": 1,
   "data": {
     "study_settings": [],
-    "subjects": [{"id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","user_id":"22222222-2222-4222-8222-222222222222","name":"Restored subject"}],
-    "topics": [{"id":"ffffffff-ffff-4fff-8fff-ffffffffffff","user_id":"22222222-2222-4222-8222-222222222222","subject_id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","name":"Restored topic"}],
+    "subjects": [{"id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","user_id":"22222222-2222-4222-8222-222222222222","name":"Restored subject","priority":"medium","sort_order":0,"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
+    "topics": [{"id":"ffffffff-ffff-4fff-8fff-ffffffffffff","user_id":"22222222-2222-4222-8222-222222222222","subject_id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","name":"Restored topic","status":"not_started","annotations":"","checklist":{"theory":false,"law":false,"questions":false,"errors":false,"revision":false},"sort_order":0,"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
     "study_plans": [],
-    "study_sessions": [{"id":"abababab-abab-4bab-8bab-abababababab","user_id":"22222222-2222-4222-8222-222222222222","subject_id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","topic_id":"ffffffff-ffff-4fff-8fff-ffffffffffff","duration_minutes":25}],
+    "study_sessions": [{"id":"abababab-abab-4bab-8bab-abababababab","user_id":"22222222-2222-4222-8222-222222222222","subject_id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","topic_id":"ffffffff-ffff-4fff-8fff-ffffffffffff","duration_minutes":25,"studied_on":"2026-11-23","notes":"","created_at":"2026-11-23T00:00:00Z"}],
     "question_attempts": [],
     "revisions": [],
     "study_plan_items": [],
@@ -48,7 +48,7 @@ begin
     "format":"planner-da-bre-v2","version":1,
     "data":{
       "study_settings":[],
-      "subjects":[{"id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","user_id":"22222222-2222-4222-8222-222222222222","name":"Restored subject"}],
+      "subjects":[{"id":"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee","user_id":"22222222-2222-4222-8222-222222222222","name":"Restored subject","priority":"medium","sort_order":0,"created_at":"2026-11-23T00:00:00Z","updated_at":"2026-11-23T00:00:00Z"}],
       "topics":[],"study_plans":[],"study_sessions":[],"question_attempts":[],
       "revisions":[],"study_plan_items":[],"mock_exams":[],"error_notebook":[],"jurisprudence_entries":[]
     }
