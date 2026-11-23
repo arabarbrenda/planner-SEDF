@@ -59,8 +59,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: planner-v2-dependency-audit
-          path: v2/npm-audit.json
+          name: planner-v2-dependency-review
+          path: |
+            v2/npm-audit.json
+            v2/package-lock.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Type-check and build
