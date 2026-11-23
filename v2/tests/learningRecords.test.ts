@@ -3,6 +3,7 @@ import {
   createErrorEntry,
   createJurisprudenceEntry,
   createMockExam,
+  deleteMockExam,
   updateErrorStatus,
   updateMockExam
 } from "../src/services/studyData";
@@ -12,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   insert: vi.fn(),
   update: vi.fn(),
+  delete: vi.fn(),
+  deleteResult: { data: [{ id: "record-3" }], error: null },
   eq: vi.fn(),
   select: vi.fn(),
   single: vi.fn(),
@@ -28,13 +31,15 @@ vi.mock("../src/lib/supabase", () => ({
 describe("studyData mock exams and learning records", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.deleteResult = { data: [{ id: "record-3" }], error: null };
     mocks.getUser.mockResolvedValue({ data: { user: { id: "user-789" } }, error: null });
-    mocks.from.mockReturnValue({ insert: mocks.insert, update: mocks.update });
+    mocks.from.mockReturnValue({ insert: mocks.insert, update: mocks.update, delete: mocks.delete });
     mocks.insert.mockReturnValue({ select: mocks.select });
-    mocks.select.mockReturnValue({ single: mocks.single, maybeSingle: mocks.maybeSingle });
+    mocks.select.mockReturnValue({ single: mocks.single, maybeSingle: mocks.maybeSingle, then: (resolve: (value: unknown) => unknown) => Promise.resolve(mocks.deleteResult).then(resolve) });
     mocks.single.mockResolvedValue({ data: { id: "record-3" }, error: null });
     mocks.maybeSingle.mockResolvedValue({ data: { id: "record-3" }, error: null });
     mocks.update.mockReturnValue({ eq: mocks.eq });
+    mocks.delete.mockReturnValue({ eq: mocks.eq });
     mocks.eq.mockReturnValue({ select: mocks.select });
   });
 
@@ -96,6 +101,22 @@ describe("studyData mock exams and learning records", () => {
       title: "Simulado", exam_date: "2026-11-23",
       total_questions: 10, correct_answers: 8, blank_answers: 1
     })).rejects.toThrow("Simulado não encontrado ou sem permissão");
+  });
+
+  it("reports when deleting a mock exam affects no row", async () => {
+    mocks.deleteResult = { data: [], error: null };
+    await expect(deleteMockExam("missing-exam"))
+      .rejects.toThrow("Simulado não encontrado ou sem permissão");
+    expect(mocks.from).toHaveBeenCalledWith("mock_exams");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "missing-exam");
+  });
+
+  it("deletes a mock exam when the target row exists", async () => {
+    await expect(deleteMockExam("exam-1")).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("mock_exams");
+    expect(mocks.delete).toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "exam-1");
   });
 
   it("reports when an error status update affects no row", async () => {
