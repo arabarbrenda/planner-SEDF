@@ -87,8 +87,10 @@ create table if not exists public.topics (
   updated_at timestamptz not null default now(),
   unique (id, user_id),
   unique (id, user_id, subject_id),
+  check (parent_topic_id is null or parent_topic_id <> id),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete cascade,
-  foreign key (parent_topic_id, user_id) references public.topics(id, user_id) on delete cascade
+  foreign key (parent_topic_id, user_id) references public.topics(id, user_id) on delete cascade,
+  foreign key (parent_topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete cascade
 );
 create index if not exists topics_user_subject_sort_idx on public.topics(user_id, subject_id, sort_order);
 
@@ -103,6 +105,7 @@ create table if not exists public.study_sessions (
   platform text,
   notes text not null default '',
   created_at timestamptz not null default now(),
+  check (topic_id is null or subject_id is not null),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
   foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
   foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
@@ -127,6 +130,7 @@ create table if not exists public.question_attempts (
   external_reference text,
   created_at timestamptz not null default now(),
   check (correct_answers + incorrect_answers + blank_answers <= total_questions),
+  check (topic_id is null or subject_id is not null),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
   foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
   foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
@@ -171,6 +175,7 @@ create table if not exists public.study_plan_items (
   sort_order integer not null default 0,
   notes text not null default '',
   foreign key (plan_id, user_id) references public.study_plans(id, user_id) on delete cascade,
+  check (topic_id is null or subject_id is not null),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
   foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
   foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
@@ -209,6 +214,7 @@ create table if not exists public.error_notebook (
   status text not null default 'open' check (status in ('open','reviewing','resolved')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  check (topic_id is null or subject_id is not null),
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
   foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id),
   foreign key (topic_id, user_id, subject_id) references public.topics(id, user_id, subject_id) on delete set null (topic_id)
