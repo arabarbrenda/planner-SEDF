@@ -163,6 +163,10 @@ create table if not exists public.study_plans (
   unique (id, user_id)
 );
 
+create unique index if not exists study_plans_one_active_per_user_idx
+  on public.study_plans (user_id)
+  where is_active = true;
+
 create table if not exists public.study_plan_items (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
