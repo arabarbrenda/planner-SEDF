@@ -131,3 +131,51 @@ describe("backup export pagination", () => {
     await expect(fetchAllRows(fetchPage)).rejects.toThrow("permission denied");
   });
 });
+
+
+describe("atomic V1 legacy import service", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("sends normalized data and the file fingerprint to one atomic RPC", async () => {
+    const backup = {
+      subjects: [{ legacy_id: "s1", name: "Direito" }],
+      topics: [], sessions: [], question_attempts: [], mock_exams: [], jurisprudence: []
+    };
+    mocks.rpc.mockResolvedValue({ data: { success: true, rows_imported: 1 }, error: null });
+    const { importLegacyV1Backup } = await import("../src/services/studyData");
+
+    await expect(importLegacyV1Backup("a".repeat(64), "backup.json", backup)).resolves.toBe(1);
+    expect(mocks.rpc).toHaveBeenCalledWith("import_legacy_v1_backup", {
+      p_fingerprint: "a".repeat(64),
+      p_original_file_name: "backup.json",
+      p_backup: backup
+    });
+  });
+
+  it("does not report success when the transaction returns a rolled-back result", async () => {
+    mocks.rpc.mockResolvedValue({ data: { success: false, rows_imported: 0, error: "invalid date" }, error: null });
+    const { importLegacyV1Backup } = await import("../src/services/studyData");
+
+    await expect(importLegacyV1Backup("b".repeat(64), "backup.json", {
+      subjects: [], topics: [], sessions: [], question_attempts: [], mock_exams: [], jurisprudence: []
+    })).rejects.toThrow("invalid date");
+  });
+
+  it("blocks an already completed fingerprint", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "23505", message: "duplicate key" } });
+    const { importLegacyV1Backup } = await import("../src/services/studyData");
+
+    await expect(importLegacyV1Backup("c".repeat(64), "backup.json", {
+      subjects: [], topics: [], sessions: [], question_attempts: [], mock_exams: [], jurisprudence: []
+    })).rejects.toThrow("já foi importado");
+  });
+
+  it("rejects an invalid row count from the RPC", async () => {
+    mocks.rpc.mockResolvedValue({ data: { success: true, rows_imported: -1 }, error: null });
+    const { importLegacyV1Backup } = await import("../src/services/studyData");
+
+    await expect(importLegacyV1Backup("d".repeat(64), "backup.json", {
+      subjects: [], topics: [], sessions: [], question_attempts: [], mock_exams: [], jurisprudence: []
+    })).rejects.toThrow("contagem inválida");
+  });
+});
