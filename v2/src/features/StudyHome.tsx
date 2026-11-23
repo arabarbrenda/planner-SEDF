@@ -125,11 +125,25 @@ export function StudyHome({ email }: { email: string }) {
           (backup as { format?: unknown }).format !== "planner-da-bre-v2" ||
           (backup as { version?: unknown }).version !== 1 ||
           !(backup as { data?: unknown }).data ||
-          typeof (backup as { data?: unknown }).data !== "object") {
+          typeof (backup as { data?: unknown }).data !== "object" ||
+          Array.isArray((backup as { data?: unknown }).data)) {
         throw new Error("Este arquivo não é um backup compatível do Planner da Bre V2.");
       }
+      const backupData = (backup as { data: Record<string, unknown> }).data;
+      const requiredSections = [
+        "study_settings", "subjects", "topics", "study_plans", "study_sessions",
+        "question_attempts", "revisions", "study_plan_items", "mock_exams",
+        "error_notebook", "jurisprudence_entries"
+      ];
+      const invalidSection = requiredSections.find(section => !Array.isArray(backupData[section]));
+      if (invalidSection) {
+        throw new Error(`Backup incompleto ou inválido: a seção "${invalidSection}" está ausente ou não é uma lista.`);
+      }
+      const recordCount = requiredSections.reduce(
+        (sum, section) => sum + (backupData[section] as unknown[]).length, 0
+      );
       const confirmed = window.confirm(
-        "A restauração é aditiva: registros com IDs já existentes serão preservados, e novos registros serão acrescentados. Deseja continuar?"
+        `Foram encontrados ${recordCount} registros em ${requiredSections.length} categorias. A restauração é aditiva: IDs já existentes serão preservados e novos registros serão acrescentados. Conflitos de integridade cancelam toda a operação. Deseja continuar?`
       );
       if (!confirmed) return;
       setRestoring(true);
