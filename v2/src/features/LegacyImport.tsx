@@ -18,8 +18,18 @@ type LegacyData = {
 };
 
 function validateLegacyData(parsed: LegacyData): void {
-  if (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) {
+  if (parsed.jurisprudencia !== undefined && (!Array.isArray(parsed.jurisprudencia) ||
+      parsed.jurisprudencia.some(entry => !entry || typeof entry !== "object" || Array.isArray(entry)))) {
     throw new Error("A lista de jurisprudência do backup não tem um formato válido.");
+  }
+  if (parsed.registrosEstudo.some(session => !session || typeof session !== "object" || Array.isArray(session))) {
+    throw new Error("Há uma sessão de estudo com estrutura inválida no backup.");
+  }
+  for (const [index, exam] of parsed.simulados.entries()) {
+    if (!exam || typeof exam !== "object" || Array.isArray(exam) ||
+        (exam.nome !== undefined && typeof exam.nome !== "string")) {
+      throw new Error(`O simulado ${index + 1} tem uma estrutura ou um nome inválido.`);
+    }
   }
   for (const [subjectIndex, subject] of parsed.materias.entries()) {
     if (!subject.nome?.trim() || !Array.isArray(subject.topicos)) {
