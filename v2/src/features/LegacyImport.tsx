@@ -143,14 +143,14 @@ export function LegacyImport() {
         importedMocks++;
       }
       for (const old of data.jurisprudencia ?? []) {
-        const title = String(old.titulo ?? old.title ?? old.nome ?? "").trim();
+        const title = String(old.tema ?? old.titulo ?? old.title ?? old.nome ?? "").trim();
         if (!title) continue;
         const source = String(old.fonte ?? old.source_url ?? old.link ?? "").trim();
         await createJurisprudenceEntry({
-          title, court: String(old.tribunal ?? old.court ?? "").trim() || undefined,
+          title, court: [String(old.tribunal ?? old.court ?? "").trim(), String(old.materia ?? "").trim()].filter(Boolean).join(" · ") || undefined,
           case_reference: String(old.processo ?? old.referencia ?? old.case_reference ?? "").trim() || undefined,
           judgment_date: asDate(old.data ?? old.julgamento ?? old.judgment_date),
-          summary: String(old.resumo ?? old.summary ?? old.descricao ?? ""),
+          summary: String(old.tese ?? old.resumo ?? old.summary ?? old.descricao ?? ""),
           source_url: /^https?:\/\//i.test(source) ? source : undefined
         });
         importedCases++;
