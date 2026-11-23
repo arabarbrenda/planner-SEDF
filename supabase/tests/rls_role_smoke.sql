@@ -45,12 +45,12 @@ do $test$
 declare
   summary record;
 begin
-  if (select count(*) from public.subjects) <> 1 then
-    raise exception 'Second user should see exactly one subject; auth.uid=%, visible_count=%',
+  if (select count(*) from public.subjects) <> 2 then
+    raise exception 'Second user should see exactly two subjects; auth.uid=%, visible_count=%',
       auth.uid(), (select count(*) from public.subjects);
   end if;
   select * into summary from public.get_study_summary();
-  if summary.subject_count <> 1
+  if summary.subject_count <> 2
     or summary.study_minutes <> 0
     or summary.total_questions <> 0
     or summary.correct_answers <> 0 then
