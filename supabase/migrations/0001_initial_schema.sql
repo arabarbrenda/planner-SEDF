@@ -100,8 +100,8 @@ create table if not exists public.study_sessions (
   platform text,
   notes text not null default '',
   created_at timestamptz not null default now(),
-  foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null,
-  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null
+  foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null (subject_id),
+  foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null (topic_id)
 );
 create index if not exists study_sessions_user_date_idx on public.study_sessions(user_id, studied_on desc);
 
@@ -150,7 +150,8 @@ create table if not exists public.study_plans (
   is_active boolean not null default false,
   settings jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (id, user_id)
 );
 
 create table if not exists public.study_plan_items (
@@ -164,7 +165,7 @@ create table if not exists public.study_plan_items (
   duration_minutes integer not null default 60 check (duration_minutes > 0),
   sort_order integer not null default 0,
   notes text not null default '',
-  foreign key (plan_id) references public.study_plans(id) on delete cascade,
+  foreign key (plan_id, user_id) references public.study_plans(id, user_id) on delete cascade,
   foreign key (subject_id, user_id) references public.subjects(id, user_id) on delete set null,
   foreign key (topic_id, user_id) references public.topics(id, user_id) on delete set null
 );
