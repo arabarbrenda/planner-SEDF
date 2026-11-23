@@ -491,3 +491,17 @@ export async function exportPlannerBackup(): Promise<PlannerBackup> {
     }
   };
 }
+
+
+export async function restorePlannerBackup(backup: unknown): Promise<number> {
+  const { data, error } = await requireSupabase().rpc("restore_planner_backup", {
+    p_backup: backup
+  });
+  if (error) throw error;
+  const result = Array.isArray(data) ? data[0] : data;
+  const inserted = Number((result as { inserted_rows?: number | string } | null)?.inserted_rows ?? 0);
+  if (!Number.isSafeInteger(inserted) || inserted < 0) {
+    throw new Error("O banco retornou um resultado inválido para a restauração.");
+  }
+  return inserted;
+}
