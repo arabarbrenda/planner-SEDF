@@ -47,14 +47,22 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   const normalizedCaseSearch = caseSearch.trim().toLocaleLowerCase("pt-BR");
   const filteredCases = cases.filter(entry => [entry.title, entry.court, entry.case_reference, entry.summary, ...entry.tags].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR").includes(normalizedCaseSearch));
 
+  function resetErrorForm() {
+    setEditingErrorId(null); setSubjectId(""); setTopicId(""); setReference("");
+    setQuestion(""); setMyAnswer(""); setRightAnswer(""); setExplanation(""); setTags("");
+  }
+  function resetCaseForm() {
+    setEditingCaseId(null); setTitle(""); setCourt(""); setCaseRef("");
+    setJudgmentDate(""); setSummary(""); setSourceUrl("");
+  }
+
   async function saveError(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     try {
       const input = { subject_id: subjectId || null, topic_id: topicId || null, question_reference: reference, question_text: question, user_answer: myAnswer, correct_answer: rightAnswer, explanation, tags: tags.split(",").map(x => x.trim()).filter(Boolean) };
       if (editingErrorId) await updateErrorEntry(editingErrorId, input);
       else await createErrorEntry(input);
-      setReference(""); setQuestion(""); setMyAnswer(""); setRightAnswer(""); setExplanation(""); setTags(""); setSubjectId(""); setTopicId("");
-      setEditingErrorId(null); setErrorForm(false); await refresh(); setMessage(editingErrorId ? "Registro atualizado." : "Erro registrado.");
+      resetErrorForm(); setErrorForm(false); await refresh(); setMessage(editingErrorId ? "Registro atualizado." : "Erro registrado.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Falha ao salvar o erro."); }
     finally { setBusy(false); }
   }
@@ -76,8 +84,7 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
       const input = { title, court, case_reference: caseRef, judgment_date: judgmentDate, summary, source_url: sourceUrl };
       if (editingCaseId) await updateJurisprudenceEntry(editingCaseId, input);
       else await createJurisprudenceEntry(input);
-      setTitle(""); setCourt(""); setCaseRef(""); setJudgmentDate(""); setSummary(""); setSourceUrl("");
-      setEditingCaseId(null); setCaseForm(false); await refresh(); setMessage(editingCaseId ? "Jurisprudência atualizada." : "Jurisprudência registrada.");
+      resetCaseForm(); setCaseForm(false); await refresh(); setMessage(editingCaseId ? "Jurisprudência atualizada." : "Jurisprudência registrada.");
     } catch (e) { setMessage(e instanceof Error ? e.message : "Falha ao salvar a jurisprudência."); }
     finally { setBusy(false); }
   }
@@ -93,7 +100,7 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
   return <>
     {message && <p className="feedback success" role="status">{message}</p>}
     <section className="detail-section">
-      <div className="section-heading"><div><span className="eyebrow">APRENDA COM CADA QUESTÃO</span><h2>Caderno de erros</h2><p>Registre a questão, entenda o erro e acompanhe sua revisão.</p></div><button className="add-button" onClick={() => setErrorForm(v => { if (v) { setEditingErrorId(null); setSubjectId(""); setTopicId(""); } return !v; })}><Plus size={17}/>{errorForm ? "Fechar" : "Novo registro"}</button></div>
+      <div className="section-heading"><div><span className="eyebrow">APRENDA COM CADA QUESTÃO</span><h2>Caderno de erros</h2><p>Registre a questão, entenda o erro e acompanhe sua revisão.</p></div><button className="add-button" onClick={() => setErrorForm(v => { if (v) resetErrorForm(); return !v; })}><Plus size={17}/>{errorForm ? "Fechar" : "Novo registro"}</button></div>
       {errorForm && <form className="entry-form notebook-form" onSubmit={saveError}>
         <h3>{editingErrorId ? "Editar registro" : "Registrar erro"}</h3>
         <label htmlFor="err-subject">Disciplina (opcional)</label><select id="err-subject" value={subjectId} onChange={e => { setSubjectId(e.target.value); setTopicId(""); }}><option value="">Não vinculada</option>{subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
@@ -110,7 +117,7 @@ export function LearningLibrary({ subjects, topics }: { subjects: Subject[]; top
       {errors.length === 0 ? <div className="empty-state"><span className="empty-icon"><FileWarning size={23}/></span><h3>Nenhum erro registrado.</h3><p>Use este espaço para transformar dificuldades em pontos de revisão.</p></div> : filteredErrors.length === 0 ? <div className="empty-state"><h3>Nenhum resultado encontrado.</h3><p>Altere os termos ou o status do filtro.</p></div> : <div className="notebook-list">{filteredErrors.map(entry => <article className="notebook-row" key={entry.id}><div className="notebook-main">{entry.subjects?.name && <span className="revision-date">{entry.subjects.name}{entry.topics?.name ? " · " + entry.topics.name : ""}</span>}<strong>{entry.question_reference || "Questão sem referência"}</strong><p>{entry.question_text}</p>{entry.user_answer && <small><b>Sua resposta:</b> {entry.user_answer}</small>}{entry.correct_answer && <small><b>Gabarito:</b> {entry.correct_answer}</small>}{entry.explanation && <small><b>Aprendizado:</b> {entry.explanation}</small>}{entry.tags.length > 0 && <small>Etiquetas: {entry.tags.join(", ")}</small>}</div><div className="notebook-controls"><select aria-label="Status do erro" value={entry.status} onChange={e => void changeStatus(entry.id, e.target.value as ErrorStatus)}><option value="open">Aberto</option><option value="reviewing">Revisando</option><option value="resolved">Resolvido</option></select><div className="notebook-actions"><button type="button" className="edit-entry-button" onClick={() => editError(entry)}>Editar</button><button type="button" className="remove-plan-item" aria-label="Excluir registro" onClick={() => void removeError(entry.id)}><Trash2 size={15}/></button></div></div></article>)}</div>}
     </section>
     <section className="detail-section">
-      <div className="section-heading"><div><span className="eyebrow">CONSULTA E MEMÓRIA JURÍDICA</span><h2>Jurisprudência</h2><p>Guarde decisões, referências e resumos para revisar.</p></div><button className="add-button" onClick={() => setCaseForm(v => { if (v) setEditingCaseId(null); return !v; })}><Plus size={17}/>{caseForm ? "Fechar" : "Novo registro"}</button></div>
+      <div className="section-heading"><div><span className="eyebrow">CONSULTA E MEMÓRIA JURÍDICA</span><h2>Jurisprudência</h2><p>Guarde decisões, referências e resumos para revisar.</p></div><button className="add-button" onClick={() => setCaseForm(v => { if (v) resetCaseForm(); return !v; })}><Plus size={17}/>{caseForm ? "Fechar" : "Novo registro"}</button></div>
       {caseForm && <form className="entry-form jurisprudence-form" onSubmit={saveCase}>
         <h3>{editingCaseId ? "Editar jurisprudência" : "Adicionar jurisprudência"}</h3>
         <label htmlFor="case-title">Título / tema</label><input id="case-title" value={title} onChange={e => setTitle(e.target.value)} maxLength={220} required/>
