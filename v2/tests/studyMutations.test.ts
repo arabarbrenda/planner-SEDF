@@ -35,13 +35,13 @@ describe("study data mutation safeguards", () => {
   });
 
   it("completes only a pending revision and reports zero affected rows", async () => {
-    await expect(completeRevision("revision-1", "good", "Revisão concluída")).resolves.toBeUndefined();
+    await expect(completeRevision("revision-1", "easy", "Revisão concluída")).resolves.toBeUndefined();
     expect(mocks.from).toHaveBeenCalledWith("revisions");
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ result: "good", notes: "Revisão concluída" }));
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ result: "easy", notes: "Revisão concluída" }));
     expect(mocks.eq).toHaveBeenCalledWith("id", "revision-1");
     expect(mocks.is).toHaveBeenCalledWith("completed_at", null);
     mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
-    await expect(completeRevision("revision-1", "good")).rejects.toThrow("Revisão não encontrada, já concluída ou sem permissão");
+    await expect(completeRevision("revision-1", "easy")).rejects.toThrow("Revisão não encontrada, já concluída ou sem permissão");
   });
 
   it("deletes weekly plan blocks only when a row was removed", async () => {
