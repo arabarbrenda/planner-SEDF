@@ -109,10 +109,16 @@ export async function createQuestionAttempt(input: QuestionAttemptInsert): Promi
 export async function getStudySummary() {
   const { data, error } = await requireSupabase().rpc("get_study_summary").single();
   if (error) throw error;
-  const subjectCount = Number(data.subject_count);
-  const minutes = Number(data.study_minutes);
-  const totalQuestions = Number(data.total_questions);
-  const correctAnswers = Number(data.correct_answers);
+  const aggregate = data as unknown as {
+    subject_count: number | string;
+    study_minutes: number | string;
+    total_questions: number | string;
+    correct_answers: number | string;
+  };
+  const subjectCount = Number(aggregate.subject_count);
+  const minutes = Number(aggregate.study_minutes);
+  const totalQuestions = Number(aggregate.total_questions);
+  const correctAnswers = Number(aggregate.correct_answers);
   return {
     subjectCount,
     studyMinutes: minutes,
