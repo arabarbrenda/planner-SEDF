@@ -50,6 +50,9 @@ $test$;
 insert into public.study_sessions (user_id, subject_id, topic_id, duration_minutes)
 values ('11111111-1111-4111-8111-111111111111', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', 30);
 
+insert into public.question_attempts (user_id, subject_id, topic_id, total_questions, correct_answers, incorrect_answers)
+values ('11111111-1111-4111-8111-111111111111', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', 10, 7, 3);
+
 -- Deleting a topic should preserve the session and clear its topic reference.
 delete from public.topics where id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 do $test$
