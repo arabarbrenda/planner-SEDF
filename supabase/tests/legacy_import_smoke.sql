@@ -46,7 +46,7 @@ declare
   v_subject uuid;
   v_topic uuid;
 begin
-  select id into v_subject from public.subjects where user_id = auth.uid() and name = 'Direito';
+  select id into v_subject from public.subjects where user_id = auth.uid() and name = 'Direito' and priority = 'high';
   select id into v_topic from public.topics where user_id = auth.uid() and subject_id = v_subject and name = 'Constitucional';
   if v_subject is null or v_topic is null then raise exception 'Legacy subject/topic mapping failed'; end if;
   if not exists (select 1 from public.study_sessions where user_id = auth.uid() and subject_id = v_subject and duration_minutes = 45) then
