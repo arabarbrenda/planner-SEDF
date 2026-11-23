@@ -43,11 +43,13 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [ ] Instalar dependências e executar build em ambiente com acesso ao npm
 - [ ] Validar migration no banco de desenvolvimento
 - [ ] Configurar e testar Google OAuth e e-mail
-- [ ] Implementar tabelas/serviços e módulos de estudo
-- [ ] Importação e validação dos dados exportados da V1
+- [x] Criar serviços Supabase para disciplinas, assuntos, sessões e tentativas de questões
+- [x] Implementar dashboard com métricas, cadastro de disciplinas/assuntos e alteração de status
+- [x] Implementar registro manual de tempo de estudo e desempenho em questões
+- [ ] Implementar importação e validação dos dados exportados da V1
 - [ ] Testes automatizados de segurança, migração e analytics
 
-## Dados e segurança
+## Limitações conhecidas nesta etapa\n\n- O dashboard registra sessões e tentativas manualmente; ainda não há importador real do Tec Concursos.\n- A fila de revisões, planejamento semanal, simulados e caderno de erros ainda não têm interface funcional nesta etapa.\n- Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.\n- Nenhuma migration foi executada no banco e nenhum fluxo de autenticação foi validado em ambiente real.\n\n## Dados e segurança
 
 A chave publishable é própria para uso no cliente, desde que as políticas RLS estejam corretamente habilitadas. Nunca publique uma chave secreta/service-role nem a senha do banco. Cada tabela de dados pessoais usa `user_id` e políticas que limitam o acesso ao usuário autenticado.
 
