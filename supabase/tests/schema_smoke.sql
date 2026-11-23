@@ -67,3 +67,58 @@ begin
   end if;
 end
 $test$;
+
+
+-- Authenticated users must not read, update, or delete another owner's rows.
+-- Mutations should affect zero rows under RLS, while own-row updates return one.
+insert into public.subjects (id, user_id, name)
+values
+  ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1', '11111111-1111-4111-8111-111111111111', 'RLS own-row probe'),
+  ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2', '22222222-2222-4222-8222-222222222222', 'RLS foreign-row probe')
+on conflict (id) do nothing;
+
+set role authenticated;
+set request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
+
+do $test$
+declare
+  affected_rows integer;
+begin
+  if exists (
+    select 1 from public.subjects
+    where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2'
+  ) then
+    raise exception 'RLS exposed another user subject to SELECT';
+  end if;
+
+  update public.subjects set name = 'Unauthorized update'
+  where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2';
+  get diagnostics affected_rows = row_count;
+  if affected_rows <> 0 then
+    raise exception 'RLS allowed updating another user subject';
+  end if;
+
+  delete from public.subjects
+  where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2';
+  get diagnostics affected_rows = row_count;
+  if affected_rows <> 0 then
+    raise exception 'RLS allowed deleting another user subject';
+  end if;
+
+  update public.subjects set name = 'RLS own-row updated'
+  where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1';
+  get diagnostics affected_rows = row_count;
+  if affected_rows <> 1 then
+    raise exception 'RLS blocked owner update or failed to return an affected row';
+  end if;
+
+  delete from public.subjects
+  where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1';
+  get diagnostics affected_rows = row_count;
+  if affected_rows <> 1 then
+    raise exception 'RLS blocked owner delete or failed to affect the owned row';
+  end if;
+end
+$test$;
+
+reset role;
