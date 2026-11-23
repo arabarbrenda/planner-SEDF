@@ -81,8 +81,10 @@ export function StudyHome({ email }: { email: string }) {
       setPlanItems(await listStudyPlanItems(nextPlan.id));
       if (selectedSubject && !nextSubjects.some(s => s.id === selectedSubject)) setSelectedSubject("");
       if (selectedSubject) setTopics(await listTopics(selectedSubject));
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar seus dados.");
+      return false;
     } finally { setLoading(false); }
   }, [selectedSubject]);
 
@@ -148,8 +150,10 @@ export function StudyHome({ email }: { email: string }) {
       if (!confirmed) return;
       setRestoring(true);
       const inserted = await restorePlannerBackup(backup);
-      await refresh();
-      setNotice(`Restauração concluída: ${inserted} novos registros adicionados. Registros existentes foram preservados.`);
+      const refreshed = await refresh();
+      setNotice(
+        `Restauração concluída: ${inserted} novos registros adicionados. Registros existentes foram preservados.${refreshed ? "" : " Os dados foram restaurados, mas não foi possível atualizar a tela; use o botão Atualizar."}`
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível restaurar este backup.");
     } finally {
