@@ -56,7 +56,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - [x] Implementar leitura, prévia, validação básica e importação do backup JSON exportado pela V1
 - [x] Criar serviços de agendamento, listagem e conclusão de revisões
 - [x] Adicionar painel de revisões programadas, atrasadas e concluídas
-- [ ] Testes automatizados de segurança, migração e analytics
+- [x] Teste de integração da migration em PostgreSQL 15 temporário no CI (smoke test de esquema, integridade referencial e isolamento RLS simulado)\n- [ ] Testes automatizados adicionais de analytics e fluxos completos
 
 ## Limitações conhecidas nesta etapa
 
