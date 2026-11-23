@@ -66,7 +66,7 @@ A criação do projeto Supabase não configura automaticamente o provedor Google
 - O planejamento semanal já permite criar e remover blocos e visualizar a carga horária por dia e total semanal; edição de blocos e comparação entre planejado e realizado ainda estão pendentes.
 - O módulo de simulados permite criar, editar e excluir resultados, apresenta histórico e permite pesquisar por nome, banca, data ou observações; o histórico também exibe um gráfico cronológico com média e melhor desempenho dos últimos oito simulados. A validação automatizada de TypeScript e build é executada pelo GitHub Actions em cada atualização desta pasta.
 - O caderno de erros permite criar, editar, excluir, pesquisar por enunciado, disciplina, assunto, respostas, explicação e etiquetas, além de filtrar por status. A jurisprudência permite criar, editar, excluir e pesquisar por tema, tribunal, processo e resumo. O formulário ainda não expõe edição de etiquetas.
-- Os formulários atuais registram data e hora automaticamente no fuso de Brasília; edição retroativa e filtros por período ainda serão implementados.
+- Sessões e tentativas de questões recebem a data atual automaticamente no fuso de Brasília; simulados e revisões usam datas informadas no formulário. Edição retroativa de sessões/tentativas e filtros por período ainda serão implementados.
 - A migration foi aplicada e testada em PostgreSQL 15 temporário no CI, com objetos mínimos de compatibilidade Supabase; isso não equivale à aplicação ou validação no projeto Supabase hospedado. Nenhum fluxo de autenticação foi validado em ambiente real. O importador ainda precisa de testes com backups reais anonimizados antes de uso em dados importantes.
 
 ## Dados e segurança
