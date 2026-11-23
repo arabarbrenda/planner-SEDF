@@ -1,0 +1,129 @@
+import { requireSupabase } from "../lib/supabase";
+import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus } from "../types/database";
+
+function currentUserId() {
+  return requireSupabase().auth.getUser().then(({ data, error }) => {
+    if (error) throw error;
+    if (!data.user) throw new Error("Você precisa entrar para acessar seus dados.");
+    return data.user.id;
+  });
+}
+
+export async function listSubjects(): Promise<Subject[]> {
+  const client = requireSupabase();
+  const { data, error } = await client.from("subjects").select("*").order("sort_order").order("name");
+  if (error) throw error;
+  return (data ?? []) as Subject[];
+}
+
+export async function createSubject(input: SubjectInsert): Promise<Subject> {
+  const client = requireSupabase();
+  const userId = await currentUserId();
+  const { data, error } = await client.from("subjects").insert({
+    user_id: userId,
+    name: input.name.trim(),
+    icon: input.icon ?? null,
+    priority: input.priority ?? "medium",
+    sort_order: input.sort_order ?? 0
+  }).select("*").single();
+  if (error) throw error;
+  return data as Subject;
+}
+
+export async function listTopics(subjectId?: string): Promise<Topic[]> {
+  let query = requireSupabase().from("topics").select("*").order("sort_order").order("name");
+  if (subjectId) query = query.eq("subject_id", subjectId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as Topic[];
+}
+
+export async function createTopic(input: TopicInsert): Promise<Topic> {
+  const client = requireSupabase();
+  const userId = await currentUserId();
+  const { data, error } = await client.from("topics").insert({
+    user_id: userId,
+    subject_id: input.subject_id,
+    name: input.name.trim(),
+    parent_topic_id: input.parent_topic_id ?? null,
+    status: input.status ?? "not_started",
+    priority: input.priority ?? null,
+    annotations: input.annotations ?? "",
+    checklist: input.checklist ?? { theory: false, law: false, questions: false, errors: false, revision: false },
+    sort_order: input.sort_order ?? 0
+  }).select("*").single();
+  if (error) throw error;
+  return data as Topic;
+}
+
+export async function updateTopicStatus(topicId: string, status: TopicStatus): Promise<void> {
+  const { error } = await requireSupabase().from("topics").update({ status }).eq("id", topicId);
+  if (error) throw error;
+}
+
+export async function createStudySession(input: StudySessionInsert): Promise<StudySession> {
+  const client = requireSupabase();
+  const userId = await currentUserId();
+  const { data, error } = await client.from("study_sessions").insert({
+    user_id: userId,
+    subject_id: input.subject_id ?? null,
+    topic_id: input.topic_id ?? null,
+    studied_on: input.studied_on ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
+    duration_minutes: input.duration_minutes,
+    platform: input.platform ?? null,
+    notes: input.notes ?? ""
+  }).select("*").single();
+  if (error) throw error;
+  return data as StudySession;
+}
+
+export async function createQuestionAttempt(input: QuestionAttemptInsert): Promise<QuestionAttempt> {
+  if (input.total_questions < 0 || input.correct_answers < 0 || input.correct_answers > input.total_questions) {
+    throw new Error("Confira a quantidade de questões e acertos.");
+  }
+  const incorrect = input.incorrect_answers ?? Math.max(0, input.total_questions - input.correct_answers - (input.blank_answers ?? 0));
+  const blank = input.blank_answers ?? 0;
+  if (input.correct_answers + incorrect + blank > input.total_questions) {
+    throw new Error("Acertos, erros e questões em branco não podem superar o total.");
+  }
+  const client = requireSupabase();
+  const userId = await currentUserId();
+  const { data, error } = await client.from("question_attempts").insert({
+    user_id: userId,
+    subject_id: input.subject_id ?? null,
+    topic_id: input.topic_id ?? null,
+    attempted_on: input.attempted_on ?? new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
+    platform: input.platform ?? null,
+    source: input.source ?? "manual",
+    total_questions: input.total_questions,
+    correct_answers: input.correct_answers,
+    incorrect_answers: incorrect,
+    blank_answers: blank,
+    notes: input.notes ?? "",
+    external_reference: input.external_reference ?? null
+  }).select("*").single();
+  if (error) throw error;
+  return data as QuestionAttempt;
+}
+
+export async function getStudySummary() {
+  const client = requireSupabase();
+  const [subjects, sessions, attempts] = await Promise.all([
+    client.from("subjects").select("id", { count: "exact", head: true }),
+    client.from("study_sessions").select("duration_minutes"),
+    client.from("question_attempts").select("total_questions,correct_answers")
+  ]);
+  if (subjects.error) throw subjects.error;
+  if (sessions.error) throw sessions.error;
+  if (attempts.error) throw attempts.error;
+  const minutes = (sessions.data ?? []).reduce((sum, row) => sum + row.duration_minutes, 0);
+  const totalQuestions = (attempts.data ?? []).reduce((sum, row) => sum + row.total_questions, 0);
+  const correctAnswers = (attempts.data ?? []).reduce((sum, row) => sum + row.correct_answers, 0);
+  return {
+    subjectCount: subjects.count ?? 0,
+    studyMinutes: minutes,
+    totalQuestions,
+    correctAnswers,
+    accuracy: totalQuestions > 0 ? Math.round(correctAnswers / totalQuestions * 100) : null
+  };
+}
