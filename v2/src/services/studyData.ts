@@ -1,5 +1,5 @@
 import { requireSupabase } from "../lib/supabase";
-import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult } from "../types/database";
+import type { QuestionAttempt, QuestionAttemptInsert, StudySession, StudySessionInsert, Subject, SubjectInsert, Topic, TopicInsert, TopicStatus, Revision, RevisionInsert, RevisionResult, StudyPlan, StudyPlanItem, StudyPlanItemInsert } from "../types/database";
 
 function currentUserId() {
   return requireSupabase().auth.getUser().then(({ data, error }) => {
@@ -164,5 +164,52 @@ export async function reopenRevision(revisionId: string): Promise<void> {
     completed_at: null,
     result: null
   }).eq("id", revisionId);
+  if (error) throw error;
+}
+
+export async function getActiveStudyPlan(): Promise<StudyPlan> {
+  const client = requireSupabase();
+  const { data: existing, error: listError } = await client.from("study_plans")
+    .select("*").eq("is_active", true).order("created_at", { ascending: true }).limit(1).maybeSingle();
+  if (listError) throw listError;
+  if (existing) return existing as StudyPlan;
+  const userId = await currentUserId();
+  const { data, error } = await client.from("study_plans").insert({
+    user_id: userId, name: "Meu planejamento semanal", is_active: true
+  }).select("*").single();
+  if (error) throw error;
+  return data as StudyPlan;
+}
+
+export async function listStudyPlanItems(planId: string): Promise<StudyPlanItem[]> {
+  const { data, error } = await requireSupabase().from("study_plan_items")
+    .select("*, subjects(name), topics(name)")
+    .eq("plan_id", planId)
+    .order("weekday", { ascending: true })
+    .order("start_time", { ascending: true })
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as StudyPlanItem[];
+}
+
+export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<StudyPlanItem> {
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase().from("study_plan_items").insert({
+    user_id: userId,
+    plan_id: input.plan_id,
+    subject_id: input.subject_id ?? null,
+    topic_id: input.topic_id ?? null,
+    weekday: input.weekday,
+    start_time: input.start_time ?? null,
+    duration_minutes: input.duration_minutes,
+    sort_order: input.sort_order ?? 0,
+    notes: input.notes ?? ""
+  }).select("*, subjects(name), topics(name)").single();
+  if (error) throw error;
+  return data as StudyPlanItem;
+}
+
+export async function deleteStudyPlanItem(itemId: string): Promise<void> {
+  const { error } = await requireSupabase().from("study_plan_items").delete().eq("id", itemId);
   if (error) throw error;
 }
