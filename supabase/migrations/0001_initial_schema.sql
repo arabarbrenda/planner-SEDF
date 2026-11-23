@@ -15,7 +15,9 @@ create table if not exists public.profiles (
 );
 
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = ''
+as $
 begin
   new.updated_at = now();
   return new;
@@ -295,6 +297,10 @@ begin
     );
   end loop;
 end $$;
+
+-- These trigger functions are invoked by database triggers, not directly through the API.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.set_updated_at() from public, anon, authenticated;
 
 -- Explicit API privileges complement RLS; RLS remains the row-level boundary.
 grant usage on schema public to authenticated;
