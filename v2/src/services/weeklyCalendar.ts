@@ -15,7 +15,7 @@ function formatUtcDateTime(date: Date): string {
     "T" + pad(date.getUTCHours()) + pad(date.getUTCMinutes()) + pad(date.getUTCSeconds());
 }
 
-function nextWeekday(referenceDate: string, weekday: number, referenceTime: string): Date {
+function nextWeekday(referenceDate: string, weekday: number): Date {
   const [year, month, day] = referenceDate.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
   let daysAhead = (weekday - date.getUTCDay() + 7) % 7;
@@ -37,7 +37,7 @@ export function buildWeeklyCalendar(
   );
 
   const events = valid.map(item => {
-    const start = nextWeekday(referenceDate, item.weekday!, referenceTime);
+    const start = nextWeekday(referenceDate, item.weekday!);
     const [hour, minute] = item.start_time!.slice(0, 5).split(":").map(Number);
     if (start.getUTCDay() === new Date(referenceDate + "T00:00:00Z").getUTCDay()) {
       const [currentHour, currentMinute] = referenceTime.split(":").map(Number);
