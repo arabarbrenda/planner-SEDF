@@ -68,3 +68,18 @@ export type SubjectInsert = Pick<Subject, "name"> & Partial<Pick<Subject, "icon"
 export type TopicInsert = Pick<Topic, "subject_id" | "name"> & Partial<Pick<Topic, "parent_topic_id" | "status" | "priority" | "annotations" | "checklist" | "sort_order">>;
 export type StudySessionInsert = Pick<StudySession, "duration_minutes"> & Partial<Pick<StudySession, "subject_id" | "topic_id" | "studied_on" | "platform" | "notes">>;
 export type QuestionAttemptInsert = Pick<QuestionAttempt, "total_questions" | "correct_answers"> & Partial<Pick<QuestionAttempt, "subject_id" | "topic_id" | "attempted_on" | "platform" | "source" | "incorrect_answers" | "blank_answers" | "notes" | "external_reference">>;
+
+export type RevisionResult = "easy" | "medium" | "hard" | "again";
+export type Revision = {
+  id: string;
+  user_id: string;
+  topic_id: string;
+  scheduled_for: string;
+  completed_at: string | null;
+  revision_type: string;
+  result: RevisionResult | null;
+  notes: string;
+  created_at: string;
+  topics?: { name: string } | null;
+};
+export type RevisionInsert = Pick<Revision, "topic_id" | "scheduled_for"> & Partial<Pick<Revision, "revision_type" | "notes">>;
