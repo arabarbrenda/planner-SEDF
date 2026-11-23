@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createQuestionAttempt, createStudySession, fetchAllRows } from "../src/services/studyData";
+import { createQuestionAttempt, createStudySession, fetchAllRows, reopenRevision } from "../src/services/studyData";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -7,7 +7,10 @@ const mocks = vi.hoisted(() => ({
   insert: vi.fn(),
   select: vi.fn(),
   single: vi.fn(),
-  rpc: vi.fn()
+  rpc: vi.fn(),
+  update: vi.fn(),
+  eq: vi.fn(),
+  maybeSingle: vi.fn()
 }));
 
 vi.mock("../src/lib/supabase", () => ({
@@ -26,6 +29,11 @@ describe("studyData session and question records", () => {
     mocks.insert.mockReturnValue({ select: mocks.select });
     mocks.select.mockReturnValue({ single: mocks.single });
     mocks.single.mockResolvedValue({ data: { id: "record-1" }, error: null });
+    mocks.from.mockReturnValue({ insert: mocks.insert, update: mocks.update });
+    mocks.update.mockReturnValue({ eq: mocks.eq });
+    mocks.eq.mockReturnValue({ select: mocks.select });
+    mocks.select.mockReturnValue({ single: mocks.single, maybeSingle: mocks.maybeSingle });
+    mocks.maybeSingle.mockResolvedValue({ data: { id: "revision-1" }, error: null });
   });
 
   it("rejects invalid study session durations before accessing Supabase", async () => {
@@ -65,6 +73,29 @@ describe("studyData session and question records", () => {
   });
 });
 
+
+
+describe("revision mutation safeguards", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.from.mockReturnValue({ update: mocks.update });
+    mocks.update.mockReturnValue({ eq: mocks.eq });
+    mocks.eq.mockReturnValue({ select: mocks.select });
+    mocks.select.mockReturnValue({ maybeSingle: mocks.maybeSingle });
+  });
+
+  it("rejects reopening a revision when RLS or a missing id affects zero rows", async () => {
+    mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+    await expect(reopenRevision("revision-missing")).rejects.toThrow("Revisão não encontrada");
+  });
+
+  it("accepts reopening a revision when the database returns the affected row", async () => {
+    mocks.maybeSingle.mockResolvedValue({ data: { id: "revision-1" }, error: null });
+    await expect(reopenRevision("revision-1")).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("revisions");
+    expect(mocks.eq).toHaveBeenCalledWith("id", "revision-1");
+  });
+});
 
 describe("V2 backup restoration service", () => {
   beforeEach(() => {
