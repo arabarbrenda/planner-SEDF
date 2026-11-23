@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createQuestionAttempt, createStudySession } from "../src/services/studyData";
+import { createQuestionAttempt, createStudySession, fetchAllRows } from "../src/services/studyData";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -98,5 +98,36 @@ describe("V2 backup restoration service", () => {
     const { restorePlannerBackup } = await import("../src/services/studyData");
 
     await expect(restorePlannerBackup({})).rejects.toThrow("restore failed");
+  });
+});
+
+
+describe("backup export pagination", () => {
+  it("fetches every page until a short page is returned", async () => {
+    const fetchPage = vi.fn()
+      .mockResolvedValueOnce({ data: Array.from({ length: 500 }, (_, i) => i), error: null })
+      .mockResolvedValueOnce({ data: [500, 501], error: null });
+
+    const rows = await fetchAllRows(fetchPage);
+
+    expect(rows).toHaveLength(502);
+    expect(fetchPage).toHaveBeenNthCalledWith(1, 0, 499);
+    expect(fetchPage).toHaveBeenNthCalledWith(2, 500, 999);
+  });
+
+  it("returns an empty result when the first page is empty", async () => {
+    const fetchPage = vi.fn().mockResolvedValue({ data: [], error: null });
+
+    await expect(fetchAllRows(fetchPage)).resolves.toEqual([]);
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails the export when any page reports a database error", async () => {
+    const fetchPage = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: "permission denied" }
+    });
+
+    await expect(fetchAllRows(fetchPage)).rejects.toThrow("permission denied");
   });
 });
