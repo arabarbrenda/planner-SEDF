@@ -31,7 +31,7 @@ export function buildWeeklyCalendar(
 ): CalendarExportResult {
   const valid = items.filter(item =>
     item.weekday !== null && Number.isInteger(item.weekday) && item.weekday >= 0 && item.weekday <= 6 &&
-    typeof item.start_time === "string" && /^([01]\\d|2[0-3]):[0-5]\\d/.test(item.start_time) &&
+    typeof item.start_time === "string" && /^([01]\d|2[0-3]):[0-5]\d/.test(item.start_time) &&
     Number.isInteger(item.duration_minutes) && item.duration_minutes > 0
   );
 
