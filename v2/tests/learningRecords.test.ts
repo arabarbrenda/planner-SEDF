@@ -3,6 +3,7 @@ import {
   createErrorEntry,
   createJurisprudenceEntry,
   createMockExam,
+  updateErrorStatus,
   updateMockExam
 } from "../src/services/studyData";
 
@@ -87,6 +88,31 @@ describe("studyData mock exams and learning records", () => {
     expect(mocks.eq).toHaveBeenCalledWith("id", "exam-1");
     expect(mocks.maybeSingle).toHaveBeenCalled();
     expect(mocks.getUser).not.toHaveBeenCalled();
+  });
+
+  it("reports when a mock exam update affects no row", async () => {
+    mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+    await expect(updateMockExam("missing-exam", {
+      title: "Simulado", exam_date: "2026-11-23",
+      total_questions: 10, correct_answers: 8, blank_answers: 1
+    })).rejects.toThrow("Simulado não encontrado ou sem permissão");
+  });
+
+  it("reports when an error status update affects no row", async () => {
+    mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+    await expect(updateErrorStatus("missing-entry", "resolved"))
+      .rejects.toThrow("Registro de erro não encontrado ou sem permissão");
+    expect(mocks.from).toHaveBeenCalledWith("error_notebook");
+    expect(mocks.update).toHaveBeenCalledWith({ status: "resolved" });
+    expect(mocks.eq).toHaveBeenCalledWith("id", "missing-entry");
+  });
+
+  it("updates an error status when the target row exists", async () => {
+    await updateErrorStatus("entry-1", "resolved");
+    expect(mocks.from).toHaveBeenCalledWith("error_notebook");
+    expect(mocks.update).toHaveBeenCalledWith({ status: "resolved" });
+    expect(mocks.eq).toHaveBeenCalledWith("id", "entry-1");
+    expect(mocks.maybeSingle).toHaveBeenCalled();
   });
 
   it("rejects an empty error notebook question before accessing Supabase", async () => {
