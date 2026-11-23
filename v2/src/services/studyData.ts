@@ -297,28 +297,38 @@ export async function deleteMockExam(examId: string): Promise<void> {
 }
 
 
-export async function startLegacyImport(fingerprint: string, originalFileName: string): Promise<string> {
-  const userId = await currentUserId();
-  const { data, error } = await requireSupabase().from("import_jobs").insert({
-    user_id: userId, source: "v1_backup", file_name: fingerprint,
-    status: "pending", rows_imported: 0,
-    error_details: { original_file_name: originalFileName }
-  }).select("id").single();
+export type LegacyImportPayload = {
+  subjects: Array<Record<string, unknown>>;
+  topics: Array<Record<string, unknown>>;
+  sessions: Array<Record<string, unknown>>;
+  question_attempts: Array<Record<string, unknown>>;
+  mock_exams: Array<Record<string, unknown>>;
+  jurisprudence: Array<Record<string, unknown>>;
+};
+
+export async function importLegacyV1Backup(
+  fingerprint: string,
+  originalFileName: string,
+  backup: LegacyImportPayload
+): Promise<number> {
+  const { data, error } = await requireSupabase().rpc("import_legacy_v1_backup", {
+    p_fingerprint: fingerprint,
+    p_original_file_name: originalFileName,
+    p_backup: backup
+  });
   if (error) {
-    if (error.code === "23505") throw new Error("Este backup já foi processado ou teve uma tentativa iniciada. Para evitar duplicações, a importação foi bloqueada. Confira seus registros antes de qualquer nova tentativa.");
+    if (error.code === "23505") throw new Error("Este backup já foi importado ou há uma tentativa em andamento.");
     throw error;
   }
-  return data.id as string;
-}
-
-export async function finishLegacyImport(jobId: string, rowsImported: number, failed = false, details = ""): Promise<void> {
-  const { error } = await requireSupabase().from("import_jobs").update({
-    status: failed ? "failed" : "completed",
-    rows_imported: Math.max(0, Math.floor(rowsImported)),
-    error_details: details ? { message: details } : {},
-    completed_at: new Date().toISOString()
-  }).eq("id", jobId);
-  if (error) throw error;
+  const result = data as { success?: boolean; rows_imported?: number; error?: string } | null;
+  if (!result?.success) {
+    throw new Error(result?.error || "A importação foi revertida pelo banco. Nenhum registro parcial foi mantido.");
+  }
+  const inserted = Number(result.rows_imported ?? 0);
+  if (!Number.isSafeInteger(inserted) || inserted < 0) {
+    throw new Error("O banco retornou uma contagem inválida para a importação.");
+  }
+  return inserted;
 }
 
 export async function listErrorNotebook(): Promise<ErrorNotebookEntry[]> {
