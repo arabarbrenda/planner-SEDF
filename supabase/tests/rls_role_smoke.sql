@@ -46,7 +46,8 @@ declare
   summary record;
 begin
   if (select count(*) from public.subjects) <> 1 then
-    raise exception 'Second user should see only its own subject';
+    raise exception 'Second user should see exactly one subject; auth.uid=%, visible_count=%',
+      auth.uid(), (select count(*) from public.subjects);
   end if;
   select * into summary from public.get_study_summary();
   if summary.subject_count <> 1
