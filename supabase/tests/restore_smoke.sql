@@ -115,3 +115,27 @@ end
 $test$;
 
 reset role;
+
+
+-- Reject unsupported backup versions and incomplete sections before writing rows.
+do $test$
+begin
+  begin
+    perform * from public.restore_planner_backup('{"format":"planner-da-bre-v2","version":99,"data":{}}'::jsonb);
+    raise exception 'Unsupported backup version was unexpectedly accepted';
+  exception when others then
+    if sqlerrm = 'Unsupported backup version was unexpectedly accepted' then raise; end if;
+    if sqlerrm not like 'Unsupported or invalid Planner V2 backup%' then raise; end if;
+  end;
+
+  begin
+    perform * from public.restore_planner_backup(
+      '{"format":"planner-da-bre-v2","version":1,"data":{"subjects":[]}}'::jsonb
+    );
+    raise exception 'Backup with missing sections was unexpectedly accepted';
+  exception when others then
+    if sqlerrm = 'Backup with missing sections was unexpectedly accepted' then raise; end if;
+    if sqlerrm not like 'Invalid backup section:%' then raise; end if;
+  end;
+end
+$test$;
