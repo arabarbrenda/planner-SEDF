@@ -210,3 +210,56 @@ describe("atomic V1 legacy import service", () => {
     })).rejects.toThrow("contagem inválida");
   });
 });
+
+
+describe("complete V2 backup export", () => {
+  const tableNames = [
+    "study_settings", "subjects", "topics", "study_sessions",
+    "question_attempts", "revisions", "study_plans", "study_plan_items",
+    "mock_exams", "error_notebook", "jurisprudence_entries"
+  ];
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("exports all eleven tables with the versioned backup envelope", async () => {
+    const rowsByTable = Object.fromEntries(tableNames.map((name) => [name, [{ table: name }]]));
+    const range = vi.fn(async () => ({ data: [], error: null }));
+    const order = vi.fn(() => ({ range }));
+    const select = vi.fn(() => ({ order }));
+    mocks.from.mockImplementation((table: string) => {
+      const tableRange = vi.fn(async () => ({ data: rowsByTable[table], error: null }));
+      const tableOrder = vi.fn(() => ({ range: tableRange }));
+      const tableSelect = vi.fn(() => ({ order: tableOrder }));
+      return { select: tableSelect };
+    });
+
+    const { exportPlannerBackup } = await import("../src/services/studyData");
+    const backup = await exportPlannerBackup();
+
+    expect(backup.format).toBe("planner-da-bre-v2");
+    expect(backup.version).toBe(1);
+    expect(Number.isNaN(Date.parse(backup.exported_at))).toBe(false);
+    expect(Object.keys(backup.data)).toEqual([
+      "study_settings", "subjects", "topics", "study_sessions",
+      "question_attempts", "revisions", "study_plans", "study_plan_items",
+      "mock_exams", "error_notebook", "jurisprudence_entries"
+    ]);
+    for (const table of tableNames) {
+      expect(mocks.from).toHaveBeenCalledWith(table);
+      expect(backup.data[table as keyof typeof backup.data]).toEqual(rowsByTable[table]);
+    }
+  });
+
+  it("rejects the whole export when any table query fails", async () => {
+    mocks.from.mockImplementation((table: string) => {
+      const range = vi.fn(async () => table === "topics"
+        ? { data: null, error: { message: "topics unavailable" } }
+        : { data: [], error: null });
+      const order = vi.fn(() => ({ range }));
+      return { select: vi.fn(() => ({ order })) };
+    });
+
+    const { exportPlannerBackup } = await import("../src/services/studyData");
+    await expect(exportPlannerBackup()).rejects.toThrow("topics unavailable");
+  });
+});
