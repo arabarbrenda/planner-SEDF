@@ -200,7 +200,7 @@ export async function getActiveStudyPlan(): Promise<StudyPlan> {
 
 export async function listStudyPlanItems(planId: string): Promise<StudyPlanItem[]> {
   const { data, error } = await requireSupabase().from("study_plan_items")
-    .select("*, subjects(name), topics(name)")
+    .select("*, subjects(name), topics!study_plan_items_topic_id_user_id_subject_id_fkey(name)")
     .eq("plan_id", planId)
     .order("weekday", { ascending: true })
     .order("start_time", { ascending: true })
@@ -227,7 +227,7 @@ export async function createStudyPlanItem(input: StudyPlanItemInsert): Promise<S
     duration_minutes: input.duration_minutes,
     sort_order: input.sort_order ?? 0,
     notes: input.notes ?? ""
-  }).select("*, subjects(name), topics(name)").single();
+  }).select("*, subjects(name), topics!study_plan_items_topic_id_user_id_subject_id_fkey(name)").single();
   if (error) throw error;
   return data as StudyPlanItem;
 }
@@ -339,7 +339,7 @@ export async function importLegacyV1Backup(
 
 export async function listErrorNotebook(): Promise<ErrorNotebookEntry[]> {
   const { data, error } = await requireSupabase().from("error_notebook")
-    .select("*, subjects(name), topics(name)").order("created_at", { ascending: false });
+    .select("*, subjects(name), topics!error_notebook_topic_id_user_id_subject_id_fkey(name)").order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as ErrorNotebookEntry[];
 }
@@ -358,7 +358,7 @@ export async function createErrorEntry(input: ErrorNotebookInsert): Promise<Erro
     explanation: input.explanation ?? "",
     tags: input.tags ?? [],
     status: input.status ?? "open"
-  }).select("*, subjects(name), topics(name)").single();
+  }).select("*, subjects(name), topics!error_notebook_topic_id_user_id_subject_id_fkey(name)").single();
   if (error) throw error;
   return data as ErrorNotebookEntry;
 }
