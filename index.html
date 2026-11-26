@@ -275,6 +275,11 @@
 
     <!-- SCRIPT DE GERENCIAMENTO DE DADOS E RENDERIZAÇÃO -->
     <script>
+        function getLocalDateISO() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
         function openMobileMenu() {
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('mobile-backdrop');
@@ -306,7 +311,7 @@
             headerSubtitle: "Analista - Apoio Administrativo",
             sidebarCustomIcon: null,
             theme: "dark",
-            consultDate: new Date().toISOString().split('T')[0],
+            consultDate: getLocalDateISO(),
             config: { teoriaAtiva: true },
             materias: [
                 {
@@ -470,7 +475,7 @@
             if (!appData.headerTitle || appData.headerTitle === "SGA-SEDF 2027") appData.headerTitle = "SEDF 2027 - PLANNER DA BRE";
             if (!appData.headerSubtitle) appData.headerSubtitle = "Analista - Apoio Administrativo";
             if (!appData.theme) appData.theme = "dark";
-            if (!appData.consultDate) appData.consultDate = new Date().toISOString().split('T')[0];
+            if (!appData.consultDate) appData.consultDate = getLocalDateISO();
         }
 
         loadPersistedData();
@@ -665,7 +670,7 @@
 
         function renderDashboardHTML() {
             const stats = getGlobalStats();
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateISO();
             const sessionsToday = appData.registrosEstudo.filter(r => r.data === today);
             const minutesToday = sessionsToday.reduce((sum, r) => sum + (Number(r.tempo) || 0), 0);
             const questionsToday = sessionsToday.reduce((sum, r) => sum + (Number(r.qTotal) || 0), 0);
@@ -1258,7 +1263,7 @@
         }
 
         function renderPlanejamentoHTML() {
-            if (!appData.consultDate) appData.consultDate = new Date().toISOString().split('T')[0];
+            if (!appData.consultDate) appData.consultDate = getLocalDateISO();
             const [ano, mes, dia] = appData.consultDate.split('-');
             const dataObj = new Date(Number(ano), Number(mes)-1, Number(dia));
             const diasSemanaMap = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
@@ -1579,7 +1584,7 @@
         function openStudyModal() {
             const select = document.getElementById('modal-materia');
             select.innerHTML = appData.materias.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
-            document.getElementById('modal-data').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-data').value = getLocalDateISO();
             document.getElementById('study-modal').classList.remove('hidden');
             document.getElementById('study-modal').classList.add('flex');
         }
@@ -1671,7 +1676,7 @@
         }
 
         function openSimuladoModal() {
-            document.getElementById('sim-data').value = new Date().toISOString().split('T')[0];
+            document.getElementById('sim-data').value = getLocalDateISO();
             document.getElementById('simulado-modal').classList.remove('hidden');
             document.getElementById('simulado-modal').classList.add('flex');
         }
@@ -1730,7 +1735,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `sedf_2027_planner_bre_backup_${new Date().toISOString().split('T')[0]}.json`);
+            downloadAnchor.setAttribute("download", `sedf_2027_planner_bre_backup_${getLocalDateISO()}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
