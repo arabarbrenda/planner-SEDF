@@ -1676,11 +1676,11 @@ function escapeHTML(value) {
                         ${appData.jurisprudencia.map(j => `
                             <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md">${j.tribunal} - ${j.materia}</span>
-                                    <span class="text-xs text-slate-400">${formatarDataPtBr(j.data)}</span>
+                                    <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md">${escapeHTML(String(j.tribunal ?? '') + ' - ' + String(j.materia ?? ''))}</span>
+                                    <span class="text-xs text-slate-400">${escapeHTML(formatarDataPtBr(j.data))}</span>
                                 </div>
-                                <h4 class="text-sm font-bold text-white">${j.tema}</h4>
-                                <p class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-900"><strong>Tese:</strong> ${j.tese}</p>
+                                <h4 class="text-sm font-bold text-white">${escapeHTML(j.tema ?? '')}</h4>
+                                <p class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-900"><strong>Tese:</strong> ${escapeHTML(j.tese ?? '')}</p>
                             </div>
                         `).join('')}
                     </div>
