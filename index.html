@@ -2072,13 +2072,20 @@ function escapeHTML(value) {
         }
 
         function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `sedf_2027_planner_bre_backup_${getLocalDateISO()}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            try {
+                const backupBlob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json;charset=utf-8' });
+                const downloadUrl = URL.createObjectURL(backupBlob);
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = downloadUrl;
+                downloadAnchor.download = `sedf_2027_planner_bre_backup_${getLocalDateISO()}.json`;
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+            } catch (e) {
+                console.error('Falha ao exportar backup:', e);
+                alert('Não foi possível gerar o backup. Tente novamente.');
+            }
         }
 
         function importBackupFile(event) {
