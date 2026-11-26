@@ -507,9 +507,13 @@
         }
 
         function toggleTheme() {
+            const anterior = appData.theme;
             appData.theme = appData.theme === 'light' ? 'dark' : 'light';
             applyTheme();
-            saveData();
+            if (!saveData()) {
+                appData.theme = anterior;
+                applyTheme();
+            }
         }
 
         function saveData() {
@@ -578,8 +582,12 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
+                    const anterior = appData.sidebarCustomIcon;
                     appData.sidebarCustomIcon = event.target.result;
-                    saveData();
+                    if (!saveData()) {
+                        appData.sidebarCustomIcon = anterior;
+                        updateSidebarHeader();
+                    }
                 };
                 reader.readAsDataURL(file);
             }
