@@ -539,10 +539,11 @@
                             (action.topicoId === undefined || typeof action.topicoId === 'string') &&
                             (action.deferredTo === undefined || isValidPlannerDate(action.deferredTo)));
                     if (parsed.planoAcoes !== undefined && !validLocalPlanActions(parsed.planoAcoes)) throw new Error('Planejamento local inválido.');
-                    if (parsed.planoAcoes !== undefined && Array.isArray(parsed.materias)) {
-                        const subjectsForPlan = new Set(parsed.materias.map(m => m && m.id));
+                    if (parsed.planoAcoes !== undefined) {
+                        const materiasForPlan = Array.isArray(parsed.materias) ? parsed.materias : defaults.materias;
+                        const subjectsForPlan = new Set(materiasForPlan.map(m => m && m.id));
                         const topicsForPlan = new Map();
-                        parsed.materias.forEach(m => (Array.isArray(m && m.topicos) ? m.topicos : []).forEach(t => topicsForPlan.set(t.id, m.id)));
+                        materiasForPlan.forEach(m => (Array.isArray(m && m.topicos) ? m.topicos : []).forEach(t => topicsForPlan.set(t.id, m.id)));
                         if (Object.values(parsed.planoAcoes).some(action =>
                             (action.materiaId !== undefined && !subjectsForPlan.has(action.materiaId)) ||
                             (action.topicoId !== undefined && (!topicsForPlan.has(action.topicoId) ||
