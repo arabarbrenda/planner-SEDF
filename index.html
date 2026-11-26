@@ -1007,14 +1007,18 @@
             const nome = prompt("Digite o nome da nova matéria:");
             if (nome && nome.trim() !== "") {
                 const id = 'm_' + Date.now();
-                appData.materias.push({
+                const novaMateria = {
                     id,
                     nome: nome.trim(),
                     icone: "fa-book",
                     prioridade: "Média",
                     topicos: []
-                });
-                saveData();
+                };
+                appData.materias.push(novaMateria);
+                if (!saveData()) {
+                    appData.materias = appData.materias.filter(m => m.id !== id);
+                    return;
+                }
                 switchTab('materia', id);
             }
         }
