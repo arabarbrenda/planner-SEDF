@@ -974,8 +974,12 @@
 
         function deleteSubject(materiaId) {
             if (confirm("Deseja realmente excluir esta matéria e todos os seus tópicos?")) {
+                const materiasAnteriores = appData.materias;
                 appData.materias = appData.materias.filter(m => m.id !== materiaId);
-                saveData();
+                if (!saveData()) {
+                    appData.materias = materiasAnteriores;
+                    return;
+                }
                 switchTab('materias_lista');
             }
         }
@@ -1586,8 +1590,13 @@
         function deleteTopic(materiaId, topicoId) {
             if (confirm('Deseja realmente excluir este tópico?')) {
                 const m = appData.materias.find(mat => mat.id === materiaId);
+                if (!m) return;
+                const topicosAnteriores = m.topicos;
                 m.topicos = m.topicos.filter(t => t.id !== topicoId);
-                saveData();
+                if (!saveData()) {
+                    m.topicos = topicosAnteriores;
+                    return;
+                }
                 renderView('materia', materiaId);
             }
         }
