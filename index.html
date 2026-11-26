@@ -1685,10 +1685,14 @@
 
         function updateTopicNotes(materiaId, topicoId, notes) {
             const m = appData.materias.find(mat => mat.id === materiaId);
-            const t = m.topicos.find(top => top.id === topicoId);
+            const t = m && m.topicos.find(top => top.id === topicoId);
             if (t) {
+                const anterior = t.anotaçoes;
                 t.anotaçoes = notes;
-                saveData();
+                if (!saveData()) {
+                    t.anotaçoes = anterior;
+                    renderView('materia', materiaId);
+                }
             }
         }
 
@@ -1708,18 +1712,23 @@
 
         function openNewTopicModal(materiaId) {
             const nome = prompt("Digite o nome do novo tópico:");
-            if (nome) {
+            if (nome && nome.trim()) {
                 const m = appData.materias.find(mat => mat.id === materiaId);
-                m.topicos.push({
+                if (!m) return;
+                const novoTopico = {
                     id: 't_' + Date.now(),
-                    nome,
+                    nome: nome.trim(),
                     status: 'Não iniciado',
                     checklist: { lei: false, questoes: false, erros: false, revisao: false, teoria: false },
                     anotaçoes: '',
                     questoesTotal: 0,
                     questoesAcertos: 0
-                });
-                saveData();
+                };
+                m.topicos.push(novoTopico);
+                if (!saveData()) {
+                    m.topicos = m.topicos.filter(t => t.id !== novoTopico.id);
+                    return;
+                }
                 renderView('materia', materiaId);
             }
         }
