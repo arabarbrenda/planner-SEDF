@@ -460,13 +460,14 @@
                     appData.jurisprudencia = Array.isArray(parsed.jurisprudencia) ? parsed.jurisprudencia : [];
 
                     if (Array.isArray(parsed.materias)) {
-                        appData.materias = parsed.materias.map(m => Object.assign({
-                            id: m.id || ('m_' + Date.now()),
+                        const migrationIdBase = Date.now();
+                        appData.materias = parsed.materias.map((m, materiaIndex) => Object.assign({
+                            id: m.id || ('m_' + migrationIdBase + '_' + materiaIndex),
                             nome: m.nome || 'Matéria',
                             icone: m.icone || 'fa-book',
                             prioridade: m.prioridade || 'Média',
-                            topicos: Array.isArray(m.topicos) ? m.topicos.map(t => Object.assign({
-                                id: t.id || ('t_' + Date.now()),
+                            topicos: Array.isArray(m.topicos) ? m.topicos.map((t, topicoIndex) => Object.assign({
+                                id: t.id || ('t_' + migrationIdBase + '_' + materiaIndex + '_' + topicoIndex),
                                 nome: t.nome || '',
                                 status: t.status || 'Não iniciado',
                                 checklist: Object.assign({ lei: false, questoes: false, erros: false, revisao: false, teoria: false }, t.checklist || {}),
