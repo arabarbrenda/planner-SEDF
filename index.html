@@ -456,6 +456,22 @@
                         (parsed.config !== undefined && (!parsed.config || typeof parsed.config !== 'object' || Array.isArray(parsed.config)))) {
                         throw new Error('Estrutura local inválida.');
                     }
+                    if (Array.isArray(parsed.materias)) {
+                        const subjectIds = parsed.materias.map(m => m && m.id);
+                        const topicIds = parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []);
+                        if (subjectIds.some(id => typeof id !== 'string' || !id.trim()) ||
+                            topicIds.some(id => typeof id !== 'string' || !id.trim()) ||
+                            new Set(subjectIds).size !== subjectIds.length || new Set(topicIds).size !== topicIds.length) {
+                            throw new Error('IDs de matérias ou tópicos locais inválidos ou duplicados.');
+                        }
+                        const subjectSet = new Set(subjectIds);
+                        const topicOwner = new Map();
+                        parsed.materias.forEach(m => (Array.isArray(m.topicos) ? m.topicos : []).forEach(t => topicOwner.set(t.id, m.id)));
+                        if (Array.isArray(parsed.registrosEstudo) && parsed.registrosEstudo.some(r => !r ||
+                            !subjectSet.has(r.materiaId) || (r.topicoId != null && topicOwner.get(r.topicoId) !== r.materiaId))) {
+                            throw new Error('Histórico local com referências inválidas.');
+                        }
+                    }
                     appData = Object.assign({}, defaults, parsed);
                     appData.config = Object.assign({}, defaultData.config, parsed.config || {});
                     appData.registrosEstudo = Array.isArray(parsed.registrosEstudo) ? parsed.registrosEstudo : [];
