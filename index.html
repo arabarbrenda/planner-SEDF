@@ -653,19 +653,34 @@
         }
 
         function handleIconUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const anterior = appData.sidebarCustomIcon;
-                    appData.sidebarCustomIcon = event.target.result;
-                    if (!saveData()) {
-                        appData.sidebarCustomIcon = anterior;
-                        updateSidebarHeader();
-                    }
-                };
-                reader.readAsDataURL(file);
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type) || file.size > 1024 * 1024) {
+                alert('Selecione uma imagem PNG, JPEG, GIF ou WebP de até 1 MB.');
+                e.target.value = '';
+                return;
             }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                if (typeof event.target.result !== 'string' || !/^data:image\/(png|jpeg|gif|webp);base64,/i.test(event.target.result)) {
+                    alert('Formato de imagem não aceito.');
+                    e.target.value = '';
+                    return;
+                }
+                const anterior = appData.sidebarCustomIcon;
+                appData.sidebarCustomIcon = event.target.result;
+                if (!saveData()) {
+                    appData.sidebarCustomIcon = anterior;
+                    updateSidebarHeader();
+                }
+                e.target.value = '';
+            };
+            reader.onerror = function() {
+                alert('Não foi possível ler o arquivo de imagem.');
+                e.target.value = '';
+            };
+            reader.readAsDataURL(file);
         }
 
         function openEditalVerticalizado() {
