@@ -1626,7 +1626,7 @@ function escapeHTML(value) {
                                                 <span class="text-sm font-bold text-indigo-400">${acertos} / ${total} acertos</span>
                                                 <p class="text-xs text-slate-400">${ap !== null ? ap + "% de aproveitamento" : "Sem questões registradas"}</p>
                                             </div>
-                                            <button onclick="deleteSimulado(${s.id})" class="text-slate-500 hover:text-red-400 text-xs p-1.5 bg-red-500/10 rounded-lg border border-red-500/20" title="Excluir Simulado"><i class="fa-solid fa-trash"></i></button>
+                                            <button onclick="deleteSimulado(${inlineHandlerArg(s.id)})" class="text-slate-500 hover:text-red-400 text-xs p-1.5 bg-red-500/10 rounded-lg border border-red-500/20" title="Excluir Simulado"><i class="fa-solid fa-trash"></i></button>
                                         </div>
                                     </div>
                                 `;
