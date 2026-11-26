@@ -67,6 +67,19 @@
         body.light-mode .bg-slate-800 {
             background-color: #e2e8f0 !important;
         }
+    
+        /* PLANNER V2 — visual refinement (isolated branch) */
+        :root { color-scheme: dark; }
+        body { background-image: radial-gradient(ellipse at 15% 0%, rgba(99,102,241,.09), transparent 38%); }
+        #sidebar { backdrop-filter: blur(18px); }
+        #sidebar nav button { transition: transform .18s ease, background .18s ease, color .18s ease; }
+        #sidebar nav button:hover { transform: translateX(2px); }
+        #view-container { scroll-behavior: smooth; }
+        #view-container > * { animation: plannerFade .22s ease both; }
+        @keyframes plannerFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        button, input, select, textarea { transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease; }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid rgba(129,140,248,.8); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
     </style>
 </head>
 <body class="h-full bg-slate-900 text-slate-100 font-sans antialiased flex md:flex-row overflow-hidden relative">
