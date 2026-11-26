@@ -1977,10 +1977,10 @@
                         (r.qAcertos === undefined || isNonNegativeInteger(r.qAcertos)) &&
                         (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
                         (r.obs === undefined || (typeof r.obs === 'string' && r.obs.length <= 10000));
-                    const validSimulado = s => isObject(s) && typeof s.nome === 'string' && s.nome.trim().length > 0 &&
-                        typeof s.data === 'string' && isValidPlannerDate(s.data) && typeof s.banca === 'string' && s.banca.trim().length > 0 &&
+                    const validSimulado = s => isObject(s) && (typeof s.id === 'string' || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) && typeof s.nome === 'string' && s.nome.trim().length > 0 && s.nome.length <= 300 &&
+                        typeof s.data === 'string' && isValidPlannerDate(s.data) && typeof s.banca === 'string' && s.banca.trim().length > 0 && s.banca.length <= 200 &&
                         isNonNegativeInteger(s.qTotal) && s.qTotal > 0 && isNonNegativeInteger(s.qAcertos) && s.qAcertos <= s.qTotal &&
-                        (s.tempo === undefined || typeof s.tempo === 'string') && (s.obs === undefined || typeof s.obs === 'string');
+                        (s.tempo === undefined || (typeof s.tempo === 'string' && s.tempo.length <= 200)) && (s.obs === undefined || (typeof s.obs === 'string' && s.obs.length <= 10000)) && (s.origem === undefined || ['manual','importado'].includes(s.origem));
                     const validPlanAction = (key, action) => /^\\d{4}-\\d{2}-\\d{2}::\\d+$/.test(key) &&
                         isValidPlannerDate(key.split('::')[0]) && isObject(action) &&
                         (action.status === undefined || ['','Concluído','Adiado','Substituído'].includes(action.status)) &&
