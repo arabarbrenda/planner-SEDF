@@ -1662,13 +1662,13 @@
             const materiaId = document.getElementById('modal-materia').value;
             const data = document.getElementById('modal-data').value;
             const plataforma = document.getElementById('modal-plataforma').value;
-            const tempo = parseInt(document.getElementById('modal-tempo').value);
-            const qTotal = parseInt(document.getElementById('modal-qtotal').value) || 0;
-            const qAcertos = parseInt(document.getElementById('modal-qacertos').value) || 0;
+            const tempo = Number(document.getElementById('modal-tempo').value);
+            const qTotal = Number(document.getElementById('modal-qtotal').value || 0);
+            const qAcertos = Number(document.getElementById('modal-qacertos').value || 0);
             const obs = document.getElementById('modal-obs').value;
 
-            if (!materiaId || !data || !Number.isFinite(tempo) || tempo < 1 ||
-                qTotal < 0 || qAcertos < 0 || qAcertos > qTotal) {
+            if (!materiaId || !isValidPlannerDate(data) || !Number.isInteger(tempo) || tempo < 1 ||
+                !Number.isInteger(qTotal) || qTotal < 0 || !Number.isInteger(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
                 alert('Confira os dados: tempo deve ser positivo e acertos não podem exceder o total de questões.');
                 return;
             }
@@ -1774,12 +1774,12 @@
             const nome = document.getElementById('sim-nome').value;
             const data = document.getElementById('sim-data').value;
             const banca = document.getElementById('sim-banca').value;
-            const qTotal = parseInt(document.getElementById('sim-qtotal').value);
-            const qAcertos = parseInt(document.getElementById('sim-qacertos').value);
+            const qTotal = Number(document.getElementById('sim-qtotal').value);
+            const qAcertos = Number(document.getElementById('sim-qacertos').value);
             const tempo = document.getElementById('sim-tempo').value;
             const obs = document.getElementById('sim-obs').value;
 
-            if (!nome.trim() || !data || !banca.trim() || !Number.isInteger(qTotal) || qTotal < 1 ||
+            if (!nome.trim() || !isValidPlannerDate(data) || !banca.trim() || !Number.isInteger(qTotal) || qTotal < 1 ||
                 !Number.isInteger(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
                 alert('Confira os dados do simulado: total deve ser um inteiro maior que zero e acertos um inteiro entre zero e o total.');
                 return;
