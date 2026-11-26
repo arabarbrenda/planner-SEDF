@@ -839,11 +839,11 @@ function escapeHTML(value) {
             const pendingTopics = appData.materias.reduce((sum, m) => sum + m.topicos.filter(t => t.status !== 'Concluído').length, 0);
             const attentionItems = getAttentionItems().slice(0, 4);
             const quickActions = [
-                {label: "Registrar estudo", icon: "fa-clock", action: "openStudyModal()", color: "indigo"},
-                {label: "Ver planejamento", icon: "fa-calendar-days", action: "switchTab('planejamento')", color: "blue"},
-                {label: "Revisões", icon: "fa-brain", action: "switchTab('revisao')", color: "amber"},
-                {label: "Simulados", icon: "fa-file-lines", action: "switchTab('simulados')", color: "purple"},
-                {label: "Edital Verticalizado", icon: "fa-list-check", action: "openEditalVerticalizado()", color: "emerald"}
+                {label: "Registrar estudo", icon: "fa-clock", action: "study", color: "indigo"},
+                {label: "Ver planejamento", icon: "fa-calendar-days", action: "planning", color: "blue"},
+                {label: "Revisões", icon: "fa-brain", action: "review", color: "amber"},
+                {label: "Simulados", icon: "fa-file-lines", action: "simulated", color: "purple"},
+                {label: "Edital Verticalizado", icon: "fa-list-check", action: "vertical", color: "emerald"}
             ];
             return `
                 <div class="space-y-6">
@@ -890,7 +890,7 @@ function escapeHTML(value) {
                     <section class="bg-slate-950 border border-slate-800 p-5 md:p-6 rounded-2xl shadow-lg">
                         <div class="flex items-center justify-between gap-3 mb-4"><h3 class="font-bold text-white"><i class="fa-solid fa-bolt text-indigo-400 mr-2"></i>Acesso rápido</h3><span class="text-xs text-slate-500">Atalhos</span></div>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                            ${quickActions.map(a => `<button onclick="${a.action}" class="p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 hover:border-indigo-500/40 transition text-left"><i class="fa-solid ${a.icon} text-indigo-400 text-lg"></i><p class="text-sm font-semibold text-white mt-2">${a.label}</p><i class="fa-solid fa-arrow-right text-slate-500 text-xs mt-2"></i></button>`).join('')}
+                            ${quickActions.map(a => `<button type="button" data-quick-action="${a.action}" class="p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 hover:border-indigo-500/40 transition text-left"><i class="fa-solid ${a.icon} text-indigo-400 text-lg"></i><p class="text-sm font-semibold text-white mt-2">${a.label}</p><i class="fa-solid fa-arrow-right text-slate-500 text-xs mt-2"></i></button>`).join('')}
                         </div>
                     </section>
 
@@ -2147,6 +2147,13 @@ function escapeHTML(value) {
             }
         }
 
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-quick-action]');
+            if (!button) return;
+            const actions = { study: openStudyModal, planning: () => switchTab('planejamento'), review: () => switchTab('revisao'), simulated: () => switchTab('simulados'), vertical: openEditalVerticalizado };
+            const action = actions[button.dataset.quickAction];
+            if (typeof action === 'function') action();
+        });
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme();
             updateQuickNav();
