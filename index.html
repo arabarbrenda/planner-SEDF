@@ -1758,9 +1758,9 @@
             const tempo = document.getElementById('sim-tempo').value;
             const obs = document.getElementById('sim-obs').value;
 
-            if (!nome.trim() || !data || !banca.trim() || !Number.isFinite(qTotal) || qTotal < 1 ||
-                !Number.isFinite(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
-                alert('Confira os dados do simulado: total deve ser maior que zero e acertos entre zero e o total.');
+            if (!nome.trim() || !data || !banca.trim() || !Number.isInteger(qTotal) || qTotal < 1 ||
+                !Number.isInteger(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
+                alert('Confira os dados do simulado: total deve ser um inteiro maior que zero e acertos um inteiro entre zero e o total.');
                 return;
             }
             if (!appData.simulados) appData.simulados = [];
