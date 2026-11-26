@@ -1014,9 +1014,12 @@
         function deleteSubject(materiaId) {
             if (confirm("Deseja realmente excluir esta matéria e todos os seus tópicos?")) {
                 const materiasAnteriores = appData.materias;
+                const planoAcoesAnterior = appData.planoAcoes || {};
                 appData.materias = appData.materias.filter(m => m.id !== materiaId);
+                appData.planoAcoes = Object.fromEntries(Object.entries(planoAcoesAnterior).filter(([key, action]) => action.materiaId !== materiaId));
                 if (!saveData()) {
                     appData.materias = materiasAnteriores;
+                    appData.planoAcoes = planoAcoesAnterior;
                     return;
                 }
                 switchTab('materias_lista');
