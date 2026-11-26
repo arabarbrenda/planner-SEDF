@@ -1764,7 +1764,7 @@
                 return;
             }
             const anterior = appData.registrosEstudo.slice();
-            const registro = { id: editId ? Number(editId) : Date.now(), materiaId, topicoId, data, plataforma, tempo, qTotal, qAcertos, obs };
+            const registro = { id: editId ? editId : Date.now(), materiaId, topicoId, data, plataforma, tempo, qTotal, qAcertos, obs };
             if(editId) appData.registrosEstudo=appData.registrosEstudo.map(r=>String(r.id)===editId?registro:r);
             else appData.registrosEstudo.push(registro);
             if (!saveData()) { appData.registrosEstudo=anterior; return; }
