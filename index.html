@@ -459,6 +459,14 @@
                     appData.registrosEstudo = Array.isArray(parsed.registrosEstudo) ? parsed.registrosEstudo : [];
                     appData.simulados = Array.isArray(parsed.simulados) ? parsed.simulados : [];
                     appData.jurisprudencia = Array.isArray(parsed.jurisprudencia) ? parsed.jurisprudencia : [];
+                    const validLocalPlanActions = value => value && typeof value === 'object' && !Array.isArray(value) &&
+                        Object.entries(value).every(([key, action]) => /^\\d{4}-\\d{2}-\\d{2}::\\d+$/.test(key) &&
+                            isValidPlannerDate(key.split('::')[0]) && action && typeof action === 'object' && !Array.isArray(action) &&
+                            (action.status === undefined || ['', 'Concluído', 'Adiado', 'Substituído'].includes(action.status)) &&
+                            (action.materiaId === undefined || typeof action.materiaId === 'string') &&
+                            (action.topicoId === undefined || typeof action.topicoId === 'string') &&
+                            (action.deferredTo === undefined || isValidPlannerDate(action.deferredTo)));
+                    if (parsed.planoAcoes !== undefined && !validLocalPlanActions(parsed.planoAcoes)) throw new Error('Planejamento local inválido.');
                     appData.planoAcoes = parsed.planoAcoes || {};
 
                     if (Array.isArray(parsed.materias)) {
