@@ -453,7 +453,7 @@
                         (parsed.registrosEstudo !== undefined && !Array.isArray(parsed.registrosEstudo)) ||
                         (parsed.simulados !== undefined && !Array.isArray(parsed.simulados)) ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
-                        (parsed.config !== undefined && (!parsed.config || typeof parsed.config !== 'object' || Array.isArray(parsed.config)))) {
+                        (parsed.config !== undefined && (!parsed.config || typeof parsed.config !== 'object' || Array.isArray(parsed.config) || Object.keys(parsed.config).some(k => k !== 'teoriaAtiva') || (parsed.config.teoriaAtiva !== undefined && typeof parsed.config.teoriaAtiva !== 'boolean')))) {
                         throw new Error('Estrutura local inválida.');
                     }
                     const localObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -2146,7 +2146,7 @@ function escapeHTML(value) {
                         (parsed.planoAcoes !== undefined && !planReferencesValidSubjectsAndTopics) ||
                         !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) || !simuladoIdsUnique ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
-                        (parsed.config !== undefined && !isObject(parsed.config)) ||
+                        (parsed.config !== undefined && (!isObject(parsed.config) || Object.keys(parsed.config).some(k => k !== 'teoriaAtiva') || (parsed.config.teoriaAtiva !== undefined && typeof parsed.config.teoriaAtiva !== 'boolean'))) ||
                         (parsed.planoAcoes !== undefined && !validPlanActions(parsed.planoAcoes))) {
                         throw new Error('Estrutura do backup inválida.');
                     }
