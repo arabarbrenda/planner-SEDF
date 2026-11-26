@@ -1970,7 +1970,7 @@
                         (isObject(t.checklist) && ['lei', 'questoes', 'erros', 'revisao', 'teoria'].every(k => typeof t.checklist[k] === 'boolean') && Object.keys(t.checklist).every(k => ['lei', 'questoes', 'erros', 'revisao', 'teoria'].includes(k)));
                     const validSubject = m => isObject(m) && validSafeId(m.id) && typeof m.nome === 'string' && m.nome.trim().length > 0 && m.nome.length <= 500 &&
                         (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
-                        (m.prioridade === undefined || typeof m.prioridade === 'string') &&
+                        (m.prioridade === undefined || (typeof m.prioridade === 'string' && m.prioridade.length <= 100)) &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
                     const validRecord = r => isObject(r) && (typeof r.id === 'string' || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) && typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 && (r.topicoId === undefined || r.topicoId === null || typeof r.topicoId === 'string') && typeof r.data === 'string' && isValidPlannerDate(r.data) && (r.plataforma === undefined || (typeof r.plataforma === 'string' && r.plataforma.length <= 200)) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
                         (r.qTotal === undefined || isNonNegativeInteger(r.qTotal)) &&
