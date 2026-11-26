@@ -1910,8 +1910,17 @@
                     const idsValidos = idsMaterias.every(id => typeof id === 'string' && id.trim().length > 0) &&
                         idsTopicos.every(id => typeof id === 'string' && id.trim().length > 0) &&
                         new Set(idsMaterias).size === idsMaterias.length && new Set(idsTopicos).size === idsTopicos.length;
+                    const subjectIdSet = new Set(idsMaterias);
+                    const topicIdSet = new Set(idsTopicos);
+                    const recordsReferenceValidSubjects = Array.isArray(parsed && parsed.registrosEstudo) &&
+                        parsed.registrosEstudo.every(r => r && subjectIdSet.has(r.materiaId));
+                    const planReferencesValidSubjectsAndTopics = parsed && parsed.planoAcoes !== undefined &&
+                        Object.values(parsed.planoAcoes).every(action => action &&
+                            (action.materiaId === undefined || subjectIdSet.has(action.materiaId)) &&
+                            (action.topicoId === undefined || topicIdSet.has(action.topicoId)));
                     if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) || !idsValidos ||
-                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) ||
+                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) || !recordsReferenceValidSubjects ||
+                        (parsed.planoAcoes !== undefined && !planReferencesValidSubjectsAndTopics) ||
                         !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
                         (parsed.config !== undefined && !isObject(parsed.config)) ||
