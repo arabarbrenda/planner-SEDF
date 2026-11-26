@@ -1558,12 +1558,19 @@
         }
 
         function saveTopicEdit(materiaId, topicoId) {
-            const novoNome = document.getElementById(`input-edit-topic-${topicoId}`).value.trim();
+            const input = document.getElementById(`input-edit-topic-${topicoId}`);
+            if (!input) return;
+            const novoNome = input.value.trim();
             if (novoNome) {
                 const m = appData.materias.find(mat => mat.id === materiaId);
-                const t = m.topicos.find(top => top.id === topicoId);
+                const t = m && m.topicos.find(top => top.id === topicoId);
+                if (!t) return;
+                const anterior = t.nome;
                 t.nome = novoNome;
-                saveData();
+                if (!saveData()) {
+                    t.nome = anterior;
+                    return;
+                }
                 renderView('materia', materiaId);
             }
         }
