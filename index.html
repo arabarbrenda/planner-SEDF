@@ -1834,9 +1834,22 @@
                         (m.icone === undefined || typeof m.icone === 'string') &&
                         (m.prioridade === undefined || typeof m.prioridade === 'string') &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
+                    const validRecord = r => isObject(r) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
+                        (r.qTotal === undefined || isNonNegativeInteger(r.qTotal)) &&
+                        (r.qAcertos === undefined || isNonNegativeInteger(r.qAcertos)) &&
+                        (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
+                        (r.obs === undefined || typeof r.obs === 'string');
+                    const validSimulado = s => isObject(s) &&
+                        (s.qTotal === undefined || isNonNegativeInteger(s.qTotal)) &&
+                        (s.qAcertos === undefined || isNonNegativeInteger(s.qAcertos)) &&
+                        (s.total === undefined || isNonNegativeInteger(s.total)) &&
+                        (s.acertos === undefined || isNonNegativeInteger(s.acertos)) &&
+                        ((s.qTotal === undefined && s.total === undefined) || (s.qAcertos === undefined && s.acertos === undefined) ||
+                         (s.qAcertos === undefined ? s.acertos : s.qAcertos) <= (s.qTotal === undefined ? s.total : s.qTotal)) &&
+                        (s.nome === undefined || typeof s.nome === 'string') && (s.obs === undefined || typeof s.obs === 'string');
                     if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) ||
-                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(isObject) ||
-                        !Array.isArray(parsed.simulados) || !parsed.simulados.every(isObject) ||
+                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) ||
+                        !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
                         (parsed.config !== undefined && !isObject(parsed.config))) {
                         throw new Error('Estrutura do backup inválida.');
