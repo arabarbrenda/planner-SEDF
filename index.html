@@ -445,7 +445,7 @@
                     appData.simulados = Array.isArray(parsed.simulados) ? parsed.simulados : [];
                     appData.jurisprudencia = Array.isArray(parsed.jurisprudencia) ? parsed.jurisprudencia : [];
 
-                    if (Array.isArray(parsed.materias) && parsed.materias.length > 0) {
+                    if (Array.isArray(parsed.materias)) {
                         appData.materias = parsed.materias.map(m => Object.assign({
                             id: m.id || ('m_' + Date.now()),
                             nome: m.nome || 'Matéria',
