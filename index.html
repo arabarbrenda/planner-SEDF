@@ -1674,12 +1674,17 @@
 
         function resetData() {
             if (confirm('Tem certeza que deseja restaurar os dados padrão?')) {
-                try {
-                    localStorage.removeItem("sga_sedf_2027_data");
-                    localStorage.removeItem("sedf_2027_db");
-                } catch(e) {}
+                const dadosAnteriores = appData;
                 appData = JSON.parse(JSON.stringify(defaultData));
-                saveData();
+                if (!saveData()) {
+                    appData = dadosAnteriores;
+                    return;
+                }
+                try {
+                    localStorage.removeItem("sedf_2027_db");
+                } catch(e) {
+                    console.warn('Não foi possível remover a chave antiga de armazenamento:', e);
+                }
                 switchTab('dashboard');
                 alert('Sistema restaurado com sucesso.');
             }
