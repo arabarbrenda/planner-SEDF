@@ -485,6 +485,17 @@
                             (action.topicoId === undefined || typeof action.topicoId === 'string') &&
                             (action.deferredTo === undefined || isValidPlannerDate(action.deferredTo)));
                     if (parsed.planoAcoes !== undefined && !validLocalPlanActions(parsed.planoAcoes)) throw new Error('Planejamento local inválido.');
+                    if (parsed.planoAcoes !== undefined && Array.isArray(parsed.materias)) {
+                        const subjectsForPlan = new Set(parsed.materias.map(m => m && m.id));
+                        const topicsForPlan = new Map();
+                        parsed.materias.forEach(m => (Array.isArray(m && m.topicos) ? m.topicos : []).forEach(t => topicsForPlan.set(t.id, m.id)));
+                        if (Object.values(parsed.planoAcoes).some(action =>
+                            (action.materiaId !== undefined && !subjectsForPlan.has(action.materiaId)) ||
+                            (action.topicoId !== undefined && (!topicsForPlan.has(action.topicoId) ||
+                                (action.materiaId !== undefined && topicsForPlan.get(action.topicoId) !== action.materiaId))))) {
+                            throw new Error('Planejamento local com referências inválidas.');
+                        }
+                    }
                     appData.planoAcoes = parsed.planoAcoes || {};
 
                     if (Array.isArray(parsed.materias)) {
