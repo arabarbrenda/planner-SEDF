@@ -434,7 +434,8 @@
             ],
             registrosEstudo: [],
             simulados: [],
-            jurisprudencia: []
+            jurisprudencia: [],
+            planoAcoes: {}
         };
 
         let appData = JSON.parse(JSON.stringify(defaultData));
@@ -458,6 +459,7 @@
                     appData.registrosEstudo = Array.isArray(parsed.registrosEstudo) ? parsed.registrosEstudo : [];
                     appData.simulados = Array.isArray(parsed.simulados) ? parsed.simulados : [];
                     appData.jurisprudencia = Array.isArray(parsed.jurisprudencia) ? parsed.jurisprudencia : [];
+                    appData.planoAcoes = parsed.planoAcoes || {};
 
                     if (Array.isArray(parsed.materias)) {
                         const migrationIdBase = Date.now();
@@ -1879,6 +1881,13 @@
                         typeof s.data === 'string' && isValidPlannerDate(s.data) && typeof s.banca === 'string' && s.banca.trim().length > 0 &&
                         isNonNegativeInteger(s.qTotal) && s.qTotal > 0 && isNonNegativeInteger(s.qAcertos) && s.qAcertos <= s.qTotal &&
                         (s.tempo === undefined || typeof s.tempo === 'string') && (s.obs === undefined || typeof s.obs === 'string');
+                    const validPlanAction = (key, action) => /^\\d{4}-\\d{2}-\\d{2}::\\d+$/.test(key) &&
+                        isValidPlannerDate(key.split('::')[0]) && isObject(action) &&
+                        (action.status === undefined || ['','Concluído','Adiado','Substituído'].includes(action.status)) &&
+                        (action.materiaId === undefined || typeof action.materiaId === 'string') &&
+                        (action.topicoId === undefined || typeof action.topicoId === 'string') &&
+                        (action.deferredTo === undefined || isValidPlannerDate(action.deferredTo));
+                    const validPlanActions = value => isObject(value) && Object.entries(value).every(([key, action]) => validPlanAction(key, action));
                     const idsMaterias = Array.isArray(parsed && parsed.materias) ? parsed.materias.map(m => m && m.id) : [];
                     const idsTopicos = Array.isArray(parsed && parsed.materias) ? parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []) : [];
                     const idsValidos = idsMaterias.every(id => typeof id === 'string' && id.trim().length > 0) &&
@@ -1888,7 +1897,8 @@
                         !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) ||
                         !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
-                        (parsed.config !== undefined && !isObject(parsed.config))) {
+                        (parsed.config !== undefined && !isObject(parsed.config)) ||
+                        (parsed.planoAcoes !== undefined && !validPlanActions(parsed.planoAcoes))) {
                         throw new Error('Estrutura do backup inválida.');
                     }
                     if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
