@@ -1856,8 +1856,9 @@
                     const parsed = JSON.parse(reader.result);
                     const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
                     const isNonNegativeInteger = value => Number.isInteger(value) && value >= 0;
-                    const validTopic = t => isObject(t) && typeof t.id === 'string' && typeof t.nome === 'string' &&
-                        (t.status === undefined || typeof t.status === 'string') &&
+                    const validStatuses = ['Não iniciado', 'Estudando', 'Rever', 'Concluído'];
+                    const validTopic = t => isObject(t) && typeof t.id === 'string' && t.id.trim().length > 0 && typeof t.nome === 'string' &&
+                        (t.status === undefined || validStatuses.includes(t.status)) &&
                         (t.anotaçoes === undefined || typeof t.anotaçoes === 'string') &&
                         (t.questoesTotal === undefined || isNonNegativeInteger(t.questoesTotal)) &&
                         (t.questoesAcertos === undefined || isNonNegativeInteger(t.questoesAcertos)) &&
@@ -1880,7 +1881,12 @@
                         ((s.qTotal === undefined && s.total === undefined) || (s.qAcertos === undefined && s.acertos === undefined) ||
                          (s.qAcertos === undefined ? s.acertos : s.qAcertos) <= (s.qTotal === undefined ? s.total : s.qTotal)) &&
                         (s.nome === undefined || typeof s.nome === 'string') && (s.obs === undefined || typeof s.obs === 'string');
-                    if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) ||
+                    const idsMaterias = Array.isArray(parsed && parsed.materias) ? parsed.materias.map(m => m && m.id) : [];
+                    const idsTopicos = Array.isArray(parsed && parsed.materias) ? parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []) : [];
+                    const idsValidos = idsMaterias.every(id => typeof id === 'string' && id.trim().length > 0) &&
+                        idsTopicos.every(id => typeof id === 'string' && id.trim().length > 0) &&
+                        new Set(idsMaterias).size === idsMaterias.length && new Set(idsTopicos).size === idsTopicos.length;
+                    if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) || !idsValidos ||
                         !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) ||
                         !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
