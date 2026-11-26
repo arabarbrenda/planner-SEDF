@@ -1764,18 +1764,22 @@
                 return;
             }
             if (!appData.simulados) appData.simulados = [];
-            appData.simulados.push({
+            const simulado = {
                 id: Date.now(),
-                nome,
+                nome: nome.trim(),
                 data,
-                banca,
+                banca: banca.trim(),
                 qTotal,
                 qAcertos,
                 tempo,
                 obs,
                 origem: 'manual'
-            });
-            saveData();
+            };
+            appData.simulados.push(simulado);
+            if (!saveData()) {
+                appData.simulados = appData.simulados.filter(s => s.id !== simulado.id);
+                return;
+            }
             closeSimuladoModal();
             renderView('simulados');
             alert('Simulado cadastrado com sucesso!');
