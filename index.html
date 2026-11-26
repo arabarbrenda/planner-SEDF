@@ -148,9 +148,7 @@
                 <i id="theme-icon" class="fa-solid fa-sun text-amber-400"></i>
                 <span id="theme-text">Alternar Modo Claro</span>
             </button>
-            <button type="button" onclick="exportToGoogleCalendar()" class="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 py-2 px-3 rounded-xl text-xs font-semibold border border-indigo-500/30 transition flex items-center justify-center space-x-1.5">
-                <i class="fa-brands fa-google"></i><span>Exportar p/ Google Agenda</span>
-            </button>
+            
         </div>
     </aside>
 <!-- CONTEÚDO PRINCIPAL -->
@@ -182,7 +180,11 @@
             <form id="study-form" onsubmit="handleStudySubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Matéria</label>
-                    <select id="modal-materia" required class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></select>
+                    <select id="modal-materia" required onchange="populateStudyTopics()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tópico</label>
+                    <select id="modal-topico" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"><option value="">Sessão geral da matéria (sem tópico)</option></select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -495,8 +497,10 @@
                     }
                 }
             } catch (e) {
-                console.warn('Dados locais inválidos; usando valores padrão:', e);
+                console.error('Dados locais inválidos. Preservando conteúdo original para recuperação.', e);
+                try { const damaged=localStorage.getItem("sga_sedf_2027_data")||localStorage.getItem("sedf_2027_db"); if(damaged) localStorage.setItem("sga_sedf_2027_data_recovery",damaged); } catch(recoveryError) {}
                 appData = JSON.parse(JSON.stringify(defaultData));
+                window.__plannerDataRecoveryBlocked = true;
             }
 
             if (!appData.examDate) appData.examDate = "2027-05-20";
@@ -534,6 +538,10 @@
         }
 
         function saveData() {
+            if(window.__plannerDataRecoveryBlocked && !window.__plannerRecoveryConfirmed) {
+                alert('Os dados locais anteriores foram preservados para recuperação. Importe um backup ou confirme a restauração antes de salvar novos dados.');
+                return false;
+            }
             try {
                 localStorage.setItem("sga_sedf_2027_data", JSON.stringify(appData));
             } catch(e) {
@@ -610,13 +618,6 @@
             }
         }
 
-        function exportToGoogleCalendar() {
-            const title = encodeURIComponent("Estudos SEDF 2027 - PLANNER DA BRE");
-            const details = encodeURIComponent("Rotina diária de estudos para Analista - Apoio Administrativo SEDF 2027.");
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=20261123T140000Z/20270520T180000Z&recur=RRULE:FREQ=DAILY`;
-            window.open(url, '_blank');
-        }
-
         function openEditalVerticalizado() {
             const editalText = `EDITAL VERTICALIZADO - SEDF 2027\nCARGO: ANALISTA EM POLÍTICAS PÚBLICAS E GESTÃO EDUCACIONAL - APOIO ADMINISTRATIVO\nBANCA: INSTITUTO QUADRIX\n\n`;
             let conteudo = editalText;
@@ -632,6 +633,24 @@
             window.open(url, '_blank');
         }
 
+        function getTopicQuestionStats(topicoId) {
+            const records = (appData.registrosEstudo || []).filter(r => r.topicoId === topicoId);
+            return { total: records.reduce((a,r)=>a+(Number(r.qTotal)||0),0), correct: records.reduce((a,r)=>a+(Number(r.qAcertos)||0),0) };
+        }
+        function getDerivedQuestionStats() {
+            const records = (appData.registrosEstudo || []).filter(r => Number(r.qTotal)>0);
+            return { total: records.reduce((a,r)=>a+(Number(r.qTotal)||0),0), correct: records.reduce((a,r)=>a+(Number(r.qAcertos)||0),0) };
+        }
+        function populateStudyTopics(selectedId = '') {
+            const subject = appData.materias.find(m=>m.id===document.getElementById('modal-materia').value);
+            const select=document.getElementById('modal-topico');
+            if(!select)return;
+            select.innerHTML='<option value="">Sessão geral da matéria (sem tópico)</option>'+(subject?subject.topicos.map(t=>'<option value="'+escapeHTML(t.id)+'">'+escapeHTML(t.nome)+'</option>').join():'');
+            if(selectedId)select.value=selectedId;
+        }
+        function escapeHTML(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
         function getGlobalStats() {
             let totalTopicos = 0;
             let concluidos = 0;
@@ -643,14 +662,16 @@
                 m.topicos.forEach(t => {
                     totalTopicos++;
                     if (t.status === 'Concluído') concluidos++;
-                    totalQuestoes += (t.questoesTotal || 0);
-                    totalAcertos += (t.questoesAcertos || 0);
+
                 });
             });
 
             appData.registrosEstudo.forEach(r => {
                 totalMinutos += (r.tempo || 0);
             });
+            const derivedQuestions = getDerivedQuestionStats();
+            totalQuestoes = derivedQuestions.total;
+            totalAcertos = derivedQuestions.correct;
 
             const progressoGeral = totalTopicos > 0 ? Math.round((concluidos / totalTopicos) * 100) : 0;
             const aproveitamentoGeral = totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
@@ -805,7 +826,8 @@
             let items = [];
             appData.materias.forEach(m => {
                 m.topicos.forEach(t => {
-                    const ap = t.questoesTotal > 0 ? Math.round((t.questoesAcertos / t.questoesTotal) * 100) : null;
+                    const stats = getTopicQuestionStats(t.id);
+                    const ap = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : null;
                     if (t.status === 'Rever') {
                         items.push({ materia: m.nome, topico: t.nome, motivo: 'Marcado como Rever' });
                     } else if (ap !== null && ap < 60) {
@@ -823,9 +845,10 @@
             let itensBaixos = [];
             appData.materias.forEach(m => {
                 m.topicos.forEach(t => {
-                    const ap = t.questoesTotal > 0 ? Math.round((t.questoesAcertos / t.questoesTotal) * 100) : null;
+                    const stats = getTopicQuestionStats(t.id);
+                    const ap = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : null;
                     if (ap !== null && ap < 60) {
-                        itensBaixos.push({ materiaId: m.id, materia: m.nome, icone: m.icone, topico: t.nome, qTotal: t.questoesTotal, qAcertos: t.questoesAcertos, ap });
+                        itensBaixos.push({ materiaId: m.id, materia: m.nome, icone: m.icone, topico: t.nome, qTotal: stats.total, qAcertos: stats.correct, ap });
                     }
                 });
             });
@@ -1696,7 +1719,9 @@
 
         function openStudyModal() {
             const select = document.getElementById('modal-materia');
-            select.innerHTML = appData.materias.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+            select.innerHTML = appData.materias.map(m => `<option value="${escapeHTML(m.id)}">${escapeHTML(m.nome)}</option>`).join('');
+            populateStudyTopics();
+            document.getElementById('study-form').dataset.editId = '';
             document.getElementById('modal-data').value = getLocalDateISO();
             document.getElementById('study-modal').classList.remove('hidden');
             document.getElementById('study-modal').classList.add('flex');
@@ -1716,21 +1741,42 @@
             const qTotal = Number(document.getElementById('modal-qtotal').value || 0);
             const qAcertos = Number(document.getElementById('modal-qacertos').value || 0);
             const obs = document.getElementById('modal-obs').value;
+            const topicoId = document.getElementById('modal-topico').value || null;
+            const editId = document.getElementById('study-form').dataset.editId;
 
             if (!materiaId || !isValidPlannerDate(data) || !Number.isInteger(tempo) || tempo < 1 ||
                 !Number.isInteger(qTotal) || qTotal < 0 || !Number.isInteger(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
                 alert('Confira os dados: tempo deve ser positivo e acertos não podem exceder o total de questões.');
                 return;
             }
-            const registro = { id: Date.now(), materiaId, data, plataforma, tempo, qTotal, qAcertos, obs };
-            appData.registrosEstudo.push(registro);
-            if (!saveData()) {
-                appData.registrosEstudo = appData.registrosEstudo.filter(r => r.id !== registro.id);
-                return;
-            }
+            const anterior = appData.registrosEstudo.slice();
+            const registro = { id: editId ? Number(editId) : Date.now(), materiaId, topicoId, data, plataforma, tempo, qTotal, qAcertos, obs };
+            if(editId) appData.registrosEstudo=appData.registrosEstudo.map(r=>String(r.id)===editId?registro:r);
+            else appData.registrosEstudo.push(registro);
+            if (!saveData()) { appData.registrosEstudo=anterior; return; }
             closeStudyModal();
             switchTab(currentActiveTab, currentActiveTab === 'materia' ? materiaId : null);
-            alert('Sessão de estudo registrada com sucesso!');
+            alert(editId ? 'Sessão atualizada!' : 'Sessão de estudo registrada com sucesso!');
+        }
+        function editStudyRecord(id) {
+            const r=appData.registrosEstudo.find(x=>String(x.id)===String(id)); if(!r)return;
+            openStudyModal();
+            document.getElementById('study-form').dataset.editId=String(r.id);
+            document.getElementById('modal-materia').value=r.materiaId;
+            populateStudyTopics(r.topicoId||'');
+            document.getElementById('modal-data').value=r.data||getLocalDateISO();
+            document.getElementById('modal-plataforma').value=r.plataforma||'Tec Concursos';
+            document.getElementById('modal-tempo').value=r.tempo||60;
+            document.getElementById('modal-qtotal').value=r.qTotal||0;
+            document.getElementById('modal-qacertos').value=r.qAcertos||0;
+            document.getElementById('modal-obs').value=r.obs||'';
+        }
+        function deleteStudyRecord(id) {
+            if(!confirm('Excluir esta sessão de estudo?'))return;
+            const old=appData.registrosEstudo.slice();
+            appData.registrosEstudo=appData.registrosEstudo.filter(r=>String(r.id)!==String(id));
+            if(!saveData()){appData.registrosEstudo=old;return;}
+            renderView(currentActiveTab);
         }
 
         function updateTopicStatus(materiaId, topicoId, status) {
@@ -1942,6 +1988,8 @@
                         throw new Error('Estrutura do backup inválida.');
                     }
                     if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
+                    window.__plannerRecoveryConfirmed = true;
+                    window.__plannerDataRecoveryBlocked = false;
                     const dadosAnteriores = appData;
                     appData = Object.assign({}, JSON.parse(JSON.stringify(defaultData)), parsed);
                     appData.config = Object.assign({}, defaultData.config, parsed.config || {});
@@ -1961,7 +2009,9 @@
         }
 
         function resetData() {
-            if (confirm('Tem certeza que deseja restaurar os dados padrão?')) {
+            if (confirm('Tem certeza que deseja restaurar os dados padrão? Os dados locais danificados foram preservados em uma cópia de recuperação.')) {
+                window.__plannerRecoveryConfirmed = true;
+                window.__plannerDataRecoveryBlocked = false;
                 const dadosAnteriores = appData;
                 appData = JSON.parse(JSON.stringify(defaultData));
                 if (!saveData()) {
