@@ -2171,7 +2171,13 @@ function escapeHTML(value) {
                         !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) || !simuladoIdsUnique ||
                         (parsed.jurisprudencia !== undefined && (!Array.isArray(parsed.jurisprudencia) || parsed.jurisprudencia.length > 1000 || !parsed.jurisprudencia.every(j => isObject(j) && typeof j.tribunal === 'string' && j.tribunal.length <= 200 && typeof j.materia === 'string' && j.materia.length <= 500 && typeof j.tema === 'string' && j.tema.length <= 2000 && typeof j.tese === 'string' && j.tese.length <= 10000 && (j.data === undefined || (typeof j.data === 'string' && isValidPlannerDate(j.data))))) ||
                         (parsed.config !== undefined && (!isObject(parsed.config) || Object.keys(parsed.config).some(k => k !== 'teoriaAtiva') || (parsed.config.teoriaAtiva !== undefined && typeof parsed.config.teoriaAtiva !== 'boolean'))) || (parsed.sidebarCustomIcon !== undefined && parsed.sidebarCustomIcon !== null && (typeof parsed.sidebarCustomIcon !== 'string' || parsed.sidebarCustomIcon.length > 1400000 || !/^data:image\/(png|jpeg|gif|webp);base64,/i.test(parsed.sidebarCustomIcon))) ||
-                        (parsed.planoAcoes !== undefined && !validPlanActions(parsed.planoAcoes))) {
+                        (parsed.planoAcoes !== undefined && !validPlanActions(parsed.planoAcoes)) ||
+                        (parsed.examDate !== undefined && !isValidPlannerDate(parsed.examDate)) ||
+                        (parsed.startDate !== undefined && !isValidPlannerDate(parsed.startDate)) ||
+                        (parsed.consultDate !== undefined && !isValidPlannerDate(parsed.consultDate)) ||
+                        (parsed.theme !== undefined && !['light','dark'].includes(parsed.theme)) ||
+                        (parsed.headerTitle !== undefined && (typeof parsed.headerTitle !== 'string' || parsed.headerTitle.length > 200)) ||
+                        (parsed.headerSubtitle !== undefined && (typeof parsed.headerSubtitle !== 'string' || parsed.headerSubtitle.length > 300))) {
                         throw new Error('Estrutura do backup inválida.');
                     }
                     if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
