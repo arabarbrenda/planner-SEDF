@@ -1867,7 +1867,7 @@
                         (t.questoesTotal === undefined || t.questoesAcertos === undefined || t.questoesAcertos <= t.questoesTotal) &&
                         (t.checklist === undefined || (isObject(t.checklist) && Object.values(t.checklist).every(v => typeof v === 'boolean')));
                     const validSubject = m => isObject(m) && typeof m.id === 'string' && typeof m.nome === 'string' &&
-                        (m.icone === undefined || typeof m.icone === 'string') &&
+                        (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
                         (m.prioridade === undefined || typeof m.prioridade === 'string') &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
                     const validRecord = r => isObject(r) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
