@@ -1434,7 +1434,7 @@
                             ${appData.simulados && appData.simulados.length > 0 ? appData.simulados.map(s => {
                                 const total = s.qTotal || s.total || 0;
                                 const acertos = s.qAcertos || s.acertos || 0;
-                                const ap = total > 0 ? Math.round((acertos / total) * 100) : 0;
+                                const ap = total > 0 ? Math.round((acertos / total) * 100) : null;
                                 return `
                                     <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                                         <div>
@@ -1447,7 +1447,7 @@
                                         <div class="flex items-center space-x-4 w-full md:w-auto justify-between">
                                             <div class="text-right">
                                                 <span class="text-sm font-bold text-indigo-400">${acertos} / ${total} acertos</span>
-                                                <p class="text-xs text-slate-400">${ap}% de aproveitamento</p>
+                                                <p class="text-xs text-slate-400">${ap !== null ? ap + "% de aproveitamento" : "Sem questões registradas"}</p>
                                             </div>
                                             <button onclick="deleteSimulado(${s.id})" class="text-slate-500 hover:text-red-400 text-xs p-1.5 bg-red-500/10 rounded-lg border border-red-500/20" title="Excluir Simulado"><i class="fa-solid fa-trash"></i></button>
                                         </div>
