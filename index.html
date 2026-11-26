@@ -1942,6 +1942,10 @@
             const file = event.target.files && event.target.files[0];
             event.target.value = '';
             if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('O arquivo de backup excede o limite de 5 MB.');
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function() {
                 try {
@@ -1983,16 +1987,25 @@
                         new Set(idsMaterias).size === idsMaterias.length && new Set(idsTopicos).size === idsTopicos.length;
                     const subjectIdSet = new Set(idsMaterias);
                     const topicIdSet = new Set(idsTopicos);
+                    const topicOwnerById = new Map();
+                    (parsed && Array.isArray(parsed.materias) ? parsed.materias : []).forEach(m =>
+                        (Array.isArray(m.topicos) ? m.topicos : []).forEach(t => topicOwnerById.set(t.id, m.id)));
                     const recordsReferenceValidSubjects = Array.isArray(parsed && parsed.registrosEstudo) &&
-                        parsed.registrosEstudo.every(r => r && subjectIdSet.has(r.materiaId));
+                        parsed.registrosEstudo.every(r => r && subjectIdSet.has(r.materiaId) &&
+                            (r.topicoId === undefined || r.topicoId === null || (topicIdSet.has(r.topicoId) && topicOwnerById.get(r.topicoId) === r.materiaId)));
+                    const sessionIds = Array.isArray(parsed && parsed.registrosEstudo) ? parsed.registrosEstudo.map(r => r && r.id).filter(id => id !== undefined && id !== null) : [];
+                    const sessionIdsUnique = new Set(sessionIds.map(String)).size === sessionIds.length;
+                    const simuladoIds = Array.isArray(parsed && parsed.simulados) ? parsed.simulados.map(s => s && s.id).filter(id => id !== undefined && id !== null) : [];
+                    const simuladoIdsUnique = new Set(simuladoIds.map(String)).size === simuladoIds.length;
                     const planReferencesValidSubjectsAndTopics = parsed && parsed.planoAcoes !== undefined &&
                         Object.values(parsed.planoAcoes).every(action => action &&
                             (action.materiaId === undefined || subjectIdSet.has(action.materiaId)) &&
-                            (action.topicoId === undefined || topicIdSet.has(action.topicoId)));
+                            (action.topicoId === undefined || (topicIdSet.has(action.topicoId) &&
+                                (action.materiaId === undefined || topicOwnerById.get(action.topicoId) === action.materiaId))));
                     if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) || !idsValidos ||
-                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) || !recordsReferenceValidSubjects ||
+                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(validRecord) || !recordsReferenceValidSubjects || !sessionIdsUnique ||
                         (parsed.planoAcoes !== undefined && !planReferencesValidSubjectsAndTopics) ||
-                        !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) ||
+                        !Array.isArray(parsed.simulados) || !parsed.simulados.every(validSimulado) || !simuladoIdsUnique ||
                         (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
                         (parsed.config !== undefined && !isObject(parsed.config)) ||
                         (parsed.planoAcoes !== undefined && !validPlanActions(parsed.planoAcoes))) {
