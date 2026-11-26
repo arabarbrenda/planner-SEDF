@@ -1875,14 +1875,10 @@
                         (r.qAcertos === undefined || isNonNegativeInteger(r.qAcertos)) &&
                         (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
                         (r.obs === undefined || typeof r.obs === 'string');
-                    const validSimulado = s => isObject(s) &&
-                        (s.qTotal === undefined || isNonNegativeInteger(s.qTotal)) &&
-                        (s.qAcertos === undefined || isNonNegativeInteger(s.qAcertos)) &&
-                        (s.total === undefined || isNonNegativeInteger(s.total)) &&
-                        (s.acertos === undefined || isNonNegativeInteger(s.acertos)) &&
-                        ((s.qTotal === undefined && s.total === undefined) || (s.qAcertos === undefined && s.acertos === undefined) ||
-                         (s.qAcertos === undefined ? s.acertos : s.qAcertos) <= (s.qTotal === undefined ? s.total : s.qTotal)) &&
-                        (s.nome === undefined || typeof s.nome === 'string') && (s.obs === undefined || typeof s.obs === 'string');
+                    const validSimulado = s => isObject(s) && typeof s.nome === 'string' && s.nome.trim().length > 0 &&
+                        typeof s.data === 'string' && isValidPlannerDate(s.data) && typeof s.banca === 'string' && s.banca.trim().length > 0 &&
+                        isNonNegativeInteger(s.qTotal) && s.qTotal > 0 && isNonNegativeInteger(s.qAcertos) && s.qAcertos <= s.qTotal &&
+                        (s.tempo === undefined || typeof s.tempo === 'string') && (s.obs === undefined || typeof s.obs === 'string');
                     const idsMaterias = Array.isArray(parsed && parsed.materias) ? parsed.materias.map(m => m && m.id) : [];
                     const idsTopicos = Array.isArray(parsed && parsed.materias) ? parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []) : [];
                     const idsValidos = idsMaterias.every(id => typeof id === 'string' && id.trim().length > 0) &&
