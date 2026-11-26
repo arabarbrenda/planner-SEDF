@@ -738,7 +738,17 @@
             const subject = appData.materias.find(m=>m.id===document.getElementById('modal-materia').value);
             const select=document.getElementById('modal-topico');
             if(!select)return;
-            select.innerHTML='<option value="">Sessão geral da matéria (sem tópico)</option>'+(subject?subject.topicos.map(t=>'<option value="'+escapeHTML(t.id)+'">'+escapeHTML(t.nome)+'</option>').join():'');
+            select.replaceChildren();
+            const generalOption=document.createElement('option');
+            generalOption.value='';
+            generalOption.textContent='Sessão geral da matéria (sem tópico)';
+            select.append(generalOption);
+            if(subject) subject.topicos.forEach(t=>{
+                const option=document.createElement('option');
+                option.value=String(t.id);
+                option.textContent=String(t.nome ?? '');
+                select.append(option);
+            });
             if(selectedId)select.value=selectedId;
         }
                 function inlineHandlerArg(value) { return escapeHTML(JSON.stringify(String(value))); }
