@@ -741,7 +741,8 @@
             select.innerHTML='<option value="">Sessão geral da matéria (sem tópico)</option>'+(subject?subject.topicos.map(t=>'<option value="'+escapeHTML(t.id)+'">'+escapeHTML(t.nome)+'</option>').join():'');
             if(selectedId)select.value=selectedId;
         }
-        function escapeHTML(value) {
+                function inlineHandlerArg(value) { return escapeHTML(JSON.stringify(String(value))); }
+function escapeHTML(value) {
             return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
         function getGlobalStats() {
@@ -899,7 +900,7 @@
                             <div class="space-y-3">
                                 ${appData.materias.slice(0,6).map(m => {
                                     const total=m.topicos.length, done=m.topicos.filter(t=>t.status==='Concluído').length, percent=total?Math.round(done/total*100):0;
-                                    return `<button onclick="switchTab('materia','${m.id}')" class="w-full text-left p-2 rounded-lg hover:bg-slate-900 transition"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300 truncate"><i class="fa-solid ${m.icone} text-indigo-400 mr-2"></i>${escapeHTML(m.nome)}</span><span class="text-slate-400 font-semibold">${percent}%</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${percent}%"></div></div></button>`;
+                                    return `<button onclick="switchTab('materia',${inlineHandlerArg(m.id)})" class="w-full text-left p-2 rounded-lg hover:bg-slate-900 transition"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300 truncate"><i class="fa-solid ${m.icone} text-indigo-400 mr-2"></i>${escapeHTML(m.nome)}</span><span class="text-slate-400 font-semibold">${percent}%</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${percent}%"></div></div></button>`;
                                 }).join('')}
                             </div>
                         </div>
@@ -974,7 +975,7 @@
                                             <span class="text-xs font-bold text-red-400">${item.ap}% de Aproveitamento</span>
                                             <p class="text-[10px] text-slate-400">${item.qAcertos} acertos / ${item.qTotal} questões</p>
                                         </div>
-                                        <button onclick="switchTab('materia', '${item.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow">Revisar Tópico</button>
+                                        <button onclick="switchTab('materia', ${inlineHandlerArg(item.materiaId)})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow">Revisar Tópico</button>
                                     </div>
                                 </div>
                             `).join('') : `
@@ -1003,17 +1004,17 @@
                             </div>
                             <div>
                                 <div class="flex items-center space-x-2 group">
-                                    <h3 class="text-xl font-bold text-white cursor-pointer" onclick="editSubjectTitle('${materia.id}')" title="Clique para editar nome da matéria">${escapeHTML(materia.nome)}</h3>
-                                    <button onclick="editSubjectTitle('${materia.id}')" class="text-slate-500 hover:text-indigo-400 text-xs opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pencil"></i></button>
+                                    <h3 class="text-xl font-bold text-white cursor-pointer" onclick="editSubjectTitle(${inlineHandlerArg(materia.id)})" title="Clique para editar nome da matéria">${escapeHTML(materia.nome)}</h3>
+                                    <button onclick="editSubjectTitle(${inlineHandlerArg(materia.id)})" class="text-slate-500 hover:text-indigo-400 text-xs opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pencil"></i></button>
                                 </div>
                                 <div class="flex items-center space-x-2 mt-1">
                                     <span class="text-xs text-slate-400">Prioridade:</span>
-                                    <select onchange="updateSubjectPriority('${materia.id}', this.value)" class="bg-slate-900 border border-slate-800 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-indigo-500 ${materia.prioridade === 'Alta' ? 'text-red-400 bg-red-950/30' : materia.prioridade === 'Média' ? 'text-blue-400 bg-blue-950/30' : 'text-slate-300 bg-slate-800'}">
+                                    <select onchange="updateSubjectPriority(${inlineHandlerArg(materia.id)}, this.value)" class="bg-slate-900 border border-slate-800 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-indigo-500 ${materia.prioridade === 'Alta' ? 'text-red-400 bg-red-950/30' : materia.prioridade === 'Média' ? 'text-blue-400 bg-blue-950/30' : 'text-slate-300 bg-slate-800'}">
                                         <option value="Alta" ${materia.prioridade === 'Alta' ? 'selected' : ''}>Alta (Vermelho)</option>
                                         <option value="Média" ${materia.prioridade === 'Média' ? 'selected' : ''}>Média (Azul)</option>
                                         <option value="Baixa" ${materia.prioridade === 'Baixa' ? 'selected' : ''}>Baixa (Cinza)</option>
                                     </select>
-                                    <span class="text-xs text-slate-500">| ${total} tópicos | <button onclick="deleteSubject('${materia.id}')" class="text-red-400 hover:text-red-300 font-semibold"><i class="fa-solid fa-trash mr-1"></i>Excluir Matéria</button></span>
+                                    <span class="text-xs text-slate-500">| ${total} tópicos | <button onclick="deleteSubject(${inlineHandlerArg(materia.id)})" class="text-red-400 hover:text-red-300 font-semibold"><i class="fa-solid fa-trash mr-1"></i>Excluir Matéria</button></span>
                                 </div>
                             </div>
                         </div>
@@ -1031,7 +1032,7 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="text-lg font-bold text-white">Tópicos do Edital Verticalizado</h4>
-                            <button onclick="openNewTopicModal('${materia.id}')" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-2">
+                            <button onclick="openNewTopicModal(${inlineHandlerArg(materia.id)})" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-2">
                                 <i class="fa-solid fa-plus"></i><span>Adicionar Tópico</span>
                             </button>
                         </div>
@@ -1046,40 +1047,40 @@
                                                 <i class="fa-solid fa-circle-dot text-indigo-400 text-sm"></i>
                                                 <div id="topic-name-container-${t.id}" class="flex items-center space-x-2 flex-1">
                                                     <span class="font-semibold text-white text-base" id="topic-title-${t.id}">${escapeHTML(t.nome)}</span>
-                                                    <button onclick="enableTopicEdit('${materia.id}', '${t.id}')" title="Editar nome do tópico" class="text-slate-400 hover:text-indigo-400 text-xs p-1"><i class="fa-solid fa-pencil"></i></button>
+                                                    <button onclick="enableTopicEdit(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)})" title="Editar nome do tópico" class="text-slate-400 hover:text-indigo-400 text-xs p-1"><i class="fa-solid fa-pencil"></i></button>
                                                 </div>
                                             </div>
                                             <div class="flex items-center space-x-3 w-full md:w-auto justify-between">
-                                                <select onchange="updateTopicStatus('${materia.id}', '${t.id}', this.value)" class="bg-slate-900 border border-slate-800 text-xs text-white rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500 font-medium">
+                                                <select onchange="updateTopicStatus(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, this.value)" class="bg-slate-900 border border-slate-800 text-xs text-white rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500 font-medium">
                                                     <option value="Não iniciado" ${t.status==='Não iniciado'?'selected':''}>Não iniciado</option>
                                                     <option value="Estudando" ${t.status==='Estudando'?'selected':''}>Estudando</option>
                                                     <option value="Rever" ${t.status==='Rever'?'selected':''}>Rever</option>
                                                     <option value="Concluído" ${t.status==='Concluído'?'selected':''}>Concluído</option>
                                                 </select>
-                                                <button onclick="clearTopicData('${materia.id}', '${t.id}')" title="Limpar dados do tópico" class="text-amber-400 hover:text-amber-300 text-sm p-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20"><i class="fa-solid fa-eraser"></i></button>
-                                                <button onclick="deleteTopic('${materia.id}', '${t.id}')" title="Excluir tópico" class="text-slate-500 hover:text-red-400 text-sm p-1.5 bg-red-500/10 rounded-lg border border-red-500/20"><i class="fa-solid fa-trash"></i></button>
+                                                <button onclick="clearTopicData(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)})" title="Limpar dados do tópico" class="text-amber-400 hover:text-amber-300 text-sm p-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20"><i class="fa-solid fa-eraser"></i></button>
+                                                <button onclick="deleteTopic(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)})" title="Excluir tópico" class="text-slate-500 hover:text-red-400 text-sm p-1.5 bg-red-500/10 rounded-lg border border-red-500/20"><i class="fa-solid fa-trash"></i></button>
                                             </div>
                                         </div>
 
                                         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-slate-900">
                                             <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/50 p-2 rounded-xl border border-slate-800/60">
-                                                <input type="checkbox" ${t.checklist.lei ? 'checked' : ''} onchange="toggleChecklist('${materia.id}', '${t.id}', 'lei')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                                                <input type="checkbox" ${t.checklist.lei ? 'checked' : ''} onchange="toggleChecklist(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, 'lei')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
                                                 <span>Lei Seca</span>
                                             </label>
                                             <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/50 p-2 rounded-xl border border-slate-800/60">
-                                                <input type="checkbox" ${t.checklist.questoes ? 'checked' : ''} onchange="toggleChecklist('${materia.id}', '${t.id}', 'questoes')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                                                <input type="checkbox" ${t.checklist.questoes ? 'checked' : ''} onchange="toggleChecklist(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, 'questoes')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
                                                 <span>Questões</span>
                                             </label>
                                             <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/50 p-2 rounded-xl border border-slate-800/60">
-                                                <input type="checkbox" ${t.checklist.erros ? 'checked' : ''} onchange="toggleChecklist('${materia.id}', '${t.id}', 'erros')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                                                <input type="checkbox" ${t.checklist.erros ? 'checked' : ''} onchange="toggleChecklist(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, 'erros')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
                                                 <span>Caderno Erros</span>
                                             </label>
                                             <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/50 p-2 rounded-xl border border-slate-800/60">
-                                                <input type="checkbox" ${t.checklist.revisao ? 'checked' : ''} onchange="toggleChecklist('${materia.id}', '${t.id}', 'revisao')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                                                <input type="checkbox" ${t.checklist.revisao ? 'checked' : ''} onchange="toggleChecklist(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, 'revisao')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
                                                 <span>Revisão</span>
                                             </label>
                                             <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-900/50 p-2 rounded-xl border border-slate-800/60">
-                                                <input type="checkbox" ${t.checklist.teoria ? 'checked' : ''} onchange="toggleChecklist('${materia.id}', '${t.id}', 'teoria')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                                                <input type="checkbox" ${t.checklist.teoria ? 'checked' : ''} onchange="toggleChecklist(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, 'teoria')" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
                                                 <span>Teoria</span>
                                             </label>
                                         </div>
@@ -1087,7 +1088,7 @@
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                             <div class="md:col-span-2">
                                                 <label class="block text-xs font-semibold text-slate-400 mb-1">Anotações do Tópico</label>
-                                                <textarea onchange="updateTopicNotes('${materia.id}', '${t.id}', this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Insira suas anotações...">${escapeHTML(t.anotaçoes || '')}</textarea>
+                                                <textarea onchange="updateTopicNotes(${inlineHandlerArg(materia.id)}, ${inlineHandlerArg(t.id)}, this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Insira suas anotações...">${escapeHTML(t.anotaçoes || '')}</textarea>
                                             </div>
                                             <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
                                                     <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Questões registradas (sessões)</h5>
@@ -1102,7 +1103,7 @@
                                                         ${appData.registrosEstudo.filter(r=>r.topicoId===t.id).sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(r=>`
                                                             <div class="text-xs bg-slate-950 rounded-lg p-2 flex justify-between gap-2 items-center">
                                                                 <div><div class="text-slate-200">${escapeHTML(formatarDataPtBr(r.data))} · ${r.qAcertos||0}/${r.qTotal||0}</div><div class="text-slate-400">${escapeHTML(r.plataforma||'')} · ${Number(r.tempo)||0} min</div></div>
-                                                                <div class="flex gap-1"><button onclick="editStudyRecord('${r.id}')" title="Editar sessão" class="text-indigo-400 p-1"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteStudyRecord('${r.id}')" title="Excluir sessão" class="text-red-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
+                                                                <div class="flex gap-1"><button onclick="editStudyRecord(${inlineHandlerArg(r.id)})" title="Editar sessão" class="text-indigo-400 p-1"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteStudyRecord(${inlineHandlerArg(r.id)})" title="Excluir sessão" class="text-red-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
                                                             </div>`).join('')}
                                                         ${appData.registrosEstudo.some(r=>r.topicoId===t.id)?'':'<p class="text-xs text-slate-500">Nenhuma sessão vinculada.</p>'}
                                                     </div>
@@ -1267,7 +1268,7 @@
             return `
                 <div class="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 p-4 rounded-xl shadow-md flex flex-col justify-between space-y-3 transition">
                     <div class="flex items-start justify-between gap-2">
-                        <div class="flex items-center space-x-3 cursor-pointer flex-1 min-w-0" onclick="switchTab('materia', '${m.id}')">
+                        <div class="flex items-center space-x-3 cursor-pointer flex-1 min-w-0" onclick="switchTab('materia', ${inlineHandlerArg(m.id)})">
                             <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-lg shrink-0">
                                 <i class="fa-solid ${m.icone} text-lg"></i>
                             </div>
@@ -1276,13 +1277,13 @@
                                 <p class="text-[10px] text-slate-400 mt-0.5">${concluidos}/${total} tópicos | ${apMat}% acertos (${qTotalMat}q)</p>
                             </div>
                         </div>
-                        <select onchange="updateSubjectPriorityFromList('${m.id}', this.value)" title="Alterar Prioridade" class="bg-slate-950 border border-slate-800 text-[10px] rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-indigo-500 shrink-0 ${m.prioridade === 'Alta' ? 'text-red-400 bg-red-950/30' : m.prioridade === 'Média' ? 'text-blue-400 bg-blue-950/30' : 'text-slate-300 bg-slate-800'}">
+                        <select onchange="updateSubjectPriorityFromList(${inlineHandlerArg(m.id)}, this.value)" title="Alterar Prioridade" class="bg-slate-950 border border-slate-800 text-[10px] rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-indigo-500 shrink-0 ${m.prioridade === 'Alta' ? 'text-red-400 bg-red-950/30' : m.prioridade === 'Média' ? 'text-blue-400 bg-blue-950/30' : 'text-slate-300 bg-slate-800'}">
                             <option value="Alta" ${m.prioridade === 'Alta' ? 'selected' : ''}>Alta (Vermelho)</option>
                             <option value="Média" ${m.prioridade === 'Média' ? 'selected' : ''}>Média (Azul)</option>
                             <option value="Baixa" ${m.prioridade === 'Baixa' ? 'selected' : ''}>Baixa (Cinza)</option>
                         </select>
                     </div>
-                    <div class="cursor-pointer space-y-1" onclick="switchTab('materia', '${m.id}')">
+                    <div class="cursor-pointer space-y-1" onclick="switchTab('materia', ${inlineHandlerArg(m.id)})">
                         <div class="flex justify-between text-[10px]">
                             <span class="text-slate-400">Progresso do Edital</span>
                             <span class="text-indigo-400 font-bold">${perc}%</span>
@@ -1540,7 +1541,7 @@
                     </section>
                     <section class="bg-slate-950 border border-indigo-500/30 rounded-2xl p-5 md:p-6 shadow-xl">
                         <div class="flex justify-between items-center gap-3 border-b border-slate-800 pb-4 mb-4"><div><p class="text-xs text-indigo-400 font-semibold">${nomeDiaSemana}</p><h4 class="text-lg font-bold text-white">Blocos do dia</h4><p class="text-xs text-slate-400">${formatarDataPtBr(appData.consultDate)} · ações ficam salvas por data</p></div><button onclick="openStudyModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-semibold"><i class="fa-solid fa-plus mr-2"></i>Registrar sessão</button></div>
-                        ${planos.length? `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">${planos.map((b,i)=>`<article class="bg-slate-900 border ${b.action.status==='Concluído'?'border-emerald-500/40':b.action.status==='Adiado'?'border-amber-500/40':'border-slate-800'} rounded-xl p-4"><div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid ${b.materia.icone||'fa-book'}"></i></div><div class="flex-1"><p class="text-sm font-semibold text-white">${escapeHTML(b.materia.nome)}</p><p class="text-xs text-indigo-300 mt-1">Bloco ${i+1}</p><p class="text-sm text-slate-300 mt-3">${b.topico?escapeHTML(b.topico.nome):'Sem tópico disponível'}</p><p class="text-xs text-slate-500 mt-2">Tópico: ${b.topico?b.topico.status:'—'} · Prioridade: ${b.materia.prioridade||'não definida'}</p>${b.action.status?`<p class="text-xs font-semibold mt-2 ${b.action.status==='Concluído'?'text-emerald-400':b.action.status==='Adiado'?'text-amber-400':'text-indigo-300'}">Marcado: ${b.action.status}</p>`:''}<button onclick="switchTab('materia','${b.materia.id}')" class="mt-3 text-xs text-indigo-300 hover:text-indigo-200">Abrir matéria <i class="fa-solid fa-arrow-right ml-1"></i></button><div class="flex flex-wrap gap-2 mt-4"><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','Concluído')` : `markPlanBlock('${appData.consultDate}',${b.slot},'Concluído')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30">Concluir</button><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','Adiado',nextStudyDate('${appData.consultDate}'))` : `markPlanBlock('${appData.consultDate}',${b.slot},'Adiado')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600/20 text-amber-300 border border-amber-500/30">Adiar</button><button onclick="${b.deferred ? `replaceDeferredAction('${b.actionKey}')` : `replacePlanBlock('${appData.consultDate}',${b.slot})`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">Substituir</button><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','')` : `markPlanBlock('${appData.consultDate}',${b.slot},'')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300">Limpar</button></div></div></div></article>`).join('')}</div>`:`<div class="text-center py-8 bg-slate-900 border border-slate-800 rounded-xl"><i class="fa-solid fa-mug-hot text-2xl text-emerald-400"></i><p class="text-sm font-semibold text-white mt-2">Dia livre</p><p class="text-xs text-slate-400">Domingo reservado para descanso ou reposição opcional.</p></div>`}
+                        ${planos.length? `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">${planos.map((b,i)=>`<article class="bg-slate-900 border ${b.action.status==='Concluído'?'border-emerald-500/40':b.action.status==='Adiado'?'border-amber-500/40':'border-slate-800'} rounded-xl p-4"><div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid ${b.materia.icone||'fa-book'}"></i></div><div class="flex-1"><p class="text-sm font-semibold text-white">${escapeHTML(b.materia.nome)}</p><p class="text-xs text-indigo-300 mt-1">Bloco ${i+1}</p><p class="text-sm text-slate-300 mt-3">${b.topico?escapeHTML(b.topico.nome):'Sem tópico disponível'}</p><p class="text-xs text-slate-500 mt-2">Tópico: ${b.topico?b.topico.status:'—'} · Prioridade: ${b.materia.prioridade||'não definida'}</p>${b.action.status?`<p class="text-xs font-semibold mt-2 ${b.action.status==='Concluído'?'text-emerald-400':b.action.status==='Adiado'?'text-amber-400':'text-indigo-300'}">Marcado: ${b.action.status}</p>`:''}<button onclick="switchTab('materia',${inlineHandlerArg(b.materia.id)})" class="mt-3 text-xs text-indigo-300 hover:text-indigo-200">Abrir matéria <i class="fa-solid fa-arrow-right ml-1"></i></button><div class="flex flex-wrap gap-2 mt-4"><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','Concluído')` : `markPlanBlock('${appData.consultDate}',${b.slot},'Concluído')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30">Concluir</button><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','Adiado',nextStudyDate('${appData.consultDate}'))` : `markPlanBlock('${appData.consultDate}',${b.slot},'Adiado')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600/20 text-amber-300 border border-amber-500/30">Adiar</button><button onclick="${b.deferred ? `replaceDeferredAction('${b.actionKey}')` : `replacePlanBlock('${appData.consultDate}',${b.slot})`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">Substituir</button><button onclick="${b.deferred ? `updateDeferredAction('${b.actionKey}','')` : `markPlanBlock('${appData.consultDate}',${b.slot},'')`}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300">Limpar</button></div></div></div></article>`).join('')}</div>`:`<div class="text-center py-8 bg-slate-900 border border-slate-800 rounded-xl"><i class="fa-solid fa-mug-hot text-2xl text-emerald-400"></i><p class="text-sm font-semibold text-white mt-2">Dia livre</p><p class="text-xs text-slate-400">Domingo reservado para descanso ou reposição opcional.</p></div>`}
                     </section>
                     <section class="bg-slate-950 border border-slate-800 p-5 md:p-6 rounded-2xl shadow-xl"><div class="flex items-center justify-between gap-3 mb-4"><div><h4 class="text-lg font-bold text-white"><i class="fa-solid fa-clock-rotate-left text-indigo-400 mr-2"></i>Histórico de sessões</h4><p class="text-xs text-slate-400 mt-1">Mais recentes primeiro.</p></div></div><div class="space-y-3">${historico.length?historico.map(r=>{const m=appData.materias.find(x=>x.id===r.materiaId);return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"><div><p class="text-sm font-semibold text-white">${m?escapeHTML(m.nome):'Matéria removida'}</p><p class="text-xs text-slate-400 mt-1">${formatarDataPtBr(r.data)} · ${r.plataforma||'—'}</p><p class="text-xs text-slate-300 mt-2">${escapeHTML(r.obs||'Sem observações')}</p></div><div class="text-right text-xs text-indigo-300">${r.tempo||0} min · ${r.qTotal||0} questões · ${r.qAcertos||0} acertos</div></div>`}).join(''):`<p class="text-center text-sm text-slate-400 py-6">Nenhuma sessão registrada ainda.</p>`}</div></section>
                 </div>
@@ -1578,7 +1579,7 @@
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Status: <strong>${tr.status}</strong></span>
                                         <span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20">${tr.ap === null ? 'Sem questões' : tr.ap + '% Acertos'}</span>
-                                        <button onclick="switchTab('materia', '${tr.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">Revisar</button>
+                                        <button onclick="switchTab('materia', ${inlineHandlerArg(tr.materiaId)})" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">Revisar</button>
                                     </div>
                                 </div>
                             `).join('') : `
@@ -1693,13 +1694,13 @@
                 return `
                     <div class="space-y-1">
                         <div class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-800 transition">
-                            <div class="flex items-center space-x-2 truncate flex-1 cursor-pointer" onclick="switchTab('materia', '${m.id}')">
+                            <div class="flex items-center space-x-2 truncate flex-1 cursor-pointer" onclick="switchTab('materia', ${inlineHandlerArg(m.id)})">
                                 <i class="fa-solid ${m.icone} w-4 text-indigo-400 shrink-0"></i>
                                 <span class="truncate">${escapeHTML(m.nome)}</span>
                             </div>
                             <div class="flex items-center space-x-2 shrink-0">
                                 <span class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded-md">${perc}%</span>
-                                <button onclick="toggleSidebarSubject('${m.id}')" class="text-slate-400 hover:text-white p-1" title="Expandir tópicos">
+                                <button onclick="toggleSidebarSubject(${inlineHandlerArg(m.id)})" class="text-slate-400 hover:text-white p-1" title="Expandir tópicos">
                                     <i class="fa-solid ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} text-[10px]"></i>
                                 </button>
                             </div>
@@ -1707,7 +1708,7 @@
                         ${isExpanded ? `
                             <div class="pl-6 space-y-1 pb-1">
                                 ${m.topicos.map(t => `
-                                    <button onclick="switchTab('materia', '${m.id}')" class="w-full text-left truncate text-[11px] text-slate-400 hover:text-indigo-300 py-1 px-2 rounded-lg hover:bg-slate-900 transition">
+                                    <button onclick="switchTab('materia', ${inlineHandlerArg(m.id)})" class="w-full text-left truncate text-[11px] text-slate-400 hover:text-indigo-300 py-1 px-2 rounded-lg hover:bg-slate-900 transition">
                                         • ${escapeHTML(t.nome)}
                                     </button>
                                 `).join('')}
