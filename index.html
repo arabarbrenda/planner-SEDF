@@ -465,18 +465,24 @@
                         const migrationIdBase = Date.now();
                         appData.materias = parsed.materias.map((m, materiaIndex) => Object.assign({
                             id: m.id || ('m_' + migrationIdBase + '_' + materiaIndex),
-                            nome: m.nome || 'Matéria',
+                            nome: typeof m.nome === 'string' && m.nome.trim() ? m.nome : 'Matéria',
                             icone: m.icone || 'fa-book',
                             prioridade: m.prioridade || 'Média',
-                            topicos: Array.isArray(m.topicos) ? m.topicos.map((t, topicoIndex) => Object.assign({
-                                id: t.id || ('t_' + migrationIdBase + '_' + materiaIndex + '_' + topicoIndex),
-                                nome: t.nome || '',
-                                status: t.status || 'Não iniciado',
-                                checklist: Object.assign({ lei: false, questoes: false, erros: false, revisao: false, teoria: false }, t.checklist || {}),
-                                anotaçoes: t.anotaçoes || '',
-                                questoesTotal: Number(t.questoesTotal) || 0,
-                                questoesAcertos: Number(t.questoesAcertos) || 0
-                            }, t)) : []
+                            topicos: Array.isArray(m.topicos) ? m.topicos.map((t, topicoIndex) => {
+                                const total = Number.isInteger(t.questoesTotal) && t.questoesTotal >= 0 ? t.questoesTotal : 0;
+                                const acertos = Number.isInteger(t.questoesAcertos) && t.questoesAcertos >= 0 && t.questoesAcertos <= total ? t.questoesAcertos : 0;
+                                const checklistBase = { lei: false, questoes: false, erros: false, revisao: false, teoria: false };
+                                const checklist = Object.fromEntries(Object.keys(checklistBase).map(k => [k, t.checklist && typeof t.checklist[k] === 'boolean' ? t.checklist[k] : false]));
+                                return Object.assign({}, t, {
+                                    id: t.id || ('t_' + migrationIdBase + '_' + materiaIndex + '_' + topicoIndex),
+                                    nome: typeof t.nome === 'string' ? t.nome : '',
+                                    status: ['Não iniciado', 'Estudando', 'Rever', 'Concluído'].includes(t.status) ? t.status : 'Não iniciado',
+                                    checklist,
+                                    anotaçoes: typeof t.anotaçoes === 'string' ? t.anotaçoes : '',
+                                    questoesTotal: total,
+                                    questoesAcertos: acertos
+                                });
+                            }) : []
                         }, m));
                     }
                 }
