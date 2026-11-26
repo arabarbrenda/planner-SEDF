@@ -1830,7 +1830,13 @@ function escapeHTML(value) {
 
         function openStudyModal() {
             const select = document.getElementById('modal-materia');
-            select.innerHTML = appData.materias.map(m => `<option value="${escapeHTML(m.id)}">${escapeHTML(m.nome)}</option>`).join('');
+            select.replaceChildren();
+            appData.materias.forEach(m => {
+                const option = document.createElement('option');
+                option.value = String(m.id);
+                option.textContent = String(m.nome ?? '');
+                select.append(option);
+            });
             populateStudyTopics();
             document.getElementById('study-form').dataset.editId = '';
             document.getElementById('modal-data').value = getLocalDateISO();
