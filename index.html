@@ -1246,9 +1246,20 @@
                     return materia && topico ? { materia, topico, action, actionKey:key, deferred:true } : null;
                 }).filter(Boolean);
             adiados.forEach(b => {
-                const jaExiste = planos.some(p => p.materia && p.topico &&
+                const indiceExistente = planos.findIndex(p => p.materia && p.topico &&
                     p.materia.id === b.materia.id && p.topico.id === b.topico.id);
-                if (!jaExiste) planos.push({...b, slot:null});
+                if (indiceExistente >= 0) {
+                    // Reaproveita o cartão do bloco automático, mas mantém a ação pendente
+                    // vinculada ao registro original do adiamento.
+                    planos[indiceExistente] = {
+                        ...planos[indiceExistente],
+                        action: b.action,
+                        actionKey: b.actionKey,
+                        deferred: true
+                    };
+                } else {
+                    planos.push({...b, slot:null});
+                }
             });
             return `
                 <div class="space-y-6">
