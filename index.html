@@ -459,7 +459,7 @@
                     const localObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
                     const localNonNegativeInt = value => Number.isInteger(value) && value >= 0;
                     const localValidRecord = r => localObject(r) &&
-                        (typeof r.id === 'string' || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) &&
+                        ((typeof r.id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(r.id)) || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) &&
                         typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 &&
                         (r.topicoId === undefined || r.topicoId === null || typeof r.topicoId === 'string') &&
                         typeof r.data === 'string' && isValidPlannerDate(r.data) &&
@@ -470,7 +470,7 @@
                         (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
                         (r.obs === undefined || (typeof r.obs === 'string' && r.obs.length <= 10000));
                     const localValidSimulado = s => localObject(s) &&
-                        (typeof s.id === 'string' || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) &&
+                        ((typeof s.id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(s.id)) || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) &&
                         typeof s.nome === 'string' && s.nome.trim().length > 0 && s.nome.length <= 300 &&
                         typeof s.data === 'string' && isValidPlannerDate(s.data) &&
                         typeof s.banca === 'string' && s.banca.trim().length > 0 && s.banca.length <= 200 &&
@@ -2058,12 +2058,12 @@
                         (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
                         (m.prioridade === undefined || (typeof m.prioridade === 'string' && m.prioridade.length <= 100)) &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
-                    const validRecord = r => isObject(r) && (typeof r.id === 'string' || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) && typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 && (r.topicoId === undefined || r.topicoId === null || typeof r.topicoId === 'string') && typeof r.data === 'string' && isValidPlannerDate(r.data) && (r.plataforma === undefined || (typeof r.plataforma === 'string' && r.plataforma.length <= 200)) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
+                    const validRecord = r => isObject(r) && ((typeof r.id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(r.id)) || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) && typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 && (r.topicoId === undefined || r.topicoId === null || typeof r.topicoId === 'string') && typeof r.data === 'string' && isValidPlannerDate(r.data) && (r.plataforma === undefined || (typeof r.plataforma === 'string' && r.plataforma.length <= 200)) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
                         (r.qTotal === undefined || isNonNegativeInteger(r.qTotal)) &&
                         (r.qAcertos === undefined || isNonNegativeInteger(r.qAcertos)) &&
                         (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
                         (r.obs === undefined || (typeof r.obs === 'string' && r.obs.length <= 10000));
-                    const validSimulado = s => isObject(s) && (typeof s.id === 'string' || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) && typeof s.nome === 'string' && s.nome.trim().length > 0 && s.nome.length <= 300 &&
+                    const validSimulado = s => isObject(s) && ((typeof s.id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(s.id)) || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) && typeof s.nome === 'string' && s.nome.trim().length > 0 && s.nome.length <= 300 &&
                         typeof s.data === 'string' && isValidPlannerDate(s.data) && typeof s.banca === 'string' && s.banca.trim().length > 0 && s.banca.length <= 200 &&
                         isNonNegativeInteger(s.qTotal) && s.qTotal > 0 && isNonNegativeInteger(s.qAcertos) && s.qAcertos <= s.qTotal &&
                         (s.tempo === undefined || (typeof s.tempo === 'string' && s.tempo.length <= 200)) && (s.obs === undefined || (typeof s.obs === 'string' && s.obs.length <= 10000)) && (s.origem === undefined || ['manual','importado'].includes(s.origem));
