@@ -1695,40 +1695,56 @@ function escapeHTML(value) {
 
         function updateQuickNav() {
             const list = document.getElementById('quick-nav-list');
-            list.innerHTML = appData.materias.map(m => {
+            list.replaceChildren();
+            appData.materias.forEach(m => {
                 const total = m.topicos.length;
                 const concluidos = m.topicos.filter(t => t.status === 'Concluído').length;
                 const perc = total > 0 ? Math.round((concluidos / total) * 100) : 0;
                 const isExpanded = expandedSidebarSubjects[m.id] || false;
 
-                return `
-                    <div class="space-y-1">
-                        <div class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-800 transition">
-                            <div class="flex items-center space-x-2 truncate flex-1 cursor-pointer" onclick="switchTab('materia', ${inlineHandlerArg(m.id)})">
-                                <i class="fa-solid ${m.icone} w-4 text-indigo-400 shrink-0"></i>
-                                <span class="truncate">${escapeHTML(m.nome)}</span>
-                            </div>
-                            <div class="flex items-center space-x-2 shrink-0">
-                                <span class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded-md">${perc}%</span>
-                                <button onclick="toggleSidebarSubject(${inlineHandlerArg(m.id)})" class="text-slate-400 hover:text-white p-1" title="Expandir tópicos">
-                                    <i class="fa-solid ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} text-[10px]"></i>
-                                </button>
-                            </div>
-                        </div>
-                        ${isExpanded ? `
-                            <div class="pl-6 space-y-1 pb-1">
-                                ${m.topicos.map(t => `
-                                    <button onclick="switchTab('materia', ${inlineHandlerArg(m.id)})" class="w-full text-left truncate text-[11px] text-slate-400 hover:text-indigo-300 py-1 px-2 rounded-lg hover:bg-slate-900 transition">
-                                        • ${escapeHTML(t.nome)}
-                                    </button>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'space-y-1';
+                const row = document.createElement('div');
+                row.className = 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-800 transition';
+                const subject = document.createElement('div');
+                subject.className = 'flex items-center space-x-2 truncate flex-1 cursor-pointer';
+                subject.addEventListener('click', () => switchTab('materia', m.id));
+                const icon = document.createElement('i');
+                icon.className = 'fa-solid ' + (m.icone || 'fa-book') + ' w-4 text-indigo-400 shrink-0';
+                const name = document.createElement('span');
+                name.className = 'truncate';
+                name.textContent = String(m.nome ?? '');
+                subject.append(icon, name);
+                const controls = document.createElement('div');
+                controls.className = 'flex items-center space-x-2 shrink-0';
+                const progress = document.createElement('span');
+                progress.className = 'text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-1 rounded-md';
+                progress.textContent = perc + '%';
+                const toggle = document.createElement('button');
+                toggle.className = 'text-slate-400 hover:text-white p-1';
+                toggle.title = 'Expandir tópicos';
+                toggle.addEventListener('click', () => toggleSidebarSubject(m.id));
+                const toggleIcon = document.createElement('i');
+                toggleIcon.className = 'fa-solid ' + (isExpanded ? 'fa-chevron-down' : 'fa-chevron-right') + ' text-[10px]';
+                toggle.append(toggleIcon);
+                controls.append(progress, toggle);
+                row.append(subject, controls);
+                wrapper.append(row);
+                if (isExpanded) {
+                    const topics = document.createElement('div');
+                    topics.className = 'pl-6 space-y-1 pb-1';
+                    m.topicos.forEach(t => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-left truncate text-[11px] text-slate-400 hover:text-indigo-300 py-1 px-2 rounded-lg hover:bg-slate-900 transition';
+                        btn.textContent = '• ' + String(t.nome ?? '');
+                        btn.addEventListener('click', () => switchTab('materia', m.id));
+                        topics.append(btn);
+                    });
+                    wrapper.append(topics);
+                }
+                list.append(wrapper);
+            });
         }
-
         function toggleSidebarSubject(materiaId) {
             expandedSidebarSubjects[materiaId] = !expandedSidebarSubjects[materiaId];
             updateQuickNav();
