@@ -541,16 +541,18 @@
         function editHeaderTitle() {
             const novo = prompt("Editar Título Principal:", appData.headerTitle);
             if (novo !== null && novo.trim() !== "") {
+                const anterior = appData.headerTitle;
                 appData.headerTitle = novo.trim();
-                saveData();
+                if (!saveData()) appData.headerTitle = anterior;
             }
         }
 
         function editHeaderSubtitle() {
             const novo = prompt("Editar Subtítulo / Cargo:", appData.headerSubtitle);
             if (novo !== null && novo.trim() !== "") {
+                const anterior = appData.headerSubtitle;
                 appData.headerSubtitle = novo.trim();
-                saveData();
+                if (!saveData()) appData.headerSubtitle = anterior;
             }
         }
 
@@ -955,10 +957,15 @@
 
         function editSubjectTitle(materiaId) {
             const m = appData.materias.find(mat => mat.id === materiaId);
+            if (!m) return;
             const novo = prompt("Editar nome da disciplina:", m.nome);
             if (novo !== null && novo.trim() !== "") {
+                const anterior = m.nome;
                 m.nome = novo.trim();
-                saveData();
+                if (!saveData()) {
+                    m.nome = anterior;
+                    return;
+                }
                 renderView('materia', materiaId);
             }
         }
@@ -966,8 +973,12 @@
         function updateSubjectPriority(materiaId, prioridade) {
             const m = appData.materias.find(mat => mat.id === materiaId);
             if (m) {
+                const anterior = m.prioridade;
                 m.prioridade = prioridade;
-                saveData();
+                if (!saveData()) {
+                    m.prioridade = anterior;
+                    return;
+                }
                 renderView('materia', materiaId);
             }
         }
@@ -1111,8 +1122,12 @@
         function updateSubjectPriorityFromList(materiaId, prioridade) {
             const m = appData.materias.find(mat => mat.id === materiaId);
             if (m) {
+                const anterior = m.prioridade;
                 m.prioridade = prioridade;
-                saveData();
+                if (!saveData()) {
+                    m.prioridade = anterior;
+                    return;
+                }
                 renderView('materias_lista');
             }
         }
