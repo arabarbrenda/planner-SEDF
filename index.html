@@ -1828,6 +1828,7 @@
                         (t.anotaçoes === undefined || typeof t.anotaçoes === 'string') &&
                         (t.questoesTotal === undefined || isNonNegativeInteger(t.questoesTotal)) &&
                         (t.questoesAcertos === undefined || isNonNegativeInteger(t.questoesAcertos)) &&
+                        (t.questoesTotal === undefined || t.questoesAcertos === undefined || t.questoesAcertos <= t.questoesTotal) &&
                         (t.checklist === undefined || (isObject(t.checklist) && Object.values(t.checklist).every(v => typeof v === 'boolean')));
                     const validSubject = m => isObject(m) && typeof m.id === 'string' && typeof m.nome === 'string' &&
                         (m.icone === undefined || typeof m.icone === 'string') &&
