@@ -1139,7 +1139,14 @@
             renderView('planejamento');
         }
 
-        function nextStudyDate(date) {\n            const parts = date.split('-').map(Number);\n            const next = new Date(parts[0], parts[1]-1, parts[2]+1);\n            if (next.getDay() === 0) next.setDate(next.getDate()+1);\n            return next.getFullYear() + '-' + String(next.getMonth()+1).padStart(2,'0') + '-' + String(next.getDate()).padStart(2,'0');\n        }\n\n        function markPlanBlock(date, slot, status) {
+        function nextStudyDate(date) {
+            const parts = date.split('-').map(Number);
+            const next = new Date(parts[0], parts[1]-1, parts[2]+1);
+            if (next.getDay() === 0) next.setDate(next.getDate()+1);
+            return next.getFullYear() + '-' + String(next.getMonth()+1).padStart(2,'0') + '-' + String(next.getDate()).padStart(2,'0');
+        }
+
+        function markPlanBlock(date, slot, status) {
             if (status === 'Adiado') {
                 const parts = date.split('-').map(Number);
                 const next = new Date(parts[0], parts[1]-1, parts[2]+1);
@@ -1268,18 +1275,6 @@
         function renderCicloHTML() {
             const dias=[{dia:"Segunda-feira",idx:1},{dia:"Terça-feira",idx:2},{dia:"Quarta-feira",idx:3},{dia:"Quinta-feira",idx:4},{dia:"Sexta-feira",idx:5},{dia:"Sábado",idx:6},{dia:"Domingo",idx:0}];
             return `<div class="space-y-6"><section class="bg-slate-950 border border-slate-800 rounded-2xl p-5"><h3 class="text-lg font-bold text-white">Ciclo semanal adaptativo</h3><p class="text-xs text-slate-400 mt-2">As sugestões são montadas com as matérias e tópicos cadastrados. Prioriza tópicos pendentes e disciplinas marcadas como alta prioridade. Domingo fica livre.</p></section><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${dias.map(d=>{const bs=getSuggestedStudyBlocks(d.idx);return `<article class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3"><h4 class="font-bold text-white border-b border-slate-800 pb-2">${d.dia}</h4>${bs.length?bs.map((b,i)=>`<div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><p class="text-sm font-semibold text-white">${b.materia.nome}</p><p class="text-xs text-slate-300 mt-1">${b.topico?b.topico.nome:'—'}</p><p class="text-[10px] text-slate-500 mt-2">Bloco ${i+1} · ${b.materia.prioridade||'Prioridade não definida'}</p></div>`).join(''):`<p class="text-sm text-slate-400">Livre / reposição opcional</p>`}</article>`;}).join('')}</div></div>`;
-        }
-
-        d-md font-semibold">Sessão Ativa</span>
-                                </div>
-                                <ul class="space-y-1.5 text-xs text-slate-300">
-                                    ${d.materias.map(m => `<li class="flex items-center space-x-2"><i class="fa-solid fa-check text-indigo-500 text-[10px]"></i><span>${m}</span></li>`).join('')}
-                                </ul>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
         }
 
         function renderRevisaoHTML() {
