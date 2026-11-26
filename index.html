@@ -1158,8 +1158,13 @@
         function setPlanAction(date, slot, patch) {
             if (!appData.planoAcoes) appData.planoAcoes = {};
             const key = getPlanActionKey(date, slot);
-            appData.planoAcoes[key] = { ...(appData.planoAcoes[key] || {}), ...patch };
-            saveData();
+            const anterior = appData.planoAcoes[key];
+            appData.planoAcoes[key] = { ...(anterior || {}), ...patch };
+            if (!saveData()) {
+                if (anterior) appData.planoAcoes[key] = anterior;
+                else delete appData.planoAcoes[key];
+                return;
+            }
             renderView('planejamento');
         }
 
@@ -1185,19 +1190,29 @@
         function moveDeferredBlock(actionKey, targetDate) {
             if (!appData.planoAcoes) appData.planoAcoes = {};
             const action = appData.planoAcoes[actionKey];
-            if (!action) return;
+            if (!action || !/^\\d{4}-\\d{2}-\\d{2}$/.test(targetDate)) return;
+            const anterior = action.deferredTo;
             action.deferredTo = targetDate;
-            saveData();
+            if (!saveData()) {
+                if (anterior === undefined) delete action.deferredTo;
+                else action.deferredTo = anterior;
+                return;
+            }
             renderView('planejamento');
         }
 
         function updateDeferredAction(actionKey, status, targetDate) {
             const action = (appData.planoAcoes || {})[actionKey];
             if (!action) return;
+            const anterior = { ...action };
             action.status = status;
             if (targetDate) action.deferredTo = targetDate;
             if (status === 'Concluído' || status === '') delete action.deferredTo;
-            saveData();
+            if (!saveData()) {
+                Object.assign(action, anterior);
+                for (const k of Object.keys(action)) if (!(k in anterior)) delete action[k];
+                return;
+            }
             renderView('planejamento');
         }
 
@@ -1215,8 +1230,15 @@
             const t = m.topicos[parseInt(topicChoice,10)-1];
             if (!t) return alert('Número inválido.');
             const action = appData.planoAcoes[actionKey];
+            if (!action) return;
+            const anterior = { ...action };
             action.materiaId = m.id; action.topicoId = t.id; action.status = 'Substituído';
-            saveData(); renderView('planejamento');
+            if (!saveData()) {
+                Object.assign(action, anterior);
+                for (const k of Object.keys(action)) if (!(k in anterior)) delete action[k];
+                return;
+            }
+            renderView('planejamento');
         }
 
         function replacePlanBlock(date, slot) {
