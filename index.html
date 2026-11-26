@@ -440,11 +440,20 @@
         let appData = JSON.parse(JSON.stringify(defaultData));
 
         function loadPersistedData() {
+            const defaults = JSON.parse(JSON.stringify(defaultData));
             try {
                 const raw = localStorage.getItem("sga_sedf_2027_data") || localStorage.getItem("sedf_2027_db");
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    appData = Object.assign({}, JSON.parse(JSON.stringify(defaultData)), parsed);
+                    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) ||
+                        (parsed.materias !== undefined && !Array.isArray(parsed.materias)) ||
+                        (parsed.registrosEstudo !== undefined && !Array.isArray(parsed.registrosEstudo)) ||
+                        (parsed.simulados !== undefined && !Array.isArray(parsed.simulados)) ||
+                        (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
+                        (parsed.config !== undefined && (!parsed.config || typeof parsed.config !== 'object' || Array.isArray(parsed.config)))) {
+                        throw new Error('Estrutura local inválida.');
+                    }
+                    appData = Object.assign({}, defaults, parsed);
                     appData.config = Object.assign({}, defaultData.config, parsed.config || {});
                     appData.registrosEstudo = Array.isArray(parsed.registrosEstudo) ? parsed.registrosEstudo : [];
                     appData.simulados = Array.isArray(parsed.simulados) ? parsed.simulados : [];
@@ -468,7 +477,10 @@
                         }, m));
                     }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('Dados locais inválidos; usando valores padrão:', e);
+                appData = JSON.parse(JSON.stringify(defaultData));
+            }
 
             if (!appData.examDate) appData.examDate = "2027-05-20";
             if (!appData.startDate) appData.startDate = "2026-11-23";
