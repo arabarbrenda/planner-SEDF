@@ -1222,12 +1222,16 @@
             const questoesDia = registrosDia.reduce((s,r)=>s+(Number(r.qTotal)||0),0);
             const acertosDia = registrosDia.reduce((s,r)=>s+(Number(r.qAcertos)||0),0);
             const historico = [...(appData.registrosEstudo||[])].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
-            const pendencias = Object.entries(appData.planoAcoes || {}).filter(([key,action]) => action.status !== 'Concluído' && action.deferredTo && action.deferredTo < appData.consultDate
+            const pendencias = Object.entries(appData.planoAcoes || {}).filter(([key,action]) => action.status !== 'Concluído' && action.deferredTo && action.deferredTo < appData.consultDate)
                 .map(([key,action]) => {
                     const materia = (appData.materias || []).find(m=>m.id===action.materiaId);
                     const topico = materia && materia.topicos.find(t=>t.id===action.topicoId);
-                    return materia && topico ? { key, action, materia, topico } : null;
-                }).filter(Boolean);
+                    const origem = key.split('::')[0];
+                    const consulta = new Date(appData.consultDate + 'T00:00:00');
+                    const inicio = new Date(origem + 'T00:00:00');
+                    const ageDays = Math.max(0, Math.round((consulta-inicio)/86400000));
+                    return materia && topico ? { key, action, materia, topico, origem, ageDays } : null;
+                }).filter(Boolean).sort((a,b)=>a.origem.localeCompare(b.origem));
             const planos = blocos.map((b,i) => {
                 const action = getPlanAction(appData.consultDate, i);
                 const materia = action.materiaId ? appData.materias.find(m=>m.id===action.materiaId) : b.materia;
@@ -1251,7 +1255,7 @@
                     </section>
                     <section class="bg-slate-950 border border-amber-500/30 rounded-2xl p-5 md:p-6 shadow-xl">
                         <div class="flex items-center justify-between mb-4"><div><h4 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check text-amber-400 mr-2"></i>Pendências acumuladas</h4><p class="text-xs text-slate-400 mt-1">Blocos adiados em datas anteriores à data consultada.</p></div><span class="text-sm font-bold text-amber-300">${pendencias.length}</span></div>
-                        ${pendencias.length ? pendencias.map(p => '<article class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><p class="text-sm font-semibold text-white">' + p.materia.nome + '</p><p class="text-sm text-slate-300 mt-1">' + p.topico.nome + '</p><p class="text-xs text-amber-300 mt-2">Adiado para: ' + formatarDataPtBr(p.action.deferredTo) + '</p></div><button onclick="moveDeferredBlock(\'' + p.key + '\',\'' + appData.consultDate + '\')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-600/20 text-amber-300 border border-amber-500/30">Trazer para esta data</button></article>').join('') : '<p class="text-sm text-slate-400 text-center py-3">Nenhuma pendência acumulada. Clean slate! ✨</p>'}
+                        ${pendencias.length ? pendencias.map(p => '<article class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><p class="text-sm font-semibold text-white">' + p.materia.nome + '</p><p class="text-sm text-slate-300 mt-1">' + p.topico.nome + '</p><p class="text-xs text-amber-300 mt-2">Adiado para: ' + formatarDataPtBr(p.action.deferredTo) + '</p><p class="text-xs text-slate-400 mt-1">Atraso: ' + p.ageDays + ' dia(s) · Data original: ' + formatarDataPtBr(p.origem) + '</p></div><button onclick="moveDeferredBlock(\'' + p.key + '\',\'' + appData.consultDate + '\')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-600/20 text-amber-300 border border-amber-500/30">Trazer para esta data</button></article>').join('') : '<p class="text-sm text-slate-400 text-center py-3">Nenhuma pendência acumulada. Clean slate! ✨</p>'}
                     </section>
                     <section class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Tempo estudado</p><div class="mt-2 text-2xl font-bold text-white">${Math.floor(minutosDia/60)}h ${minutosDia%60}min</div><p class="text-xs text-slate-500">Na data consultada</p></div>
