@@ -1821,8 +1821,23 @@
             reader.onload = function() {
                 try {
                     const parsed = JSON.parse(reader.result);
-                    if (!parsed || !Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) ||
-                        !Array.isArray(parsed.simulados) || !parsed.materias.every(m => m && typeof m.nome === 'string' && Array.isArray(m.topicos))) {
+                    const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+                    const isNonNegativeInteger = value => Number.isInteger(value) && value >= 0;
+                    const validTopic = t => isObject(t) && typeof t.id === 'string' && typeof t.nome === 'string' &&
+                        (t.status === undefined || typeof t.status === 'string') &&
+                        (t.anotaçoes === undefined || typeof t.anotaçoes === 'string') &&
+                        (t.questoesTotal === undefined || isNonNegativeInteger(t.questoesTotal)) &&
+                        (t.questoesAcertos === undefined || isNonNegativeInteger(t.questoesAcertos)) &&
+                        (t.checklist === undefined || (isObject(t.checklist) && Object.values(t.checklist).every(v => typeof v === 'boolean')));
+                    const validSubject = m => isObject(m) && typeof m.id === 'string' && typeof m.nome === 'string' &&
+                        (m.icone === undefined || typeof m.icone === 'string') &&
+                        (m.prioridade === undefined || typeof m.prioridade === 'string') &&
+                        Array.isArray(m.topicos) && m.topicos.every(validTopic);
+                    if (!isObject(parsed) || !Array.isArray(parsed.materias) || !parsed.materias.every(validSubject) ||
+                        !Array.isArray(parsed.registrosEstudo) || !parsed.registrosEstudo.every(isObject) ||
+                        !Array.isArray(parsed.simulados) || !parsed.simulados.every(isObject) ||
+                        (parsed.jurisprudencia !== undefined && !Array.isArray(parsed.jurisprudencia)) ||
+                        (parsed.config !== undefined && !isObject(parsed.config))) {
                         throw new Error('Estrutura do backup inválida.');
                     }
                     if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
