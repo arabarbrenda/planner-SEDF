@@ -1503,10 +1503,12 @@
                     <div class="bg-slate-950 border border-slate-800 p-8 rounded-2xl shadow-xl space-y-4">
                         <h3 class="text-lg font-bold text-white">Exportar Dados</h3>
                         <p class="text-xs text-slate-400">Exporte todos os seus registros de estudos, anotações e progresso em formato JSON para garantir total segurança.</p>
-                        <div class="flex space-x-3 pt-2">
+                        <div class="flex flex-col sm:flex-row gap-3 pt-2">
                             <button onclick="exportBackup()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-download mr-2"></i>Exportar Backup JSON</button>
+                            <button onclick="document.getElementById('backup-file-input').click()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-upload mr-2"></i>Importar Backup JSON</button>
                             <button onclick="resetData()" class="px-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2.5 rounded-xl text-xs font-semibold border border-red-500/30 transition">Restaurar Padrão</button>
                         </div>
+                        <input type="file" id="backup-file-input" accept=".json,application/json" class="hidden" onchange="importBackupFile(event">
                     </div>
                 </div>
             `;
@@ -1809,6 +1811,37 @@
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
+        }
+
+        function importBackupFile(event) {
+            const file = event.target.files && event.target.files[0];
+            event.target.value = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const parsed = JSON.parse(reader.result);
+                    if (!parsed || !Array.isArray(parsed.materias) || !Array.isArray(parsed.registrosEstudo) ||
+                        !Array.isArray(parsed.simulados) || !parsed.materias.every(m => m && typeof m.nome === 'string' && Array.isArray(m.topicos))) {
+                        throw new Error('Estrutura do backup inválida.');
+                    }
+                    if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
+                    const dadosAnteriores = appData;
+                    appData = Object.assign({}, JSON.parse(JSON.stringify(defaultData)), parsed);
+                    appData.config = Object.assign({}, defaultData.config, parsed.config || {});
+                    if (!saveData()) {
+                        appData = dadosAnteriores;
+                        return;
+                    }
+                    switchTab('dashboard');
+                    alert('Backup importado com sucesso!');
+                } catch (e) {
+                    console.error('Falha na importação do backup:', e);
+                    alert('Não foi possível importar o arquivo. Verifique se é um backup JSON válido do planner.');
+                }
+            };
+            reader.onerror = function() { alert('Não foi possível ler o arquivo selecionado.'); };
+            reader.readAsText(file);
         }
 
         function resetData() {
