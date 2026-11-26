@@ -2162,13 +2162,17 @@ function escapeHTML(value) {
                         throw new Error('Estrutura do backup inválida.');
                     }
                     if (!confirm('Importar este backup substituirá todos os dados atuais do planner. Deseja continuar?')) return;
+                    const recoveryConfirmedAnterior = window.__plannerRecoveryConfirmed;
+                    const recoveryBlockedAnterior = window.__plannerDataRecoveryBlocked;
+                    const dadosAnteriores = appData;
                     window.__plannerRecoveryConfirmed = true;
                     window.__plannerDataRecoveryBlocked = false;
-                    const dadosAnteriores = appData;
                     appData = Object.assign({}, JSON.parse(JSON.stringify(defaultData)), parsed);
                     appData.config = Object.assign({}, defaultData.config, parsed.config || {});
                     if (!saveData()) {
                         appData = dadosAnteriores;
+                        window.__plannerRecoveryConfirmed = recoveryConfirmedAnterior;
+                        window.__plannerDataRecoveryBlocked = recoveryBlockedAnterior;
                         return;
                     }
                     switchTab('dashboard');
