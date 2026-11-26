@@ -485,7 +485,7 @@
                     if (parsed.consultDate !== undefined && !isValidPlannerDate(parsed.consultDate)) throw new Error('Data de consulta local inválida.');
                     if (parsed.theme !== undefined && !['light','dark'].includes(parsed.theme)) throw new Error('Tema local inválido.');
                     if (Array.isArray(parsed.materias)) {
-                        if (parsed.materias.some(m => !m || typeof m !== 'object' || Array.isArray(m) || !Array.isArray(m.topicos) || m.topicos.some(t => !t || typeof t !== 'object' || Array.isArray(t)))) {
+                        if (parsed.materias.some(m => !m || typeof m !== 'object' || Array.isArray(m) || !Array.isArray(m.topicos) || m.topicos.some(t => !t || typeof t !== 'object' || Array.isArray(t)) || (m.icone !== undefined && !['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)))) {
                             throw new Error('Estrutura local de matérias ou tópicos inválida.');
                         }
                         const subjectIds = parsed.materias.map(m => m && m.id);
