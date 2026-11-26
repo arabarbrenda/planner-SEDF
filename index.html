@@ -1097,8 +1097,9 @@
             if (confirm("Deseja realmente excluir esta matéria e todos os seus tópicos?")) {
                 const materiasAnteriores = appData.materias;
                 const planoAcoesAnterior = appData.planoAcoes || {};
+                const topicIdsRemoved = new Set((appData.materias.find(m => m.id === materiaId)?.topicos || []).map(t => t.id));
                 appData.materias = appData.materias.filter(m => m.id !== materiaId);
-                appData.planoAcoes = Object.fromEntries(Object.entries(planoAcoesAnterior).filter(([key, action]) => action.materiaId !== materiaId));
+                appData.planoAcoes = Object.fromEntries(Object.entries(planoAcoesAnterior).filter(([key, action]) => action.materiaId !== materiaId && !topicIdsRemoved.has(action.topicoId)));
                 if (!saveData()) {
                     appData.materias = materiasAnteriores;
                     appData.planoAcoes = planoAcoesAnterior;
