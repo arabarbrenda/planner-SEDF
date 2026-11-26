@@ -462,8 +462,8 @@
                         }
                         const subjectIds = parsed.materias.map(m => m && m.id);
                         const topicIds = parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []);
-                        if (subjectIds.some(id => typeof id !== 'string' || !id.trim()) ||
-                            topicIds.some(id => typeof id !== 'string' || !id.trim()) ||
+                        if (subjectIds.some(id => typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) ||
+                            topicIds.some(id => typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(id)) ||
                             new Set(subjectIds).size !== subjectIds.length || new Set(topicIds).size !== topicIds.length) {
                             throw new Error('IDs de matérias ou tópicos locais inválidos ou duplicados.');
                         }
