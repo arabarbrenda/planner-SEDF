@@ -806,14 +806,14 @@
                             <div class="space-y-3">
                                 ${appData.materias.slice(0,6).map(m => {
                                     const total=m.topicos.length, done=m.topicos.filter(t=>t.status==='Concluído').length, percent=total?Math.round(done/total*100):0;
-                                    return `<button onclick="switchTab('materia','${m.id}')" class="w-full text-left p-2 rounded-lg hover:bg-slate-900 transition"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300 truncate"><i class="fa-solid ${m.icone} text-indigo-400 mr-2"></i>${m.nome}</span><span class="text-slate-400 font-semibold">${percent}%</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${percent}%"></div></div></button>`;
+                                    return `<button onclick="switchTab('materia','${m.id}')" class="w-full text-left p-2 rounded-lg hover:bg-slate-900 transition"><div class="flex justify-between text-xs mb-1"><span class="text-slate-300 truncate"><i class="fa-solid ${m.icone} text-indigo-400 mr-2"></i>${escapeHTML(m.nome)}</span><span class="text-slate-400 font-semibold">${percent}%</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:${percent}%"></div></div></button>`;
                                 }).join('')}
                             </div>
                         </div>
                         <div class="bg-slate-950 border border-slate-800 p-5 md:p-6 rounded-2xl shadow-lg">
                             <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-white"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-2"></i>Pontos de atenção</h3><button onclick="switchTab('baixo_aproveitamento')" class="text-xs text-indigo-400 hover:text-indigo-300">Detalhes</button></div>
                             <div class="space-y-3">
-                                ${attentionItems.map(item=>`<div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><p class="text-xs text-indigo-300">${item.materia}</p><p class="text-sm text-white mt-1">${item.topico}</p><p class="text-xs text-amber-400 mt-1">${item.motivo}</p></div>`).join('')}
+                                ${attentionItems.map(item=>`<div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><p class="text-xs text-indigo-300">${escapeHTML(item.materia)}</p><p class="text-sm text-white mt-1">${escapeHTML(item.topico)}</p><p class="text-xs text-amber-400 mt-1">${item.motivo}</p></div>`).join('')}
                             </div>
                             <div class="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center"><span class="text-xs text-slate-500">${pendingTopics} tópicos ainda não concluídos</span><button onclick="switchTab('revisao')" class="text-xs text-indigo-400 hover:text-indigo-300">Abrir revisões</button></div>
                         </div>
@@ -872,8 +872,8 @@
                                             <i class="fa-solid ${item.icone} text-lg"></i>
                                         </div>
                                         <div>
-                                            <span class="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md">${item.materia}</span>
-                                            <h4 class="text-sm font-bold text-white mt-1">${item.topico}</h4>
+                                            <span class="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md">${escapeHTML(item.materia)}</span>
+                                            <h4 class="text-sm font-bold text-white mt-1">${escapeHTML(item.topico)}</h4>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-4 w-full md:w-auto justify-between">
@@ -910,7 +910,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center space-x-2 group">
-                                    <h3 class="text-xl font-bold text-white cursor-pointer" onclick="editSubjectTitle('${materia.id}')" title="Clique para editar nome da matéria">${materia.nome}</h3>
+                                    <h3 class="text-xl font-bold text-white cursor-pointer" onclick="editSubjectTitle('${materia.id}')" title="Clique para editar nome da matéria">${escapeHTML(materia.nome)}</h3>
                                     <button onclick="editSubjectTitle('${materia.id}')" class="text-slate-500 hover:text-indigo-400 text-xs opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pencil"></i></button>
                                 </div>
                                 <div class="flex items-center space-x-2 mt-1">
@@ -952,7 +952,7 @@
                                             <div class="flex items-center space-x-3 w-full md:w-auto">
                                                 <i class="fa-solid fa-circle-dot text-indigo-400 text-sm"></i>
                                                 <div id="topic-name-container-${t.id}" class="flex items-center space-x-2 flex-1">
-                                                    <span class="font-semibold text-white text-base" id="topic-title-${t.id}">${t.nome}</span>
+                                                    <span class="font-semibold text-white text-base" id="topic-title-${t.id}">${escapeHTML(t.nome)}</span>
                                                     <button onclick="enableTopicEdit('${materia.id}', '${t.id}')" title="Editar nome do tópico" class="text-slate-400 hover:text-indigo-400 text-xs p-1"><i class="fa-solid fa-pencil"></i></button>
                                                 </div>
                                             </div>
@@ -994,7 +994,7 @@
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                             <div class="md:col-span-2">
                                                 <label class="block text-xs font-semibold text-slate-400 mb-1">Anotações do Tópico</label>
-                                                <textarea onchange="updateTopicNotes('${materia.id}', '${t.id}', this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Insira suas anotações...">${t.anotaçoes || ''}</textarea>
+                                                <textarea onchange="updateTopicNotes('${materia.id}', '${t.id}', this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Insira suas anotações...">${escapeHTML(t.anotaçoes || '')}</textarea>
                                             </div>
                                             <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
                                                     <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Questões registradas (sessões)</h5>
@@ -1953,14 +1953,14 @@
                     const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
                     const isNonNegativeInteger = value => Number.isInteger(value) && value >= 0;
                     const validStatuses = ['Não iniciado', 'Estudando', 'Rever', 'Concluído'];
-                    const validTopic = t => isObject(t) && typeof t.id === 'string' && t.id.trim().length > 0 && typeof t.nome === 'string' &&
+                    const validSafeId = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(id);\n                    const validTopic = t => isObject(t) && validSafeId(t.id) && typeof t.nome === 'string' &&
                         (t.status === undefined || validStatuses.includes(t.status)) &&
                         (t.anotaçoes === undefined || typeof t.anotaçoes === 'string') &&
                         (t.questoesTotal === undefined || isNonNegativeInteger(t.questoesTotal)) &&
                         (t.questoesAcertos === undefined || isNonNegativeInteger(t.questoesAcertos)) &&
                         (t.questoesTotal === undefined || t.questoesAcertos === undefined || t.questoesAcertos <= t.questoesTotal) &&
                         (isObject(t.checklist) && ['lei', 'questoes', 'erros', 'revisao', 'teoria'].every(k => typeof t.checklist[k] === 'boolean') && Object.keys(t.checklist).every(k => ['lei', 'questoes', 'erros', 'revisao', 'teoria'].includes(k)));
-                    const validSubject = m => isObject(m) && typeof m.id === 'string' && typeof m.nome === 'string' &&
+                    const validSubject = m => isObject(m) && validSafeId(m.id) && typeof m.nome === 'string' &&
                         (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
                         (m.prioridade === undefined || typeof m.prioridade === 'string') &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
