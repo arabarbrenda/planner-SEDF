@@ -944,7 +944,8 @@
                         </div>
                         <div class="space-y-3">
                             ${materia.topicos.map(t => {
-                                const aproveitamento = t.questoesTotal > 0 ? Math.round((t.questoesAcertos / t.questoesTotal) * 100) : 0;
+                                const stats = getTopicQuestionStats(t.id);
+                                const aproveitamento = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
                                 return `
                                     <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
                                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -995,23 +996,23 @@
                                                 <label class="block text-xs font-semibold text-slate-400 mb-1">Anotações do Tópico</label>
                                                 <textarea onchange="updateTopicNotes('${materia.id}', '${t.id}', this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Insira suas anotações...">${t.anotaçoes || ''}</textarea>
                                             </div>
-                                            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col justify-between">
-                                                <div>
-                                                    <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Desempenho em Questões</h5>
+                                            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                                                    <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Questões registradas (sessões)</h5>
                                                     <div class="grid grid-cols-2 gap-2">
-                                                        <div>
-                                                            <input type="number" id="q-total-${t.id}" min="0" value="${t.questoesTotal || 0}" onchange="saveTopicQuestionsDirect('${materia.id}', '${t.id}')" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white text-center font-bold">
-                                                            <div class="text-[10px] text-center text-slate-400 mt-0.5 font-semibold">T</div>
-                                                        </div>
-                                                        <div>
-                                                            <input type="number" id="q-acertos-${t.id}" min="0" value="${t.questoesAcertos || 0}" onchange="saveTopicQuestionsDirect('${materia.id}', '${t.id}')" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-indigo-400 text-center font-bold">
-                                                            <div class="text-[10px] text-center text-slate-400 mt-0.5 font-semibold">C</div>
-                                                        </div>
+                                                        <div class="bg-slate-950 rounded-lg p-2 text-center"><div class="text-white font-bold">${stats.total}</div><div class="text-xs text-slate-400">Total</div></div>
+                                                        <div class="bg-slate-950 rounded-lg p-2 text-center"><div class="text-indigo-400 font-bold">${stats.correct}</div><div class="text-xs text-slate-400">Acertos</div></div>
                                                     </div>
-                                                </div>
-                                                <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-800 text-xs">
-                                                    <span class="text-slate-400">Aproveitamento:</span>
-                                                    <span class="text-indigo-400 font-bold">${aproveitamento}%</span>
+                                                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-800 text-xs">
+                                                        <span class="text-slate-400">Aproveitamento:</span><span class="text-indigo-400 font-bold">${stats.total ? aproveitamento+'%' : '—'}</span>
+                                                    </div>
+                                                    <div class="mt-3 space-y-2">
+                                                        ${appData.registrosEstudo.filter(r=>r.topicoId===t.id).sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(r=>`
+                                                            <div class="text-xs bg-slate-950 rounded-lg p-2 flex justify-between gap-2 items-center">
+                                                                <div><div class="text-slate-200">${escapeHTML(formatarDataPtBr(r.data))} · ${r.qAcertos||0}/${r.qTotal||0}</div><div class="text-slate-400">${escapeHTML(r.plataforma||'')} · ${Number(r.tempo)||0} min</div></div>
+                                                                <div class="flex gap-1"><button onclick="editStudyRecord('${r.id}')" title="Editar sessão" class="text-indigo-400 p-1"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteStudyRecord('${r.id}')" title="Excluir sessão" class="text-red-400 p-1"><i class="fa-solid fa-trash"></i></button></div>
+                                                            </div>`).join('')}
+                                                        ${appData.registrosEstudo.some(r=>r.topicoId===t.id)?'':'<p class="text-xs text-slate-500">Nenhuma sessão vinculada.</p>'}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
