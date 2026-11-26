@@ -484,6 +484,8 @@
                     if (parsed.startDate !== undefined && !isValidPlannerDate(parsed.startDate)) throw new Error('Data de início local inválida.');
                     if (parsed.consultDate !== undefined && !isValidPlannerDate(parsed.consultDate)) throw new Error('Data de consulta local inválida.');
                     if (parsed.theme !== undefined && !['light','dark'].includes(parsed.theme)) throw new Error('Tema local inválido.');
+                    if (parsed.headerTitle !== undefined && (typeof parsed.headerTitle !== 'string' || parsed.headerTitle.length > 200)) throw new Error('Título local inválido.');
+                    if (parsed.headerSubtitle !== undefined && (typeof parsed.headerSubtitle !== 'string' || parsed.headerSubtitle.length > 300)) throw new Error('Subtítulo local inválido.');
                     if (Array.isArray(parsed.materias)) {
                         const validLocalChecklist = value => localObject(value) && ['lei', 'questoes', 'erros', 'revisao', 'teoria'].every(k => typeof value[k] === 'boolean') && Object.keys(value).every(k => ['lei', 'questoes', 'erros', 'revisao', 'teoria'].includes(k));
                         const validLocalTopic = t => localObject(t) && typeof t.nome === 'string' && t.nome.trim().length > 0 && t.nome.length <= 500 &&
