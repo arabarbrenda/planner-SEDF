@@ -471,6 +471,18 @@
                             !subjectSet.has(r.materiaId) || (r.topicoId != null && topicOwner.get(r.topicoId) !== r.materiaId))) {
                             throw new Error('Histórico local com referências inválidas.');
                         }
+                        if (Array.isArray(parsed.registrosEstudo)) {
+                            const recordIds = parsed.registrosEstudo.map(r => r && r.id).filter(id => id !== undefined && id !== null);
+                            if (recordIds.length !== parsed.registrosEstudo.length || new Set(recordIds.map(String)).size !== recordIds.length) {
+                                throw new Error('IDs de sessões locais inválidos ou duplicados.');
+                            }
+                        }
+                        if (Array.isArray(parsed.simulados)) {
+                            const examIds = parsed.simulados.map(s => s && s.id).filter(id => id !== undefined && id !== null);
+                            if (examIds.length !== parsed.simulados.length || new Set(examIds.map(String)).size !== examIds.length) {
+                                throw new Error('IDs de simulados locais inválidos ou duplicados.');
+                            }
+                        }
                     }
                     appData = Object.assign({}, defaults, parsed);
                     appData.config = Object.assign({}, defaultData.config, parsed.config || {});
