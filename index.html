@@ -1870,7 +1870,7 @@
                         (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
                         (m.prioridade === undefined || typeof m.prioridade === 'string') &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
-                    const validRecord = r => isObject(r) && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
+                    const validRecord = r => isObject(r) && typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 && typeof r.data === 'string' && isValidPlannerDate(r.data) && (r.plataforma === undefined || typeof r.plataforma === 'string') && (r.tempo === undefined || isNonNegativeInteger(r.tempo)) &&
                         (r.qTotal === undefined || isNonNegativeInteger(r.qTotal)) &&
                         (r.qAcertos === undefined || isNonNegativeInteger(r.qAcertos)) &&
                         (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
