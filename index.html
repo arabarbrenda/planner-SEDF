@@ -1517,16 +1517,26 @@
         }
 
         function saveTopicQuestionsDirect(materiaId, topicoId) {
-            const total = parseInt(document.getElementById(`q-total-${topicoId}`).value) || 0;
-            const acertos = parseInt(document.getElementById(`q-acertos-${topicoId}`).value) || 0;
-            const m = appData.materias.find(mat => mat.id === materiaId);
-            const t = m.topicos.find(top => top.id === topicoId);
-            if (t) {
-                t.questoesTotal = total;
-                t.questoesAcertos = acertos > total ? total : acertos;
-                saveData();
-                renderView('materia', materiaId);
+            const totalInput = document.getElementById(`q-total-${topicoId}`);
+            const acertosInput = document.getElementById(`q-acertos-${topicoId}`);
+            if (!totalInput || !acertosInput) return;
+            const total = Number(totalInput.value);
+            const acertos = Number(acertosInput.value);
+            if (!Number.isInteger(total) || !Number.isInteger(acertos) || total < 0 || acertos < 0 || acertos > total) {
+                alert('Informe números inteiros não negativos, com acertos iguais ou inferiores ao total.');
+                return;
             }
+            const m = appData.materias.find(mat => mat.id === materiaId);
+            const t = m && m.topicos.find(top => top.id === topicoId);
+            if (!t) return;
+            const anterior = { questoesTotal: t.questoesTotal, questoesAcertos: t.questoesAcertos };
+            t.questoesTotal = total;
+            t.questoesAcertos = acertos;
+            if (!saveData()) {
+                Object.assign(t, anterior);
+                return;
+            }
+            renderView('materia', materiaId);
         }
 
         function openStudyModal() {
@@ -1566,11 +1576,11 @@
 
         function updateTopicStatus(materiaId, topicoId, status) {
             const m = appData.materias.find(mat => mat.id === materiaId);
-            const t = m.topicos.find(top => top.id === topicoId);
-            if (t) {
-                t.status = status;
-                saveData();
-            }
+            const t = m && m.topicos.find(top => top.id === topicoId);
+            if (!t) return;
+            const anterior = t.status;
+            t.status = status;
+            if (!saveData()) t.status = anterior;
         }
 
         function toggleChecklist(materiaId, topicoId, key) {
