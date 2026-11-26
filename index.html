@@ -485,7 +485,18 @@
                     if (parsed.consultDate !== undefined && !isValidPlannerDate(parsed.consultDate)) throw new Error('Data de consulta local inválida.');
                     if (parsed.theme !== undefined && !['light','dark'].includes(parsed.theme)) throw new Error('Tema local inválido.');
                     if (Array.isArray(parsed.materias)) {
-                        if (parsed.materias.some(m => !m || typeof m !== 'object' || Array.isArray(m) || !Array.isArray(m.topicos) || m.topicos.some(t => !t || typeof t !== 'object' || Array.isArray(t)) || (m.icone !== undefined && !['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)))) {
+                        const validLocalChecklist = value => localObject(value) && ['lei', 'questoes', 'erros', 'revisao', 'teoria'].every(k => typeof value[k] === 'boolean') && Object.keys(value).every(k => ['lei', 'questoes', 'erros', 'revisao', 'teoria'].includes(k));
+                        const validLocalTopic = t => localObject(t) && typeof t.nome === 'string' && t.nome.trim().length > 0 && t.nome.length <= 500 &&
+                            (t.status === undefined || ['Não iniciado', 'Estudando', 'Rever', 'Concluído'].includes(t.status)) &&
+                            (t.anotaçoes === undefined || (typeof t.anotaçoes === 'string' && t.anotaçoes.length <= 10000)) &&
+                            (t.questoesTotal === undefined || localNonNegativeInt(t.questoesTotal)) &&
+                            (t.questoesAcertos === undefined || localNonNegativeInt(t.questoesAcertos)) &&
+                            (t.questoesTotal === undefined || t.questoesAcertos === undefined || t.questoesAcertos <= t.questoesTotal) &&
+                            validLocalChecklist(t.checklist);
+                        if (parsed.materias.some(m => !localObject(m) || !Array.isArray(m.topicos) || !m.topicos.every(validLocalTopic) ||
+                            typeof m.nome !== 'string' || !m.nome.trim() || m.nome.length > 500 ||
+                            (m.icone !== undefined && !['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) ||
+                            (m.prioridade !== undefined && (typeof m.prioridade !== 'string' || m.prioridade.length > 100)))) {
                             throw new Error('Estrutura local de matérias ou tópicos inválida.');
                         }
                         const subjectIds = parsed.materias.map(m => m && m.id);
