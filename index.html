@@ -1741,9 +1741,12 @@
                 const m = appData.materias.find(mat => mat.id === materiaId);
                 if (!m) return;
                 const topicosAnteriores = m.topicos;
+                const planoAcoesAnterior = appData.planoAcoes || {};
                 m.topicos = m.topicos.filter(t => t.id !== topicoId);
+                appData.planoAcoes = Object.fromEntries(Object.entries(planoAcoesAnterior).filter(([key, action]) => action.topicoId !== topicoId));
                 if (!saveData()) {
                     m.topicos = topicosAnteriores;
+                    appData.planoAcoes = planoAcoesAnterior;
                     return;
                 }
                 renderView('materia', materiaId);
