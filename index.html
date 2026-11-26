@@ -1245,12 +1245,14 @@
                     const topico = materia && materia.topicos.find(t=>t.id===action.topicoId);
                     return materia && topico ? { materia, topico, action, actionKey:key, deferred:true } : null;
                 }).filter(Boolean);
+            const slotsReaproveitados = new Set();
             adiados.forEach(b => {
-                const indiceExistente = planos.findIndex(p => p.materia && p.topico &&
+                const indiceExistente = planos.findIndex((p, idx) => !slotsReaproveitados.has(idx) &&
+                    !p.deferred && p.materia && p.topico &&
                     p.materia.id === b.materia.id && p.topico.id === b.topico.id);
                 if (indiceExistente >= 0) {
-                    // Reaproveita o cartão do bloco automático, mas mantém a ação pendente
-                    // vinculada ao registro original do adiamento.
+                    // Cada pendência reutiliza no máximo um cartão automático.
+                    slotsReaproveitados.add(indiceExistente);
                     planos[indiceExistente] = {
                         ...planos[indiceExistente],
                         action: b.action,
@@ -1258,6 +1260,7 @@
                         deferred: true
                     };
                 } else {
+                    // Pendências duplicadas de um mesmo tópico permanecem visíveis.
                     planos.push({...b, slot:null});
                 }
             });
