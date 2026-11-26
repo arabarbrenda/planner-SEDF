@@ -1689,7 +1689,10 @@
             if (!t) return;
             const anterior = t.status;
             t.status = status;
-            if (!saveData()) t.status = anterior;
+            if (!saveData()) {
+                t.status = anterior;
+                renderView('materia', materiaId);
+            }
         }
 
         function toggleChecklist(materiaId, topicoId, key) {
