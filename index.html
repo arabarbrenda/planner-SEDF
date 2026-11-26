@@ -1640,8 +1640,12 @@
                 alert('Confira os dados: tempo deve ser positivo e acertos não podem exceder o total de questões.');
                 return;
             }
-            appData.registrosEstudo.push({ id: Date.now(), materiaId, data, plataforma, tempo, qTotal, qAcertos, obs });
-            saveData();
+            const registro = { id: Date.now(), materiaId, data, plataforma, tempo, qTotal, qAcertos, obs };
+            appData.registrosEstudo.push(registro);
+            if (!saveData()) {
+                appData.registrosEstudo = appData.registrosEstudo.filter(r => r.id !== registro.id);
+                return;
+            }
             closeStudyModal();
             switchTab(currentActiveTab, currentActiveTab === 'materia' ? materiaId : null);
             alert('Sessão de estudo registrada com sucesso!');
