@@ -1539,6 +1539,11 @@
             const qAcertos = parseInt(document.getElementById('modal-qacertos').value) || 0;
             const obs = document.getElementById('modal-obs').value;
 
+            if (!materiaId || !data || !Number.isFinite(tempo) || tempo < 1 ||
+                qTotal < 0 || qAcertos < 0 || qAcertos > qTotal) {
+                alert('Confira os dados: tempo deve ser positivo e acertos não podem exceder o total de questões.');
+                return;
+            }
             appData.registrosEstudo.push({ id: Date.now(), materiaId, data, plataforma, tempo, qTotal, qAcertos, obs });
             saveData();
             closeStudyModal();
@@ -1616,11 +1621,16 @@
             const nome = document.getElementById('sim-nome').value;
             const data = document.getElementById('sim-data').value;
             const banca = document.getElementById('sim-banca').value;
-            const qTotal = parseInt(document.getElementById('sim-qtotal').value) || 120;
-            const qAcertos = parseInt(document.getElementById('sim-qacertos').value) || 0;
+            const qTotal = parseInt(document.getElementById('sim-qtotal').value);
+            const qAcertos = parseInt(document.getElementById('sim-qacertos').value);
             const tempo = document.getElementById('sim-tempo').value;
             const obs = document.getElementById('sim-obs').value;
 
+            if (!nome.trim() || !data || !banca.trim() || !Number.isFinite(qTotal) || qTotal < 1 ||
+                !Number.isFinite(qAcertos) || qAcertos < 0 || qAcertos > qTotal) {
+                alert('Confira os dados do simulado: total deve ser maior que zero e acertos entre zero e o total.');
+                return;
+            }
             if (!appData.simulados) appData.simulados = [];
             appData.simulados.push({
                 id: Date.now(),
