@@ -2188,12 +2188,16 @@ function escapeHTML(value) {
 
         function resetData() {
             if (confirm('Tem certeza que deseja restaurar os dados padrão? Os dados locais danificados foram preservados em uma cópia de recuperação.')) {
+                const recoveryConfirmedAnterior = window.__plannerRecoveryConfirmed;
+                const recoveryBlockedAnterior = window.__plannerDataRecoveryBlocked;
+                const dadosAnteriores = appData;
                 window.__plannerRecoveryConfirmed = true;
                 window.__plannerDataRecoveryBlocked = false;
-                const dadosAnteriores = appData;
                 appData = JSON.parse(JSON.stringify(defaultData));
                 if (!saveData()) {
                     appData = dadosAnteriores;
+                    window.__plannerRecoveryConfirmed = recoveryConfirmedAnterior;
+                    window.__plannerDataRecoveryBlocked = recoveryBlockedAnterior;
                     return;
                 }
                 try {
