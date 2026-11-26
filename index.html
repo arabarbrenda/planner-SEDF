@@ -1401,7 +1401,7 @@
                         <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-brain text-indigo-400 mr-2"></i>Fila de Revisão Inteligente</h3>
                         <p class="text-xs text-slate-400 mb-4">Tópicos concluídos, marcados como 'Rever' ou com aproveitamento inferior a 60%.</p>
                         <div class="space-y-3">
-                            ${topicosRevisao.map(tr => `
+                            ${topicosRevisao.length > 0 ? topicosRevisao.map(tr => `
                                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
                                     <div>
                                         <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md">${tr.materia}</span>
@@ -1413,7 +1413,11 @@
                                         <button onclick="switchTab('materia', '${tr.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">Revisar</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `).join('') : `
+                                <div class="text-center py-8 text-slate-400 text-xs bg-slate-900 rounded-xl border border-slate-800">
+                                    Nenhum tópico na fila de revisão no momento.
+                                </div>
+                            `}
                         </div>
                     </div>
                 </div>
