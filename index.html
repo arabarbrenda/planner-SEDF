@@ -1245,7 +1245,11 @@
                     const topico = materia && materia.topicos.find(t=>t.id===action.topicoId);
                     return materia && topico ? { materia, topico, action, actionKey:key, deferred:true } : null;
                 }).filter(Boolean);
-            adiados.forEach(b => planos.push({...b, slot:null}));
+            adiados.forEach(b => {
+                const jaExiste = planos.some(p => p.materia && p.topico &&
+                    p.materia.id === b.materia.id && p.topico.id === b.topico.id);
+                if (!jaExiste) planos.push({...b, slot:null});
+            });
             return `
                 <div class="space-y-6">
                     <section class="bg-gradient-to-br from-indigo-600/20 via-slate-950 to-slate-950 border border-indigo-500/30 rounded-2xl p-5 md:p-7 shadow-xl">
