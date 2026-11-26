@@ -498,9 +498,14 @@
         function saveData() {
             try {
                 localStorage.setItem("sga_sedf_2027_data", JSON.stringify(appData));
-            } catch(e) {}
+            } catch(e) {
+                console.error('Falha ao salvar dados do planner:', e);
+                alert('Não foi possível salvar os dados no armazenamento local. Evite fechar ou atualizar a página e exporte/registre suas informações, se possível. Verifique o espaço disponível no navegador.');
+                return false;
+            }
             updateQuickNav();
             updateSidebarHeader();
+            return true;
         }
 
         let currentActiveTab = 'dashboard';
