@@ -1054,6 +1054,11 @@
         }
 
         function deleteSubject(materiaId) {
+            const linkedSessions = (appData.registrosEstudo || []).filter(r => r.materiaId === materiaId);
+            if (linkedSessions.length) {
+                alert('Esta matéria possui ' + linkedSessions.length + ' registro(s) de estudo. Exclua ou reassocie esses registros antes de excluir a matéria, para evitar perda do histórico.');
+                return;
+            }
             if (confirm("Deseja realmente excluir esta matéria e todos os seus tópicos?")) {
                 const materiasAnteriores = appData.materias;
                 const planoAcoesAnterior = appData.planoAcoes || {};
@@ -1819,6 +1824,11 @@
         }
 
         function deleteTopic(materiaId, topicoId) {
+            const linkedSessions = (appData.registrosEstudo || []).filter(r => r.materiaId === materiaId && r.topicoId === topicoId);
+            if (linkedSessions.length) {
+                alert('Este tópico possui ' + linkedSessions.length + ' registro(s) de estudo. Exclua ou reassocie esses registros antes de excluir o tópico, para preservar o histórico.');
+                return;
+            }
             if (confirm('Deseja realmente excluir este tópico?')) {
                 const m = appData.materias.find(mat => mat.id === materiaId);
                 if (!m) return;
