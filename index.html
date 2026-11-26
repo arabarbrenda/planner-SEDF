@@ -1588,14 +1588,31 @@
 
         function enableTopicEdit(materiaId, topicoId) {
             const m = appData.materias.find(mat => mat.id === materiaId);
-            const t = m.topicos.find(top => top.id === topicoId);
+            const t = m && m.topicos.find(top => top.id === topicoId);
             const container = document.getElementById(`topic-name-container-${topicoId}`);
-            
-            container.innerHTML = `
-                <input type="text" id="input-edit-topic-${topicoId}" value="${t.nome}" class="bg-slate-900 border border-indigo-500 text-xs text-white rounded-lg px-2 py-1 flex-1 focus:outline-none">
-                <button onclick="saveTopicEdit('${materiaId}', '${topicoId}')" class="text-emerald-400 hover:text-emerald-300 text-xs px-2 py-1 bg-emerald-500/10 rounded-lg"><i class="fa-solid fa-check"></i></button>
-                <button onclick="cancelTopicEdit('${materiaId}', '${topicoId}')" class="text-slate-400 hover:text-slate-300 text-xs px-2 py-1 bg-slate-800 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
-            `;
+            if (!t || !container) return;
+
+            container.replaceChildren();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `input-edit-topic-${topicoId}`;
+            input.value = t.nome;
+            input.className = 'bg-slate-900 border border-indigo-500 text-xs text-white rounded-lg px-2 py-1 flex-1 focus:outline-none';
+
+            const save = document.createElement('button');
+            save.className = 'text-emerald-400 hover:text-emerald-300 text-xs px-2 py-1 bg-emerald-500/10 rounded-lg';
+            save.title = 'Salvar tópico';
+            save.innerHTML = '<i class="fa-solid fa-check"></i>';
+            save.addEventListener('click', () => saveTopicEdit(materiaId, topicoId));
+
+            const cancel = document.createElement('button');
+            cancel.className = 'text-slate-400 hover:text-slate-300 text-xs px-2 py-1 bg-slate-800 rounded-lg';
+            cancel.title = 'Cancelar edição';
+            cancel.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            cancel.addEventListener('click', () => cancelTopicEdit(materiaId, topicoId));
+
+            container.append(input, save, cancel);
+            input.focus();
         }
 
         function saveTopicEdit(materiaId, topicoId) {
