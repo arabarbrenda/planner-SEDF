@@ -582,7 +582,20 @@
                 }
             } catch (e) {
                 console.error('Dados locais inválidos. Preservando conteúdo original para recuperação.', e);
-                try { const damaged=localStorage.getItem("sga_sedf_2027_data")||localStorage.getItem("sedf_2027_db"); const recoveryExists=localStorage.getItem("sga_sedf_2027_data_recovery"); if(damaged && !recoveryExists) localStorage.setItem("sga_sedf_2027_data_recovery",damaged); } catch(recoveryError) { console.error('Não foi possível preservar dados locais para recuperação.', recoveryError); }
+                let recoveryPreserved = false;
+                try {
+                    const damaged = localStorage.getItem("sga_sedf_2027_data") || localStorage.getItem("sedf_2027_db");
+                    const recoveryExists = localStorage.getItem("sga_sedf_2027_data_recovery");
+                    if (damaged && !recoveryExists) {
+                        localStorage.setItem("sga_sedf_2027_data_recovery", damaged);
+                        recoveryPreserved = localStorage.getItem("sga_sedf_2027_data_recovery") === damaged;
+                    } else if (damaged && recoveryExists) {
+                        recoveryPreserved = true;
+                    }
+                } catch(recoveryError) {
+                    console.error('Não foi possível preservar dados locais para recuperação.', recoveryError);
+                }
+                if (!recoveryPreserved) alert('A leitura dos dados locais falhou e não foi possível confirmar uma cópia de recuperação. Evite fechar a página e, se possível, exporte ou registre manualmente seus dados antes de restaurar.');
                 appData = JSON.parse(JSON.stringify(defaultData));
                 window.__plannerDataRecoveryBlocked = true;
             }
