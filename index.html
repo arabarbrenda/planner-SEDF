@@ -1171,7 +1171,7 @@
             if (!action) return;
             action.status = status;
             if (targetDate) action.deferredTo = targetDate;
-            if (status === 'Concluído') delete action.deferredTo;
+            if (status === 'Concluído' || status === '') delete action.deferredTo;
             saveData();
             renderView('planejamento');
         }
