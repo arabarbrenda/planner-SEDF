@@ -1245,7 +1245,7 @@
         function moveDeferredBlock(actionKey, targetDate) {
             if (!appData.planoAcoes) appData.planoAcoes = {};
             const action = appData.planoAcoes[actionKey];
-            if (!action || !/^\\d{4}-\\d{2}-\\d{2}$/.test(targetDate)) return;
+            if (!action || !isValidPlannerDate(targetDate)) return;
             const anterior = action.deferredTo;
             action.deferredTo = targetDate;
             if (!saveData()) {
