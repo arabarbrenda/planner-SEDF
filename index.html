@@ -1961,14 +1961,14 @@
                     const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
                     const isNonNegativeInteger = value => Number.isInteger(value) && value >= 0;
                     const validStatuses = ['Não iniciado', 'Estudando', 'Rever', 'Concluído'];
-                    const validSafeId = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(id);\n                    const validTopic = t => isObject(t) && validSafeId(t.id) && typeof t.nome === 'string' &&
+                    const validSafeId = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(id);\n                    const validTopic = t => isObject(t) && validSafeId(t.id) && typeof t.nome === 'string' && t.nome.trim().length > 0 && t.nome.length <= 500 &&
                         (t.status === undefined || validStatuses.includes(t.status)) &&
-                        (t.anotaçoes === undefined || typeof t.anotaçoes === 'string') &&
+                        (t.anotaçoes === undefined || (typeof t.anotaçoes === 'string' && t.anotaçoes.length <= 10000)) &&
                         (t.questoesTotal === undefined || isNonNegativeInteger(t.questoesTotal)) &&
                         (t.questoesAcertos === undefined || isNonNegativeInteger(t.questoesAcertos)) &&
                         (t.questoesTotal === undefined || t.questoesAcertos === undefined || t.questoesAcertos <= t.questoesTotal) &&
                         (isObject(t.checklist) && ['lei', 'questoes', 'erros', 'revisao', 'teoria'].every(k => typeof t.checklist[k] === 'boolean') && Object.keys(t.checklist).every(k => ['lei', 'questoes', 'erros', 'revisao', 'teoria'].includes(k)));
-                    const validSubject = m => isObject(m) && validSafeId(m.id) && typeof m.nome === 'string' &&
+                    const validSubject = m => isObject(m) && validSafeId(m.id) && typeof m.nome === 'string' && m.nome.trim().length > 0 && m.nome.length <= 500 &&
                         (m.icone === undefined || ['fa-book', 'fa-map-location-dot', 'fa-landmark', 'fa-file-shield', 'fa-briefcase', 'fa-boxes-stacked', 'fa-pen-nib'].includes(m.icone)) &&
                         (m.prioridade === undefined || typeof m.prioridade === 'string') &&
                         Array.isArray(m.topicos) && m.topicos.every(validTopic);
