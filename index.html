@@ -619,10 +619,13 @@
             const aproveitamentoGeral = totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
             const horasEstudadas = (totalMinutos / 60).toFixed(1);
 
-            const hoje = new Date();
-            const prova = new Date(appData.examDate + 'T00:00:00');
+            const hojeISO = getLocalDateISO();
+            const hojeParts = hojeISO.split('-').map(Number);
+            const provaParts = appData.examDate.split('-').map(Number);
+            const hoje = new Date(hojeParts[0], hojeParts[1]-1, hojeParts[2]);
+            const prova = new Date(provaParts[0], provaParts[1]-1, provaParts[2]);
             const diffTime = prova - hoje;
-            const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diasRestantes = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
             return { totalTopicos, concluidos, progressoGeral, totalQuestoes, aproveitamentoGeral, horasEstudadas, diasRestantes };
         }
