@@ -457,6 +457,9 @@
                         throw new Error('Estrutura local inválida.');
                     }
                     if (Array.isArray(parsed.materias)) {
+                        if (parsed.materias.some(m => !m || typeof m !== 'object' || Array.isArray(m) || !Array.isArray(m.topicos) || m.topicos.some(t => !t || typeof t !== 'object' || Array.isArray(t)))) {
+                            throw new Error('Estrutura local de matérias ou tópicos inválida.');
+                        }
                         const subjectIds = parsed.materias.map(m => m && m.id);
                         const topicIds = parsed.materias.flatMap(m => Array.isArray(m && m.topicos) ? m.topicos.map(t => t && t.id) : []);
                         if (subjectIds.some(id => typeof id !== 'string' || !id.trim()) ||
