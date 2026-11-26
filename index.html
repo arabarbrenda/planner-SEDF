@@ -456,6 +456,34 @@
                         (parsed.config !== undefined && (!parsed.config || typeof parsed.config !== 'object' || Array.isArray(parsed.config)))) {
                         throw new Error('Estrutura local inválida.');
                     }
+                    const localObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+                    const localNonNegativeInt = value => Number.isInteger(value) && value >= 0;
+                    const localValidRecord = r => localObject(r) &&
+                        (typeof r.id === 'string' || (typeof r.id === 'number' && Number.isSafeInteger(r.id) && r.id > 0)) &&
+                        typeof r.materiaId === 'string' && r.materiaId.trim().length > 0 &&
+                        (r.topicoId === undefined || r.topicoId === null || typeof r.topicoId === 'string') &&
+                        typeof r.data === 'string' && isValidPlannerDate(r.data) &&
+                        (r.plataforma === undefined || (typeof r.plataforma === 'string' && r.plataforma.length <= 200)) &&
+                        (r.tempo === undefined || localNonNegativeInt(r.tempo)) &&
+                        (r.qTotal === undefined || localNonNegativeInt(r.qTotal)) &&
+                        (r.qAcertos === undefined || localNonNegativeInt(r.qAcertos)) &&
+                        (r.qTotal === undefined || r.qAcertos === undefined || r.qAcertos <= r.qTotal) &&
+                        (r.obs === undefined || (typeof r.obs === 'string' && r.obs.length <= 10000));
+                    const localValidSimulado = s => localObject(s) &&
+                        (typeof s.id === 'string' || (typeof s.id === 'number' && Number.isSafeInteger(s.id) && s.id > 0)) &&
+                        typeof s.nome === 'string' && s.nome.trim().length > 0 && s.nome.length <= 300 &&
+                        typeof s.data === 'string' && isValidPlannerDate(s.data) &&
+                        typeof s.banca === 'string' && s.banca.trim().length > 0 && s.banca.length <= 200 &&
+                        localNonNegativeInt(s.qTotal) && s.qTotal > 0 && localNonNegativeInt(s.qAcertos) && s.qAcertos <= s.qTotal &&
+                        (s.tempo === undefined || (typeof s.tempo === 'string' && s.tempo.length <= 200)) &&
+                        (s.obs === undefined || (typeof s.obs === 'string' && s.obs.length <= 10000)) &&
+                        (s.origem === undefined || ['manual','importado'].includes(s.origem));
+                    if (parsed.registrosEstudo !== undefined && !parsed.registrosEstudo.every(localValidRecord)) throw new Error('Registros locais inválidos.');
+                    if (parsed.simulados !== undefined && !parsed.simulados.every(localValidSimulado)) throw new Error('Simulados locais inválidos.');
+                    if (parsed.examDate !== undefined && !isValidPlannerDate(parsed.examDate)) throw new Error('Data da prova local inválida.');
+                    if (parsed.startDate !== undefined && !isValidPlannerDate(parsed.startDate)) throw new Error('Data de início local inválida.');
+                    if (parsed.consultDate !== undefined && !isValidPlannerDate(parsed.consultDate)) throw new Error('Data de consulta local inválida.');
+                    if (parsed.theme !== undefined && !['light','dark'].includes(parsed.theme)) throw new Error('Tema local inválido.');
                     if (Array.isArray(parsed.materias)) {
                         if (parsed.materias.some(m => !m || typeof m !== 'object' || Array.isArray(m) || !Array.isArray(m.topicos) || m.topicos.some(t => !t || typeof t !== 'object' || Array.isArray(t)))) {
                             throw new Error('Estrutura local de matérias ou tópicos inválida.');
