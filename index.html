@@ -1665,10 +1665,14 @@
 
         function toggleChecklist(materiaId, topicoId, key) {
             const m = appData.materias.find(mat => mat.id === materiaId);
-            const t = m.topicos.find(top => top.id === topicoId);
-            if (t) {
-                t.checklist[key] = !t.checklist[key];
-                saveData();
+            const t = m && m.topicos.find(top => top.id === topicoId);
+            if (t && t.checklist && Object.prototype.hasOwnProperty.call(t.checklist, key)) {
+                const anterior = t.checklist[key];
+                t.checklist[key] = !anterior;
+                if (!saveData()) {
+                    t.checklist[key] = anterior;
+                    renderView('materia', materiaId);
+                }
             }
         }
 
