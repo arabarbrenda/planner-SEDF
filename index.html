@@ -1384,8 +1384,8 @@
             let topicosRevisao = [];
             appData.materias.forEach(m => {
                 m.topicos.forEach(t => {
-                    const ap = t.questoesTotal > 0 ? Math.round((t.questoesAcertos / t.questoesTotal) * 100) : 100;
-                    if (t.status === 'Concluído' || t.status === 'Rever' || ap < 60) {
+                    const ap = t.questoesTotal > 0 ? Math.round((t.questoesAcertos / t.questoesTotal) * 100) : null;
+                    if (t.status === 'Concluído' || t.status === 'Rever' || (ap !== null && ap < 60)) {
                         topicosRevisao.push({ materia: m.nome, materiaId: m.id, topico: t.nome, status: t.status, ap });
                     }
                 });
@@ -1405,7 +1405,7 @@
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Status: <strong>${tr.status}</strong></span>
-                                        <span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20">${tr.ap}% Acertos</span>
+                                        <span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20">${tr.ap === null ? 'Sem questões' : tr.ap + '% Acertos'}</span>
                                         <button onclick="switchTab('materia', '${tr.materiaId}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold">Revisar</button>
                                     </div>
                                 </div>
