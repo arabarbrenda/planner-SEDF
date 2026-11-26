@@ -129,9 +129,6 @@
             <button type="button" onclick="switchTab('jurisprudencia')" id="nav-jurisprudencia" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-scale-balanced w-5"></i><span>Jurisprudência</span>
             </button>
-            <button type="button" onclick="switchTab('importacao')" id="nav-importacao" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
-                <i class="fa-solid fa-file-arrow-up w-5"></i><span>Importar Tec Concursos</span>
-            </button>
             <button type="button" onclick="switchTab('backup')" id="nav-backup" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white text-left">
                 <i class="fa-solid fa-database w-5"></i><span>Backup & Configs</span>
             </button>
@@ -647,9 +644,6 @@
             } else if (tabId === 'jurisprudencia') {
                 titleEl.textContent = 'Jurisprudência e Informativos';
                 container.innerHTML = renderJurisprudenciaHTML();
-            } else if (tabId === 'importacao') {
-                titleEl.textContent = 'Importação de Dados (Tec Concursos)';
-                container.innerHTML = renderImportacaoHTML();
             } else if (tabId === 'backup') {
                 titleEl.textContent = 'Backup, Exportação e Configurações';
                 container.innerHTML = renderBackupHTML();
@@ -1397,22 +1391,6 @@
             `;
         }
 
-        function renderImportacaoHTML() {
-            return `
-                <div class="space-y-6 max-w-2xl mx-auto">
-                    <div class="bg-slate-950 border border-slate-800 p-8 rounded-2xl shadow-xl text-center space-y-4">
-                        <div class="w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/30">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white">Importar Dados</h3>
-                        <p class="text-xs text-slate-400">Faça o upload do seu relatório em formato CSV ou XLSX exportado para atualizar automaticamente seu progresso e aproveitamento.</p>
-                        <input type="file" id="import-file" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-slate-800 rounded-xl bg-slate-900 p-2">
-                        <button onclick="processTecImportSimulation()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Processar e Sincronizar</button>
-                    </div>
-                </div>
-            `;
-        }
-
         function renderBackupHTML() {
             return `
                 <div class="space-y-6 max-w-2xl mx-auto">
@@ -1654,24 +1632,6 @@
                 saveData();
                 renderView('simulados');
             }
-        }
-
-        function processTecImportSimulation() {
-            if (!appData.simulados) appData.simulados = [];
-            appData.simulados.push({
-                id: Date.now(),
-                nome: "Simulado Tec Concursos - Relatório Importado",
-                data: new Date().toISOString().split('T')[0],
-                banca: "Quadrix",
-                qTotal: 120,
-                qAcertos: 96,
-                tempo: "3h10",
-                obs: "Importado via relatório do Tec Concursos.",
-                origem: 'tec'
-            });
-            saveData();
-            alert('Relatório do Tec Concursos processado com sucesso! Simulado integrado e dados sincronizados.');
-            switchTab('simulados');
         }
 
         function exportBackup() {
