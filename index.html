@@ -577,10 +577,18 @@
             document.getElementById('header-subtitle-text').textContent = appData.headerSubtitle;
             
             const iconContainer = document.getElementById('sidebar-icon-container');
-            if (appData.sidebarCustomIcon) {
-                iconContainer.innerHTML = `<img src="${appData.sidebarCustomIcon}" class="w-full h-full object-cover rounded-xl" alt="Ícone">`;
+            iconContainer.replaceChildren();
+            if (typeof appData.sidebarCustomIcon === 'string' && /^data:image\/(png|jpeg|gif|webp);base64,/i.test(appData.sidebarCustomIcon)) {
+                const img = document.createElement('img');
+                img.src = appData.sidebarCustomIcon;
+                img.className = 'w-full h-full object-cover rounded-xl';
+                img.alt = 'Ícone';
+                iconContainer.appendChild(img);
             } else {
-                iconContainer.innerHTML = `<i class="fa-solid fa-graduation-cap text-xl" id="sidebar-icon-elem"></i>`;
+                const icon = document.createElement('i');
+                icon.className = 'fa-solid fa-graduation-cap text-xl';
+                icon.id = 'sidebar-icon-elem';
+                iconContainer.appendChild(icon);
             }
         }
 
